@@ -29,16 +29,16 @@ function TeksCatatan({ catatan, cadangan }) {
   );
 }
 
-// Kartu angka di baris atas. Kartu pertama berwarna penuh sebagai angka utama.
+// Kartu angka di baris atas. Semua datar; angka utama cukup ditandai warna biru.
 function Kpi({ label, nilai, ket, to, utama = false }) {
-  const cls = utama ? 'bg-biru text-white shadow-[0_14px_30px_rgb(29_89_187/0.28)]' : 'border border-garis bg-kartu shadow-kartu hover:border-biru/40';
+  const cls = 'border border-garis bg-kartu hover:border-biru/40';
   const isi = (
     <>
       <span className="flex items-start justify-between gap-2">
-        <span className={`text-sm font-medium ${utama ? 'text-white/85' : 'text-redup'}`}>{label}</span>
+        <span className="text-sm font-medium text-redup">{label}</span>
       </span>
-      <span className="font-judul angka mt-3 block truncate text-[26px] leading-none font-bold">{nilai}</span>
-      <span className={`mt-2 block truncate text-xs ${utama ? 'text-white/80' : 'text-redup'}`}>{ket}</span>
+      <span className={`font-judul angka mt-3 block truncate text-[26px] leading-none font-bold ${utama ? 'text-biru' : ''}`}>{nilai}</span>
+      <span className="mt-2 block truncate text-xs text-redup">{ket}</span>
     </>
   );
   return to ? (
@@ -196,7 +196,7 @@ function StatusMenu({ kpi, perlu, catatan, sesudah }) {
       {perlu.length > 0 && (
         <ul className="mt-3 flex flex-col gap-2">
           {perlu.slice(0, 3).map((p) => (
-            <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-kuning-muda/60 px-3 py-2">
+            <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-dasar px-3 py-2">
               <span className="min-w-0">
                 <Link to={`/produk/${p.id}`} className="block truncate font-semibold hover:text-biru">
                   {p.nama}
@@ -351,10 +351,10 @@ export default function Dashboard() {
           </p>
         </header>
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <div className="rounded-[24px] bg-biru p-6 text-white shadow-[0_20px_45px_rgb(29_89_187/0.25)] sm:p-8">
+          <div className="rounded-[24px] border border-garis bg-kartu p-6 sm:p-8">
             <h2 className="text-2xl font-bold">Tambahkan menu pertama</h2>
-            <p className="mt-2 max-w-lg text-white/85">Ceritakan menu dengan bahasa sehari-hari: nama, harga jual, dan bahan per porsi. AI menyusunnya menjadi resep, lalu modal per porsi langsung dihitung.</p>
-            <Tombol to="/produk/baru" varian="garis" className="mt-6 !border-transparent !bg-kuning !text-tinta hover:!bg-[#f2b000]">
+            <p className="mt-2 max-w-lg text-redup">Ceritakan menu dengan bahasa sehari-hari: nama, harga jual, dan bahan per porsi. AI menyusunnya menjadi resep, lalu modal per porsi langsung dihitung.</p>
+            <Tombol to="/produk/baru" className="mt-6">
               <Plus size={16} weight="bold" aria-hidden /> Tambah menu
             </Tombol>
           </div>

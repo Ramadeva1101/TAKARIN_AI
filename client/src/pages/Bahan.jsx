@@ -96,11 +96,11 @@ export default function Bahan() {
       type="button"
       aria-pressed={tab === kunci}
       onClick={() => setTab(tab === kunci ? 'semua' : kunci)}
-      className={`min-w-0 rounded-[20px] p-4 text-left transition hover:-translate-y-0.5 ${warna} ${tab === kunci ? 'ring-2 ring-tinta' : ''}`}
+      className={`min-w-0 rounded-[20px] border bg-kartu p-4 text-left transition-colors ${warna} ${tab === kunci ? 'border-biru ring-1 ring-biru' : 'border-garis hover:border-biru/40'}`}
     >
       <p className="text-sm font-medium">{label}</p>
       <p className="mt-1 truncate text-2xl font-extrabold">{isi}</p>
-      <p className="truncate text-xs opacity-80">{ket}</p>
+      <p className="truncate text-xs text-redup">{ket}</p>
     </button>
   );
 
@@ -116,14 +116,14 @@ export default function Bahan() {
           <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Link
               to={teratas ? `/bahan/${teratas.id}` : '/produk'}
-              className="min-w-0 rounded-[20px] bg-gradient-to-br from-biru to-biru-tua p-4 text-white shadow-[0_14px_30px_rgb(29_89_187/0.25)] transition hover:-translate-y-0.5"
+              className="min-w-0 rounded-[20px] border border-garis bg-kartu p-4 transition-colors hover:border-biru/40"
             >
               <p className="text-sm font-medium">Paling berpengaruh ke modal</p>
-              <p className="mt-1 truncate text-2xl font-extrabold capitalize">{teratas ? teratas.nama : '–'}</p>
-              <p className="truncate text-xs opacity-80">{teratas ? `${persen(teratas.bagian_terbesar)} dari modal ${teratas.kontribusi[0].nama}` : 'Belum ada resep'}</p>
+              <p className="mt-1 truncate text-2xl font-extrabold text-biru capitalize">{teratas ? teratas.nama : '–'}</p>
+              <p className="truncate text-xs text-redup">{teratas ? `${persen(teratas.bagian_terbesar)} dari modal ${teratas.kontribusi[0].nama}` : 'Belum ada resep'}</p>
             </Link>
-            {ubin('naik', 'bg-kuning text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Belum ada kenaikan dari belanja yang tercatat')}
-            {ubin('pasar', 'bg-kartu text-tinta border border-garis shadow-kartu', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
+            {ubin('naik', 'text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Belum ada kenaikan dari belanja yang tercatat')}
+            {ubin('pasar', 'text-tinta', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] lg:items-start">

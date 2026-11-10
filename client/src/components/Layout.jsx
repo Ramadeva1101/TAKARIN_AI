@@ -49,8 +49,8 @@ export default function Layout() {
   const lainnyaAktif = LAINNYA.some((m) => lokasi.pathname.startsWith(m.to));
 
   return (
-    <div className="latar-merek min-h-dvh lg:flex lg:gap-6 lg:p-4">
-      <aside className="hidden w-60 shrink-0 flex-col rounded-[24px] border border-garis bg-kartu p-4 shadow-kartu lg:sticky lg:top-4 lg:flex lg:h-[calc(100dvh-2rem)]">
+    <div className="ruang-kerja min-h-dvh bg-dasar lg:flex lg:gap-6 lg:p-4">
+      <aside className="hidden w-60 shrink-0 flex-col rounded-[24px] border border-garis bg-kartu p-4 lg:sticky lg:top-4 lg:flex lg:h-[calc(100dvh-2rem)]">
         <Link to="/" className="mb-6 inline-flex min-h-11 items-center px-2">
           <Merek className="text-xl" />
         </Link>
@@ -64,7 +64,7 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto rounded-2xl border border-kuning/40 bg-gradient-to-br from-kuning-muda to-white p-4">
+        <div className="mt-auto rounded-2xl bg-dasar p-4">
           <p className="text-sm font-semibold">Butuh bantuan?</p>
           <p className="mt-1 text-xs text-redup">Cara menghitung modal, takaran, dan harga pasar.</p>
           <Link to="/panduan" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-4 text-xs font-semibold text-biru hover:border-biru/40">

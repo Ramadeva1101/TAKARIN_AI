@@ -82,3 +82,10 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* Area aplikasi (setelah masuk): datar dan tenang. Tanpa gradasi dan bayangan agar fokus ke angka.
+   Biru tetap untuk aksi utama, kuning hanya untuk penanda penting (target, saran harga). */
+.ruang-kerja .tombol-merek { background: var(--color-biru); box-shadow: none; text-shadow: none; }
+.ruang-kerja .tombol-merek:hover { background: var(--color-biru-tua); }
+.ruang-kerja .bingkai-merek { border: 1px solid var(--color-garis); background: var(--color-kartu); }
+.ruang-kerja .shadow-kartu { box-shadow: none; }
