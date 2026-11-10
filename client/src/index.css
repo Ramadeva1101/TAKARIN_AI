@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Figtree untuk teks dan angka (jelas di ukuran kecil), Bricolage Grotesque untuk judul. */
-  --font-sans: 'Figtree Variable', 'Segoe UI', system-ui, sans-serif;
-  --font-judul: 'Bricolage Grotesque Variable', 'Figtree Variable', system-ui, sans-serif;
+  /* Plus Jakarta Sans: dirancang di Indonesia, jelas untuk angka rupiah, satu keluarga untuk judul dan teks. */
+  --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-judul: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
   /* Palet Sicily: 1D59BB, 76B9FF, FEF3B3, FEBD19 */
   --color-dasar: #f5f8fd;
   --color-kartu: #ffffff;
@@ -30,7 +30,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body { background: var(--color-dasar); color: var(--color-tinta); font-family: var(--font-sans); }
 .angka { font-variant-numeric: tabular-nums; }
-h1, h2, h3, .font-judul { font-family: var(--font-judul); letter-spacing: -0.01em; }
+h1, h2, h3, .font-judul { font-family: var(--font-judul); letter-spacing: -0.02em; }
 
 /* Warna merek: biru ke kuning. Hanya untuk kata sorotan besar di beranda, bukan untuk teks biasa
    (kuning di atas putih tidak cukup kontras untuk teks kecil). */

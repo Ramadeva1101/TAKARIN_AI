@@ -5,8 +5,8 @@ import { useApi } from '../lib/hooks.js';
 import { useAuth } from '../lib/auth.jsx';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Galat, Kartu, Muat, Tombol } from '../components/ui.jsx';
-import Garis from '../components/Garis.jsx';
 import { Segmen } from '../components/Grafik.jsx';
+import { BatangUntung, Mini } from '../components/Chart.jsx';
 import { Perubahan } from './Pasar.jsx';
 
 const SUMBER = { foto: [Camera, 'Foto nota'], suara: [Microphone, 'Suara'], teks: [TextT, 'Ketik'], manual: [PencilSimple, 'Manual'] };
@@ -56,16 +56,13 @@ function GrafikUntung({ produk, target }) {
   const lengkap = produk.filter((p) => p.lengkap);
   const [pilih, setPilih] = useState(() => [...lengkap].sort((a, b) => a.margin - b.margin)[0]?.id);
   const p = lengkap.find((x) => x.id === pilih) || lengkap[0];
-  const skala = Math.ceil(Math.max(target * 1.25, ...lengkap.map((x) => x.margin)) * 5) / 5; // dibulatkan ke 20%
-  const garis = [1, 0.75, 0.5, 0.25, 0].map((t) => t * skala);
-  const posisi = (m) => `${(Math.max(0, m) / skala) * 100}%`;
 
   return (
     <Kartu className="flex flex-col">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Untung per menu</h2>
-          <p className="text-sm text-redup">Pilih batang untuk melihat rinciannya</p>
+          <p className="text-sm text-redup">Klik batang atau nama menu untuk melihat rinciannya</p>
         </div>
         {p && (
           <div className="text-right">
@@ -78,53 +75,24 @@ function GrafikUntung({ produk, target }) {
       </div>
 
       {lengkap.length ? (
-        <div className="mt-5 grid grid-cols-[2.5rem_1fr] gap-2">
-          <div className="angka relative h-48 text-right text-[11px] text-redup" aria-hidden>
-            {garis.map((g) => (
-              <span key={g} className="absolute right-0 translate-y-1/2" style={{ bottom: posisi(g) }}>
-                {Math.round(g * 100)}%
-              </span>
+        <>
+          <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Pilih menu">
+            {lengkap.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={m.id === p?.id}
+                onClick={() => setPilih(m.id)}
+                className={`min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${m.id === p?.id ? 'bg-biru text-white' : 'bg-dasar text-redup ring-1 ring-garis hover:text-tinta'}`}
+              >
+                {m.nama}
+              </button>
             ))}
           </div>
-          <div className="min-w-0">
-            <div className="relative h-48">
-              {garis.map((g) => (
-                <span key={g} className="absolute inset-x-0 border-t border-garis" style={{ bottom: posisi(g) }} aria-hidden />
-              ))}
-              <span className="absolute inset-x-0 z-10 border-t-2 border-dashed border-kuning" style={{ bottom: posisi(target) }} aria-hidden />
-              <div className="absolute inset-0 flex items-end justify-around gap-2">
-                {lengkap.map((m) => {
-                  const aktif = m.id === p?.id;
-                  const warna = aktif ? 'bg-biru' : m.status === 'aman' ? 'bg-[#d6e0ee] group-hover:bg-[#c2d1e6]' : 'bg-kuning-muda ring-1 ring-inset ring-kuning group-hover:bg-[#fde98a]';
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      aria-pressed={aktif}
-                      aria-label={`${m.nama}, untung ${persen(m.margin)}`}
-                      onClick={() => setPilih(m.id)}
-                      className="group relative flex h-full w-full max-w-28 items-end justify-center outline-none focus-visible:ring-2 focus-visible:ring-biru"
-                    >
-                      <span className={`block w-full max-w-12 rounded-t-lg transition-colors ${warna}`} style={{ height: posisi(m.margin) }} />
-                      {aktif && (
-                        <span className="angka absolute z-20 mb-1.5 rounded-md bg-tinta px-1.5 py-0.5 text-[11px] font-semibold text-white" style={{ bottom: posisi(m.margin) }}>
-                          {persen(m.margin)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="mt-2 flex justify-around gap-2" aria-hidden>
-              {lengkap.map((m) => (
-                <span key={m.id} className={`w-full max-w-28 truncate text-center text-xs ${m.id === p?.id ? 'font-semibold text-tinta' : 'text-redup'}`}>
-                  {m.nama}
-                </span>
-              ))}
-            </div>
+          <div className="mt-3">
+            <BatangUntung data={lengkap} target={target} pilih={p?.id} ubah={setPilih} />
           </div>
-        </div>
+        </>
       ) : (
         <p className="mt-5 text-sm text-redup">Lengkapi harga bahan menu supaya untungnya bisa dihitung.</p>
       )}
@@ -144,9 +112,6 @@ function GrafikUntung({ produk, target }) {
             <b>{rupiah(p.harga_jual - p.hpp)}</b>
           </span>
           <span className="flex items-center gap-3 text-xs text-redup sm:ml-auto">
-            <span className="flex items-center gap-1">
-              <span className="h-0.5 w-4 border-t-2 border-dashed border-kuning" aria-hidden /> Target {persen(target, 0)}
-            </span>
             <Link to={`/produk/${p.id}`} className="inline-flex min-h-11 items-center font-semibold text-biru hover:underline">
               Rincian
             </Link>
@@ -291,7 +256,7 @@ function HargaPasar({ data }) {
                   <span className="block truncate text-xs text-redup">{d.menu.length ? `Dipakai di ${d.menu.map((m) => m.nama).join(', ')}` : d.wilayah}</span>
                 </span>
                 <span className="hidden sm:block">
-                  <Garis data={d.riwayat} label={`Tren harga ${d.komoditas} di ${d.wilayah}`} />
+                  <Mini data={d.riwayat} label={`Tren harga ${d.komoditas} di ${d.wilayah}`} />
                 </span>
                 <span className="angka text-right text-sm">
                   <span className="block font-semibold">{`${rupiah(d.harga)}/${d.satuan}`}</span>

@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
-import { Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
-import Garis from '../components/Garis.jsx';
-import { GrafikHarga, Segmen } from '../components/Grafik.jsx';
+import { Chip, Galat, Judul, Kartu, Kosong, Muat, Tombol, hargaSatuan } from '../components/ui.jsx';
+import { Segmen } from '../components/Grafik.jsx';
+import { AreaHarga, Mini } from '../components/Chart.jsx';
 
 const LEVEL = { kota: 'kota', provinsi: 'rata-rata provinsi', nasional: 'rata-rata nasional' };
 
@@ -24,7 +24,8 @@ export function Perubahan({ nilai, ket }) {
 }
 
 // Panel rincian satu komoditas: harga, perubahan, grafik yang bisa disentuh, dan menu yang memakainya.
-function Rincian({ d }) {
+function Rincian({ d, belanja }) {
+  const punya = belanja.filter((b) => b.harga_terakhir && d.bahan.some((x) => x.id === b.id));
   return (
     <Kartu className="lg:sticky lg:top-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -50,8 +51,28 @@ function Rincian({ d }) {
         </div>
       </div>
       <div className="mt-4">
-        <GrafikHarga data={d.riwayat} satuan={d.satuan} label={`Harga ${d.komoditas} di ${d.wilayah}, ${d.riwayat.length} data terakhir`} />
+        <AreaHarga data={d.riwayat} satuan={d.satuan} label={`Harga ${d.komoditas} di ${d.wilayah}, ${d.riwayat.length} data terakhir`} />
       </div>
+      {punya.length > 0 && (
+        <div className="mt-4 rounded-2xl bg-kuning-muda/70 p-3.5 ring-1 ring-kuning/40">
+          <p className="text-sm font-semibold">Harga belanja Anda</p>
+          <ul className="mt-1.5 flex flex-col gap-1.5">
+            {punya.map((b) => {
+              const h = hargaSatuan(b.harga_terakhir.harga_per_satuan, b.satuan_dasar);
+              return (
+                <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <Link to={`/bahan/${b.id}`} className="font-medium capitalize hover:text-biru">
+                    {b.nama} <span className="angka text-redup">{h && `${rupiah(h.harga)}/${h.satuan}`}</span>
+                  </Link>
+                  <Chip status={b.status_acuan}>
+                    {b.selisih_acuan == null ? 'Tanpa acuan' : Math.abs(b.selisih_acuan) < 0.005 ? 'Sama dengan pasar' : `${persen(Math.abs(b.selisih_acuan))} ${b.selisih_acuan > 0 ? 'di atas' : 'di bawah'} pasar`}
+                  </Chip>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
       {d.menu.length > 0 ? (
         <div className="mt-4 border-t border-garis pt-3">
           <p className="text-sm text-redup">Dipakai di menu</p>
@@ -62,11 +83,6 @@ function Rincian({ d }) {
               </Link>
             ))}
           </div>
-          {d.bahan.length > 0 && (
-            <Link to={`/bahan/${d.bahan[0].id}`} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-biru">
-              Bandingkan dengan harga belanja Anda
-            </Link>
-          )}
         </div>
       ) : (
         <p className="mt-4 border-t border-garis pt-3 text-sm text-redup">Belum dipakai di resep Anda. Ditampilkan sebagai gambaran harga di daerah Anda.</p>
@@ -88,7 +104,7 @@ function BarisKomoditas({ d, aktif, pilih }) {
           <span className={`block truncate font-semibold capitalize ${aktif ? 'text-biru-tua' : ''}`}>{d.komoditas}</span>
           <span className="angka block text-xs text-redup">{`${rupiah(d.harga)}/${d.satuan}`}</span>
         </span>
-        <Garis data={d.riwayat} label={`Tren ${d.komoditas}`} />
+        <Mini data={d.riwayat} label={`Tren ${d.komoditas}`} />
         <span className="w-16 text-right text-sm">
           <Perubahan nilai={d.perubahan_mingguan} ket="" />
         </span>
@@ -99,6 +115,7 @@ function BarisKomoditas({ d, aktif, pilih }) {
 
 export default function Pasar() {
   const { data, loading, error, muat } = useApi('/pasar');
+  const bahan = useApi('/bahan');
   const [proses, setProses] = useState(false);
   const [galatPerbarui, setGalatPerbarui] = useState(null);
   const { state } = useLocation();
@@ -166,11 +183,15 @@ export default function Pasar() {
             'Mengambil harga terbaru dari PIHPS Bank Indonesia. Bisa sampai setengah menit.'
           ) : (
             <>
-              {galatPerbarui && <p>{galatPerbarui}</p>}
-              {data.sinkron.galat.map((g) => (
-                <p key={g}>{g}</p>
-              ))}
-              <p>Data yang tampil adalah data tersimpan terakhir.</p>
+              <p className="font-semibold">Server PIHPS Bank Indonesia belum bisa dihubungi.</p>
+              <p>Harga di bawah adalah data tersimpan terakhir. Coba perbarui lagi beberapa saat lagi.</p>
+              <details className="mt-1 text-xs opacity-80">
+                <summary className="inline-flex min-h-9 items-center">Rincian teknis</summary>
+                {galatPerbarui && <p>{galatPerbarui}</p>}
+                {data.sinkron.galat.map((g) => (
+                  <p key={g}>{g}</p>
+                ))}
+              </details>
             </>
           )}
         </div>
@@ -202,7 +223,7 @@ export default function Pasar() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-start">
             <div ref={rincianRef} className="scroll-mt-20 lg:order-last">
-              {terpilih && <Rincian d={terpilih} />}
+              {terpilih && <Rincian d={terpilih} belanja={bahan.data || []} />}
             </div>
             <Kartu>
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">

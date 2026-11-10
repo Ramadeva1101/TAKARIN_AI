@@ -4,6 +4,7 @@ import { useApi } from '../lib/hooks.js';
 import { persen, rupiah } from '../lib/api.js';
 import { Chip, Galat, Judul, Kartu, Kosong, Muat, Tombol, hargaSatuan, inputCls } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
+import { BatangKomposisi } from '../components/Chart.jsx';
 
 // Alasan sebuah bahan perlu dilihat. Urutan = urutan pentingnya.
 function alasan(b) {
@@ -59,6 +60,7 @@ export default function Bahan() {
   const { data, loading, error, muat } = useApi('/bahan');
   const [cari, setCari] = useState('');
   const [tab, setTab] = useState('semua');
+  const [menuPilih, setMenuPilih] = useState(null);
 
   if (loading && !data) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
@@ -77,6 +79,18 @@ export default function Bahan() {
   };
   const cocok = urut.filter((b) => b.nama.toLowerCase().includes(cari.toLowerCase()) && FILTER[tab](b));
   const jmlPerlu = data.filter(FILTER.perlu).length;
+  // Komposisi modal per menu, disusun dari kontribusi setiap bahan.
+  const perMenu = new Map();
+  for (const b of data)
+    for (const k of b.kontribusi) {
+      const m = perMenu.get(k.menu_id) || { id: k.menu_id, nama: k.nama, bahan: [] };
+      m.bahan.push({ nama: b.nama, biaya: k.biaya, bagian: k.bagian });
+      perMenu.set(k.menu_id, m);
+    }
+  const daftarMenu = [...perMenu.values()].sort((a, b) => a.nama.localeCompare(b.nama, 'id'));
+  const menuAktif = perMenu.get(menuPilih) || daftarMenu[0];
+  const komposisi = menuAktif ? [...menuAktif.bahan].sort((a, b) => b.biaya - a.biaya).slice(0, 7) : [];
+  const totalModal = menuAktif ? menuAktif.bahan.reduce((t, x) => t + x.biaya, 0) : 0;
   const ubin = (kunci, warna, label, isi, ket) => (
     <button
       type="button"
@@ -112,6 +126,36 @@ export default function Bahan() {
             {ubin('pasar', 'bg-kartu text-tinta border border-garis shadow-kartu', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
           </div>
 
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] lg:items-start">
+          <Kartu className="lg:order-last lg:sticky lg:top-6">
+            <h2 className="text-lg font-semibold">Komposisi modal per porsi</h2>
+            <p className="text-sm text-redup">Bahan mana yang paling banyak memakan modal satu menu.</p>
+            <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Pilih menu">
+              {daftarMenu.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  aria-pressed={m.id === menuAktif?.id}
+                  onClick={() => setMenuPilih(m.id)}
+                  className={`min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${m.id === menuAktif?.id ? 'bg-biru text-white' : 'bg-dasar text-redup ring-1 ring-garis hover:text-tinta'}`}
+                >
+                  {m.nama}
+                </button>
+              ))}
+            </div>
+            {menuAktif ? (
+              <>
+                <p className="angka mt-4 text-sm text-redup">
+                  Total bahan <b className="text-tinta">{rupiah(totalModal)}</b> per porsi {menuAktif.nama}
+                </p>
+                <div className="mt-2">
+                  <BatangKomposisi data={komposisi} menu={menuAktif.nama} />
+                </div>
+              </>
+            ) : (
+              <p className="mt-4 text-sm text-redup">Belum ada menu dengan harga bahan lengkap.</p>
+            )}
+          </Kartu>
           <Kartu>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <Segmen
@@ -148,6 +192,7 @@ export default function Bahan() {
               <p className="py-6 text-center text-sm text-redup">{cari ? `Tidak ada bahan bernama "${cari}".` : 'Tidak ada bahan di kelompok ini.'}</p>
             )}
           </Kartu>
+          </div>
         </>
       )}
     </>
