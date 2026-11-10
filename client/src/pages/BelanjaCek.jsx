@@ -32,7 +32,7 @@ function Acuan({ it }) {
 function Dampak({ hasil }) {
   const { dampak, ringkasan } = hasil;
   return (
-    <Kartu className="border-teal/40">
+    <Kartu className="border-biru/40">
       <h2 className="text-lg font-bold">Belanja tersimpan</h2>
       <p className="mt-1 text-sm text-redup">
         {ringkasan.jumlah_item} bahan, total <span className="angka font-semibold text-tinta">{rupiah(ringkasan.total)}</span>.{' '}
@@ -43,7 +43,7 @@ function Dampak({ hasil }) {
           {dampak.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
               <div className="min-w-0">
-                <Link to={`/produk/${d.id}`} className="font-semibold hover:text-teal">
+                <Link to={`/produk/${d.id}`} className="font-semibold hover:text-biru">
                   {d.nama}
                 </Link>
                 <p className="angka text-sm text-redup">

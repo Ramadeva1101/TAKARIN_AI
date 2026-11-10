@@ -20,7 +20,7 @@ export default function Produk() {
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {data.map((p) => (
             <li key={p.id}>
-              <Link to={`/produk/${p.id}`} className="block h-full rounded-2xl border border-garis bg-kartu p-4 hover:border-teal">
+              <Link to={`/produk/${p.id}`} className="block h-full rounded-[20px] border border-garis bg-kartu shadow-kartu p-4 hover:border-biru">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold">{p.nama}</p>
                   <Chip status={p.status} />

@@ -2,7 +2,7 @@ import { all, get } from '../lib/db.js';
 import { hitungSemua } from './hpp.js';
 import { daftarBahan } from './bahan.js';
 import { opsiPerbaikan } from '../domain/rekomendasi.js';
-import { infoHarian } from './pasar.js';
+import { infoHarian, hargaWilayah } from './pasar.js';
 
 // Biaya tiap bahan di setiap menu dan bagiannya dari modal menu itu.
 export function bahanDenganKontribusi(usaha) {
@@ -39,6 +39,7 @@ export function ringkasan(usaha) {
     usaha.id,
   );
 
+  const wilayah = hargaWilayah(usaha);
   const perluTindakan = lengkap
     .filter((p) => p.status !== 'aman')
     .sort((a, b) => a.margin - b.margin)
@@ -58,7 +59,11 @@ export function ringkasan(usaha) {
     },
     produk: produk.map(({ id, nama, harga_jual, hpp, margin, status, harga_aman, lengkap: l, kurang }) => ({ id, nama, harga_jual, hpp, margin, status, harga_aman, lengkap: l, kurang })),
     perlu_tindakan: perluTindakan,
-    info_pasar: infoHarian(usaha).slice(0, 4),
+    info_pasar: infoHarian(usaha, wilayah).slice(0, 4),
+    pasar_ringkas: wilayah
+      .filter((d) => d.bahan.length)
+      .slice(0, 4)
+      .map(({ komoditas, wilayah: w, harga, satuan, perubahan_mingguan, riwayat }) => ({ komoditas, wilayah: w, harga, satuan, perubahan_mingguan, riwayat })),
     bahan_naik: bahanNaik.map(({ id, nama, satuan_dasar, perubahan, harga_terakhir }) => ({ id, nama, satuan_dasar, perubahan, harga_terakhir })),
     harga_pasar: bahan
       .filter((b) => b.acuan)

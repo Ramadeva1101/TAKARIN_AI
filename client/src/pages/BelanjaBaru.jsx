@@ -19,9 +19,9 @@ function Foto({ kirim, proses }) {
   return (
     <>
       <p className="text-sm text-redup">Foto nota dari atas, terang, dan seluruh baris terlihat. Hasil bacaan bisa Anda periksa sebelum disimpan.</p>
-      <label className="mt-4 flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-garis bg-dasar p-4 text-center hover:border-teal">
+      <label className="mt-4 flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-garis bg-dasar p-4 text-center hover:border-biru">
         {pratinjau ? <img src={pratinjau} alt="Pratinjau nota" className="max-h-72 rounded-lg object-contain" /> : <Camera size={32} className="text-redup" aria-hidden />}
-        <span className="text-sm font-semibold text-teal">{file ? 'Ganti foto' : 'Ambil atau pilih foto nota'}</span>
+        <span className="text-sm font-semibold text-biru">{file ? 'Ganti foto' : 'Ambil atau pilih foto nota'}</span>
         <input
           type="file"
           accept="image/*"
@@ -233,7 +233,7 @@ export default function BelanjaBaru() {
               setCara(id);
               setGalat(null);
             }}
-            className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border text-sm font-semibold ${cara === id ? 'border-lime bg-lime text-lime-tua' : 'border-garis bg-kartu text-redup hover:text-tinta'}`}
+            className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border text-sm font-semibold ${cara === id ? 'border-biru bg-biru-muda text-biru-tua' : 'border-garis bg-kartu text-redup hover:text-tinta'}`}
           >
             <Ikon size={20} aria-hidden /> {label}
           </button>

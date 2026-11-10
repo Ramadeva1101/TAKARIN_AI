@@ -24,7 +24,7 @@ export function Perubahan({ nilai, ket }) {
 
 function KartuKomoditas({ d }) {
   return (
-    <li className="min-w-0 rounded-2xl border border-garis bg-kartu p-4">
+    <li className="min-w-0 rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="font-semibold capitalize">{d.komoditas}</p>
@@ -50,7 +50,7 @@ function KartuKomoditas({ d }) {
           {d.menu.map((m, i) => (
             <span key={m.id}>
               {i > 0 && ', '}
-              <Link to={`/produk/${m.id}`} className="font-medium text-teal hover:underline">
+              <Link to={`/produk/${m.id}`} className="font-medium text-biru hover:underline">
                 {m.nama}
               </Link>
             </span>
@@ -58,7 +58,7 @@ function KartuKomoditas({ d }) {
         </p>
       )}
       {d.bahan.length > 0 && (
-        <Link to={`/bahan/${d.bahan[0].id}`} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-teal">
+        <Link to={`/bahan/${d.bahan[0].id}`} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-biru">
           Bandingkan dengan harga belanja Anda
         </Link>
       )}
@@ -115,7 +115,7 @@ export default function Pasar() {
         }
       />
       {(berjalan || galatPerbarui || data.sinkron.galat.length > 0) && (
-        <div role="status" className={`mb-4 rounded-xl px-3 py-2 text-sm ${berjalan ? 'bg-teal-muda text-teal-tua' : 'bg-waspada-muda text-waspada'}`}>
+        <div role="status" className={`mb-4 rounded-xl px-3 py-2 text-sm ${berjalan ? 'bg-biru-muda text-biru-tua' : 'bg-waspada-muda text-waspada'}`}>
           {berjalan ? (
             'Mengambil harga terbaru dari PIHPS Bank Indonesia. Bisa sampai setengah menit.'
           ) : (

@@ -1,4 +1,4 @@
-const KUNCI = 'dapur-untung-token';
+const KUNCI = 'takarin-token';
 
 export const token = {
   get: () => localStorage.getItem(KUNCI),

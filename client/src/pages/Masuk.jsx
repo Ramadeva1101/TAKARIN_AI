@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
-import { Field, Tombol } from '../components/ui.jsx';
+import { Field, Merek, Tombol } from '../components/ui.jsx';
 
 export default function Masuk({ mode }) {
   const { masuk } = useAuth();
@@ -25,15 +25,15 @@ export default function Masuk({ mode }) {
   };
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-2">
-      <div className="hidden flex-col justify-end bg-teal p-12 text-white lg:flex">
-        <p className="max-w-md text-3xl font-bold leading-tight">Tahu modal tiap porsi, dari nota belanja yang biasa Anda simpan.</p>
-        <p className="mt-4 max-w-md text-white/80">Foto nota atau ucapkan belanjaan. Modal dan untung setiap menu ikut diperbarui.</p>
+    <div className="grid min-h-dvh bg-gradient-to-b from-[#eef4ff] to-dasar lg:grid-cols-2 lg:gap-4 lg:p-4">
+      <div className="hidden flex-col justify-end rounded-[28px] bg-gradient-to-br from-biru to-[#13254a] p-12 text-white lg:flex">
+        <p className="max-w-md text-3xl leading-tight font-bold">Tahu modal tiap porsi, dari nota belanja yang biasa Anda simpan.</p>
+        <p className="mt-4 max-w-md text-white/80">Foto nota atau ucapkan belanjaan. Modal dan untung setiap menu ikut diperbarui, dibandingkan dengan harga pasar di kota Anda.</p>
       </div>
       <div className="flex items-center justify-center px-4 py-10">
-        <form onSubmit={submit} className="w-full max-w-sm" noValidate>
-          <Link to="/" className="mb-6 inline-flex min-h-11 items-center text-lg font-bold text-teal">
-            Dapur Untung
+        <form onSubmit={submit} className="w-full max-w-sm rounded-[24px] border border-garis bg-kartu p-6 shadow-kartu sm:p-8" noValidate>
+          <Link to="/" className="mb-6 inline-flex min-h-11 items-center">
+            <Merek className="text-xl" />
           </Link>
           <h1 className="text-2xl font-bold">{daftar ? 'Buat akun' : 'Masuk'}</h1>
           <p className="mt-1 mb-6 text-sm text-redup">{daftar ? 'Satu akun untuk satu usaha.' : 'Lanjutkan hitungan usaha Anda.'}</p>
@@ -60,7 +60,7 @@ export default function Masuk({ mode }) {
           </Tombol>
           <p className="mt-6 text-sm text-redup">
             {daftar ? 'Sudah punya akun? ' : 'Belum punya akun? '}
-            <Link className="inline-block py-2 font-semibold text-teal" to={daftar ? '/masuk' : '/daftar'}>
+            <Link className="inline-block py-2 font-semibold text-biru" to={daftar ? '/masuk' : '/daftar'}>
               {daftar ? 'Masuk' : 'Daftar'}
             </Link>
           </p>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash } from '@phosphor-icons/react';
 import { api, pesanGalat } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
-import { Field, Kartu, Tombol, inputCls } from '../components/ui.jsx';
+import { Field, Kartu, Merek, Tombol, inputCls } from '../components/ui.jsx';
 import ResepEditor, { cekResep, rapikanResep, resepKosong } from '../components/ResepEditor.jsx';
 
 const JENIS = [
@@ -52,7 +52,7 @@ function Pilihan({ aktif, onClick, judul, ket }) {
       role="radio"
       aria-checked={aktif}
       onClick={onClick}
-      className={`min-h-16 rounded-xl border p-3 text-left ${aktif ? 'border-teal bg-teal-muda' : 'border-garis bg-kartu hover:border-teal'}`}
+      className={`min-h-16 rounded-xl border p-3 text-left ${aktif ? 'border-biru bg-biru-muda' : 'border-garis bg-kartu hover:border-biru'}`}
     >
       <span className="block font-semibold">{judul}</span>
       {ket && <span className="block text-sm text-redup">{ket}</span>}
@@ -158,7 +158,7 @@ export default function Onboarding() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <p className="font-bold text-teal">Dapur Untung</p>
+        <Merek className="text-lg" />
         <Tombol varian="hantu" onClick={keluar}>
           Keluar
         </Tombol>
@@ -166,7 +166,7 @@ export default function Onboarding() {
 
       <ol className="mb-6 flex gap-1" aria-label={`Langkah ${langkah + 1} dari ${LANGKAH.length}: ${LANGKAH[langkah]}`}>
         {LANGKAH.map((l, i) => (
-          <li key={l} className={`h-1.5 flex-1 rounded-full ${i <= langkah ? 'bg-teal' : 'bg-garis'}`} title={l} />
+          <li key={l} className={`h-1.5 flex-1 rounded-full ${i <= langkah ? 'bg-biru' : 'bg-garis'}`} title={l} />
         ))}
       </ol>
       <p className="text-sm text-redup">

@@ -8,7 +8,7 @@ import { simpanHarga } from './hargaPasar.js';
 
 const BASE = 'https://www.bi.go.id/hargapangan/WebSite/TabelHarga';
 export const SUMBER = 'PIHPS Bank Indonesia';
-const UA = 'DapurUntung/1.0 (proyek hackathon, pengambilan harian terbatas)';
+const UA = 'takarin.ai/1.0 (proyek hackathon, pengambilan harian terbatas)';
 const JEDA_ULANG_MS = 6 * 3_600_000;
 const HARI_RIWAYAT = 30;
 

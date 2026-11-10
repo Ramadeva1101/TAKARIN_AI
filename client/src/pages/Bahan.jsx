@@ -19,7 +19,7 @@ function Baris({ b }) {
   const masalah = alasan(b);
   return (
     <li>
-      <Link to={`/bahan/${b.id}`} className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 py-3 hover:text-teal">
+      <Link to={`/bahan/${b.id}`} className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 py-3 hover:text-biru">
         <div className="min-w-0 flex-1">
           <p className="font-semibold capitalize">{b.nama}</p>
           {utama ? (

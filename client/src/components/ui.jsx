@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { WarningCircle } from '@phosphor-icons/react';
 
 const VARIAN = {
-  utama: 'bg-teal text-white hover:bg-teal-tua',
-  lime: 'bg-lime text-lime-tua hover:brightness-95',
-  garis: 'border border-garis bg-kartu text-tinta hover:bg-dasar',
-  hantu: 'text-teal hover:bg-teal-muda',
+  utama: 'bg-biru text-white shadow-[0_6px_16px_rgb(37_99_235/0.25)] hover:bg-biru-tua',
+  lembut: 'bg-biru-muda text-biru-tua hover:bg-[#dce8ff]',
+  garis: 'border border-garis bg-kartu text-tinta hover:border-biru/40 hover:text-biru',
+  hantu: 'text-biru hover:bg-biru-muda',
   bahaya: 'text-rugi hover:bg-rugi-muda',
 };
 const dasarTombol =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors disabled:opacity-50';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:shadow-none';
 
 export function Tombol({ varian = 'utama', className = '', to, ...p }) {
   const cls = `${dasarTombol} ${VARIAN[varian]} ${className}`;
@@ -32,7 +32,7 @@ export function Field({ label, hint, error, as = 'input', className = '', childr
         <Tag
           id={id}
           aria-invalid={error ? true : undefined}
-          className="min-h-11 w-full rounded-xl border border-garis bg-kartu px-3 py-2 text-base outline-none focus:border-teal"
+          className="min-h-11 w-full rounded-xl border border-garis bg-kartu px-3 py-2 text-base outline-none focus:border-biru"
           {...p}
         />
       )}
@@ -42,7 +42,7 @@ export function Field({ label, hint, error, as = 'input', className = '', childr
   );
 }
 
-export const inputCls = 'min-h-11 w-full rounded-lg border border-garis bg-kartu px-2 py-1.5 text-sm outline-none focus:border-teal';
+export const inputCls = 'min-h-11 w-full rounded-lg border border-garis bg-kartu px-2 py-1.5 text-sm outline-none focus:border-biru';
 
 const STATUS = {
   aman: ['Sesuai target', 'bg-aman-muda text-aman'],
@@ -53,18 +53,42 @@ const STATUS = {
   wajar: ['Wajar', 'bg-aman-muda text-aman'],
   di_atas: ['Di atas pasar', 'bg-waspada-muda text-waspada'],
   jauh_di_atas: ['Jauh di atas pasar', 'bg-rugi-muda text-rugi'],
-  di_bawah: ['Di bawah pasar', 'bg-teal-muda text-teal-tua'],
+  di_bawah: ['Di bawah pasar', 'bg-biru-muda text-biru-tua'],
   tanpa_acuan: ['Tanpa acuan', 'bg-dasar text-redup border border-garis'],
 };
 
 export function Chip({ status, children }) {
   const [label, cls] = STATUS[status] || [status, 'bg-dasar text-redup'];
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${cls}`}>{children || label}</span>;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${cls}`}>
+      <span className="size-1.5 rounded-full bg-current" aria-hidden />
+      {children || label}
+    </span>
+  );
+}
+
+// Nama produk sebagai teks: "takarin" gelap, ".ai" biru. Bukan logo gambar.
+export function Merek({ className = '' }) {
+  return (
+    <span className={`font-bold tracking-tight text-tinta ${className}`}>
+      takarin<span className="text-biru">.ai</span>
+    </span>
+  );
+}
+
+// Kotak ikon berwarna di kartu angka.
+export function IkonKotak({ ikon: Ikon, warna = 'biru' }) {
+  const cls = { biru: 'bg-biru-muda text-biru', kuning: 'bg-kuning-muda text-kuning-tua', rugi: 'bg-rugi-muda text-rugi', aman: 'bg-aman-muda text-aman' }[warna];
+  return (
+    <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${cls}`} aria-hidden>
+      <Ikon size={22} weight="duotone" />
+    </span>
+  );
 }
 
 export function Kartu({ className = '', children, ...p }) {
   return (
-    <section className={`min-w-0 rounded-2xl border border-garis bg-kartu p-4 sm:p-5 ${className}`} {...p}>
+    <section className={`min-w-0 rounded-[20px] border border-garis bg-kartu p-4 shadow-kartu sm:p-5 ${className}`} {...p}>
       {children}
     </section>
   );
@@ -75,11 +99,11 @@ export function Judul({ judul, sub, aksi, kembali }) {
     <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         {kembali && (
-          <Link to={kembali} className="mb-1 inline-flex min-h-11 items-center text-sm font-medium text-teal">
+          <Link to={kembali} className="mb-1 inline-flex min-h-11 items-center text-sm font-medium text-biru">
             Kembali
           </Link>
         )}
-        <h1 className="text-xl font-bold sm:text-2xl">{judul}</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">{judul}</h1>
         {sub && <p className="mt-1 text-sm text-redup">{sub}</p>}
       </div>
       {aksi && <div className="flex flex-wrap gap-2">{aksi}</div>}
@@ -90,7 +114,7 @@ export function Judul({ judul, sub, aksi, kembali }) {
 export function Muat({ penuh, teks = 'Memuat data' }) {
   return (
     <div role="status" className={`flex items-center justify-center gap-3 text-sm text-redup ${penuh ? 'min-h-dvh' : 'py-16'}`}>
-      <span className="size-4 animate-spin rounded-full border-2 border-garis border-t-teal" aria-hidden />
+      <span className="size-4 animate-spin rounded-full border-2 border-garis border-t-biru" aria-hidden />
       {teks}
     </div>
   );

@@ -168,7 +168,7 @@ export default function Promo() {
                       setOpsi(o.jenis);
                       setHarga(o.harga);
                     }}
-                    className={`rounded-xl border p-3 text-left ${opsi === o.jenis ? 'border-teal bg-teal-muda' : 'border-garis bg-kartu hover:border-teal'}`}
+                    className={`rounded-xl border p-3 text-left ${opsi === o.jenis ? 'border-biru bg-biru-muda' : 'border-garis bg-kartu hover:border-biru'}`}
                   >
                     <p className="text-sm font-semibold">{NAMA_OPSI[o.jenis]}</p>
                     <p className="angka text-xl font-bold">{rupiah(o.harga)}</p>
@@ -200,7 +200,7 @@ export default function Promo() {
 
         <div className="flex flex-col gap-4 lg:col-span-2">
           {hasil && (
-            <Kartu className="bg-lime/30">
+            <Kartu className="bg-kuning-muda">
               <h2 className="font-semibold">3. Nama dan caption</h2>
               <p className="mb-3 text-sm text-redup">Bisa diisi sendiri atau minta usulan.</p>
               <Tombol varian="garis" onClick={saran} disabled={proses === 'saran' || !(hargaN > 0)}>

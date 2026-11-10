@@ -14,7 +14,7 @@ function GrafikAcuan({ riwayat, satuan }) {
     <div>
       <div className="flex h-28 items-end gap-1" role="img" aria-label={`Harga pasar ${riwayat.length} hari terakhir, terakhir ${rupiah(akhir.harga)} per ${satuan}`}>
         {riwayat.map((r) => (
-          <div key={r.tanggal} title={`${tanggal(r.tanggal)}: ${rupiah(r.harga)}`} className="flex-1 rounded-t bg-teal/70" style={{ height: `${((r.harga - min) / (maks - min || 1)) * 100}%`, minHeight: 4 }} />
+          <div key={r.tanggal} title={`${tanggal(r.tanggal)}: ${rupiah(r.harga)}`} className="flex-1 rounded-t bg-biru/70" style={{ height: `${((r.harga - min) / (maks - min || 1)) * 100}%`, minHeight: 4 }} />
         ))}
       </div>
       <div className="mt-1 flex justify-between text-xs text-redup">
@@ -167,7 +167,7 @@ export default function BahanDetail() {
               {b.dipakai_di.map((m, i) => (
                 <span key={m.id}>
                   {i > 0 && ', '}
-                  <Link to={`/produk/${m.id}`} className="inline-block py-2 font-semibold text-teal">
+                  <Link to={`/produk/${m.id}`} className="inline-block py-2 font-semibold text-biru">
                     {m.nama}
                   </Link>
                 </span>

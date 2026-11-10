@@ -2,32 +2,43 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
-  --color-dasar: #f3f4ef;
+  --color-dasar: #f4f7fc;
   --color-kartu: #ffffff;
-  --color-tinta: #1b1f1a;
-  --color-redup: #5a6158;
-  --color-garis: #dfe2d8;
-  --color-lime: #c6f06b;
-  --color-lime-tua: #3f5a10;
-  --color-teal: #17756b;
-  --color-teal-tua: #0f554e;
-  --color-teal-muda: #e2f1ee;
-  --color-aman: #1f7a3d;
-  --color-aman-muda: #e3f4e8;
+  --color-tinta: #0f1f3d;
+  --color-redup: #5b6782;
+  --color-garis: #e3e9f3;
+  --color-biru: #2563eb;
+  --color-biru-tua: #1d4ed8;
+  --color-biru-muda: #eaf1ff;
+  --color-kuning: #f5b301;
+  --color-kuning-tua: #8a5a00;
+  --color-kuning-muda: #fff6dc;
+  --color-aman: #157f3b;
+  --color-aman-muda: #e6f6ec;
   --color-waspada: #8a5a00;
-  --color-waspada-muda: #fff3d6;
-  --color-rugi: #b42318;
-  --color-rugi-muda: #fde7e4;
+  --color-waspada-muda: #fff4d6;
+  --color-rugi: #c0261a;
+  --color-rugi-muda: #fdecea;
+  --shadow-kartu: 0 1px 2px rgb(15 31 61 / 0.04), 0 6px 20px rgb(15 31 61 / 0.05);
 }
 
 html { -webkit-text-size-adjust: 100%; }
 body { background: var(--color-dasar); color: var(--color-tinta); font-family: var(--font-sans); }
 .angka { font-variant-numeric: tabular-nums; }
 
+/* Warna merek: biru ke kuning. Hanya untuk kata sorotan besar di beranda, bukan untuk teks biasa
+   (kuning di atas putih tidak cukup kontras untuk teks kecil). */
+.teks-merek {
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 45%, #c98a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 a[href], button:not(:disabled), summary, select, label[for], input[type='checkbox'], input[type='radio'], [role='button'] { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 
-:focus-visible { outline: 3px solid var(--color-teal); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--color-biru); outline-offset: 2px; border-radius: 8px; }
 
 /* Motif nota: tepi putus-putus seperti struk belanja */
 .tepi-nota { border-top: 2px dashed var(--color-garis); }

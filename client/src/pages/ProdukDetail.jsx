@@ -25,7 +25,7 @@ function Rincian({ p }) {
           {baris.map((r) => (
             <tr key={r.bahan_id}>
               <td className="py-2">
-                <Link to={`/bahan/${r.bahan_id}`} className="font-medium capitalize hover:text-teal">
+                <Link to={`/bahan/${r.bahan_id}`} className="font-medium capitalize hover:text-biru">
                   {r.nama}
                 </Link>
                 <span className="block text-xs text-redup">{r.biaya == null ? 'harga belum ada' : SUMBER[r.sumber_harga] || r.sumber_harga}</span>
@@ -37,7 +37,7 @@ function Rincian({ p }) {
               <td className="angka py-2 text-right font-semibold">{r.biaya == null ? '–' : rupiah(r.biaya)}</td>
               <td className="py-2 pl-3">
                 <div className="h-2 rounded-full bg-dasar" aria-hidden>
-                  <div className="h-2 rounded-full bg-teal" style={{ width: `${((r.biaya ?? 0) / total) * 100}%` }} />
+                  <div className="h-2 rounded-full bg-biru" style={{ width: `${((r.biaya ?? 0) / total) * 100}%` }} />
                 </div>
               </td>
             </tr>
@@ -89,7 +89,7 @@ function Simulasi({ p }) {
         step="500"
         value={harga}
         onChange={(e) => setHarga(Number(e.target.value))}
-        className="mt-2 h-11 w-full accent-teal"
+        className="mt-2 h-11 w-full accent-biru"
       />
       {bahanUtama.map((b) => {
         const f = faktor[b.bahan_id] ?? 1;
@@ -106,7 +106,7 @@ function Simulasi({ p }) {
               step="0.05"
               value={f}
               onChange={(e) => setFaktor({ ...faktor, [b.bahan_id]: Number(e.target.value) })}
-              className="h-11 w-full accent-teal"
+              className="h-11 w-full accent-biru"
             />
           </div>
         );
@@ -140,7 +140,7 @@ function Rekomendasi({ id, onTerapkan }) {
   if (loading && !data) return <Muat teks="Menyusun penjelasan" />;
   if (error) return <Galat error={error} ulang={muat} />;
   return (
-    <Kartu className="bg-lime/30">
+    <Kartu className="bg-kuning-muda">
       <h2 className="font-semibold">Penjelasan</h2>
       <p className="mt-2 text-sm leading-relaxed">{data.penjelasan}</p>
       {data.opsi?.length > 0 && (
@@ -242,20 +242,20 @@ export default function ProdukDetail() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div className="rounded-2xl border border-garis bg-kartu p-4">
+            <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
               <p className="text-sm text-redup">Modal per porsi</p>
               <p className="angka mt-1 text-2xl font-bold">{rupiah(p.hpp)}</p>
             </div>
-            <div className="rounded-2xl border border-garis bg-kartu p-4">
+            <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
               <p className="text-sm text-redup">Harga jual</p>
               <p className="angka mt-1 text-2xl font-bold">{rupiah(p.harga_jual)}</p>
             </div>
-            <div className="rounded-2xl border border-garis bg-lime/40 p-4">
+            <div className="rounded-2xl border border-garis bg-kuning-muda p-4">
               <p className="text-sm text-redup">Untung</p>
               <p className="angka mt-1 text-2xl font-bold">{persen(p.margin)}</p>
               <p className="mt-1 text-xs text-redup">Target {persen(p.target_margin)}</p>
             </div>
-            <div className="rounded-2xl border border-garis bg-kartu p-4">
+            <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
               <p className="text-sm text-redup">Harga aman</p>
               <p className="angka mt-1 text-2xl font-bold">{rupiah(p.harga_aman)}</p>
               <div className="mt-1">

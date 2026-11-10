@@ -22,7 +22,7 @@ export default function Belanja() {
             <ul className="divide-y divide-garis">
               {data.map((n) => (
                 <li key={n.id}>
-                  <Link to={`/belanja/${n.id}`} className="flex min-h-14 items-center justify-between gap-3 py-3 hover:text-teal">
+                  <Link to={`/belanja/${n.id}`} className="flex min-h-14 items-center justify-between gap-3 py-3 hover:text-biru">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{n.nama_toko || 'Tanpa nama toko'}</p>
                       <p className="text-sm text-redup">
