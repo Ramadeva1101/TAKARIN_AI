@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { WarningCircle } from '@phosphor-icons/react';
 
 const VARIAN = {
-  utama: 'bg-biru text-white shadow-[0_6px_16px_rgb(37_99_235/0.25)] hover:bg-biru-tua',
+  utama: 'tombol-merek text-white',
+  polos: 'bg-biru text-white hover:bg-biru-tua',
+  masuk: 'bingkai-merek text-tinta hover:text-biru',
   lembut: 'bg-biru-muda text-biru-tua hover:bg-[#dce8ff]',
   garis: 'border border-garis bg-kartu text-tinta hover:border-biru/40 hover:text-biru',
   hantu: 'text-biru hover:bg-biru-muda',
@@ -68,20 +70,40 @@ export function Chip({ status, children }) {
 }
 
 // Nama produk sebagai teks: "takarin" gelap, ".ai" biru. Bukan logo gambar.
-export function Merek({ className = '' }) {
+// Tanda empat bulatan dari palet Sicily. Pengganti sementara sampai ada file logo resmi dari tim UI.
+export function TandaMerek({ ukuran = 22 }) {
+  const warna = ['#1d59bb', '#76b9ff', '#fef3b3', '#febd19'];
   return (
-    <span className={`font-bold tracking-tight text-tinta ${className}`}>
-      takarin<span className="text-biru">.ai</span>
+    <span className="inline-flex shrink-0 items-center" aria-hidden>
+      {warna.map((w, i) => (
+        <span key={w} className="rounded-full ring-2 ring-white" style={{ width: ukuran, height: ukuran, background: w, marginLeft: i ? -ukuran * 0.38 : 0 }} />
+      ))}
+    </span>
+  );
+}
+
+export function Merek({ className = '', tanda = true, terang = false }) {
+  return (
+    <span className={`inline-flex items-center gap-2 font-bold tracking-tight ${terang ? 'text-white' : 'text-tinta'} ${className}`}>
+      {tanda && <TandaMerek ukuran={18} />}
+      <span>
+        takarin<span className={terang ? 'text-biru-terang' : 'text-biru'}>.ai</span>
+      </span>
     </span>
   );
 }
 
 // Kotak ikon berwarna di kartu angka.
 export function IkonKotak({ ikon: Ikon, warna = 'biru' }) {
-  const cls = { biru: 'bg-biru-muda text-biru', kuning: 'bg-kuning-muda text-kuning-tua', rugi: 'bg-rugi-muda text-rugi', aman: 'bg-aman-muda text-aman' }[warna];
+  const cls = {
+    biru: 'bg-gradient-to-br from-biru-terang to-biru text-white shadow-[0_6px_14px_rgb(29_89_187/0.3)]',
+    kuning: 'bg-gradient-to-br from-[#ffd75e] to-kuning text-navy shadow-[0_6px_14px_rgb(254_189_25/0.35)]',
+    rugi: 'bg-gradient-to-br from-[#ff8a7a] to-rugi text-white shadow-[0_6px_14px_rgb(192_38_26/0.25)]',
+    aman: 'bg-gradient-to-br from-[#5fd08a] to-aman text-white shadow-[0_6px_14px_rgb(21_127_59/0.25)]',
+  }[warna];
   return (
-    <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${cls}`} aria-hidden>
-      <Ikon size={22} weight="duotone" />
+    <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${cls}`} aria-hidden>
+      <Ikon size={24} weight="fill" />
     </span>
   );
 }

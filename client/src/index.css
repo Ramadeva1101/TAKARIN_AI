@@ -2,17 +2,20 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
-  --color-dasar: #f4f7fc;
+  /* Palet Sicily: 1D59BB, 76B9FF, FEF3B3, FEBD19 */
+  --color-dasar: #f5f8fd;
   --color-kartu: #ffffff;
-  --color-tinta: #0f1f3d;
+  --color-tinta: #0d1b3e;
   --color-redup: #5b6782;
-  --color-garis: #e3e9f3;
-  --color-biru: #2563eb;
-  --color-biru-tua: #1d4ed8;
-  --color-biru-muda: #eaf1ff;
-  --color-kuning: #f5b301;
+  --color-garis: #e2e9f4;
+  --color-biru: #1d59bb;
+  --color-biru-tua: #164a9e;
+  --color-biru-terang: #76b9ff;
+  --color-biru-muda: #e8f2ff;
+  --color-kuning: #febd19;
   --color-kuning-tua: #8a5a00;
-  --color-kuning-muda: #fff6dc;
+  --color-kuning-muda: #fef3b3;
+  --color-navy: #13254a;
   --color-aman: #157f3b;
   --color-aman-muda: #e6f6ec;
   --color-waspada: #8a5a00;
@@ -29,10 +32,40 @@ body { background: var(--color-dasar); color: var(--color-tinta); font-family: v
 /* Warna merek: biru ke kuning. Hanya untuk kata sorotan besar di beranda, bukan untuk teks biasa
    (kuning di atas putih tidak cukup kontras untuk teks kecil). */
 .teks-merek {
-  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 45%, #c98a00 100%);
+  background: linear-gradient(90deg, #1d59bb 0%, #4f97f5 40%, #e0a800 75%, #f0b000 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+.teks-biru { color: #3d86ea; }
+.teks-emas {
+  background: linear-gradient(90deg, #c9a227, #f0ad00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Tombol utama: biru, berakhir kuning di ujung kanan (tempat ikon panah), teks tetap di area biru. */
+.tombol-merek {
+  background: linear-gradient(90deg, #1d59bb 0%, #2b6fd6 62%, #febd19 118%);
+  box-shadow: 0 8px 20px rgb(29 89 187 / 0.28), 0 2px 0 rgb(254 189 25 / 0.35) inset;
+  text-shadow: 0 1px 1px rgb(13 27 62 / 0.25);
+}
+.tombol-merek:hover { background: linear-gradient(90deg, #164a9e 0%, #2463c8 62%, #febd19 118%); }
+
+/* Bingkai pil dua warna (tombol Masuk). */
+.bingkai-merek {
+  border: 1.5px solid transparent;
+  background: linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #76b9ff, #febd19) border-box;
+}
+
+/* Latar halaman publik: cahaya biru di kiri, hangat kuning di kanan. */
+.latar-merek {
+  background:
+    radial-gradient(55% 45% at 0% 25%, rgb(118 185 255 / 0.28) 0%, transparent 70%),
+    radial-gradient(45% 40% at 100% 15%, rgb(254 189 25 / 0.22) 0%, transparent 70%),
+    radial-gradient(60% 40% at 50% 100%, rgb(254 243 179 / 0.35) 0%, transparent 70%),
+    #f8fbff;
 }
 
 a[href], button:not(:disabled), summary, select, label[for], input[type='checkbox'], input[type='radio'], [role='button'] { cursor: pointer; }

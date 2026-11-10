@@ -25,7 +25,7 @@ export default function Masuk({ mode }) {
   };
 
   return (
-    <div className="grid min-h-dvh bg-gradient-to-b from-[#eef4ff] to-dasar lg:grid-cols-2 lg:gap-4 lg:p-4">
+    <div className="latar-merek grid min-h-dvh lg:grid-cols-2 lg:gap-4 lg:p-4">
       <div className="hidden flex-col justify-end rounded-[28px] bg-gradient-to-br from-biru to-[#13254a] p-12 text-white lg:flex">
         <p className="max-w-md text-3xl leading-tight font-bold">Tahu modal tiap porsi, dari nota belanja yang biasa Anda simpan.</p>
         <p className="mt-4 max-w-md text-white/80">Foto nota atau ucapkan belanjaan. Modal dan untung setiap menu ikut diperbarui, dibandingkan dengan harga pasar di kota Anda.</p>

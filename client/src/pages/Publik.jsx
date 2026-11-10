@@ -1,8 +1,34 @@
 import { useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, Camera, Microphone, ChatText, Storefront, Calculator, Tag, ChartBar, ForkKnife, Basket } from '@phosphor-icons/react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import {
+  ArrowRight,
+  Camera,
+  Microphone,
+  ChatText,
+  Storefront,
+  Calculator,
+  Tag,
+  ChartBar,
+  ForkKnife,
+  Basket,
+  PlayCircle,
+  House,
+  CalendarBlank,
+  CaretDown,
+  ShoppingCart,
+  ChartLineUp,
+  Scales,
+  MapPin,
+} from '@phosphor-icons/react';
 import { Chip, IkonKotak, Merek, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
+
+const MENU_SITUS = [
+  ['/', 'Beranda'],
+  ['/#cara-kerja', 'Cara Kerja'],
+  ['/#fitur', 'Fitur'],
+  ['/bantuan', 'FAQ'],
+];
 
 export function PublikLayout() {
   const { pathname, hash } = useLocation();
@@ -10,31 +36,29 @@ export function PublikLayout() {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
     else window.scrollTo(0, 0);
   }, [pathname, hash]);
-  const kelas = 'inline-flex min-h-11 items-center px-3 text-sm font-medium text-redup hover:text-tinta';
+  const aktif = (to) => (to.includes('#') ? `/${hash}` === to : pathname === to && !hash);
   return (
-    <div className="flex min-h-dvh flex-col bg-gradient-to-b from-[#eef4ff] via-white to-dasar">
-      <header className="sticky top-0 z-10 border-b border-garis/70 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2 sm:px-6">
+    <div className="latar-merek flex min-h-dvh flex-col">
+      <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <Link to="/" className="inline-flex min-h-11 items-center">
             <Merek className="text-xl" />
           </Link>
-          <nav aria-label="Menu situs" className="hidden items-center md:flex">
-            <Link to="/#cara-kerja" className={kelas}>
-              Cara kerja
-            </Link>
-            <Link to="/#fitur" className={kelas}>
-              Fitur
-            </Link>
-            <NavLink to="/bantuan" className={({ isActive }) => `${kelas} ${isActive ? '!text-biru' : ''}`}>
-              Bantuan
-            </NavLink>
-            <NavLink to="/tentang" className={({ isActive }) => `${kelas} ${isActive ? '!text-biru' : ''}`}>
-              Tentang
-            </NavLink>
+          <nav aria-label="Menu situs" className="hidden items-center gap-2 md:flex">
+            {MENU_SITUS.map(([to, label]) => (
+              <Link
+                key={to}
+                to={to}
+                aria-current={aktif(to) ? 'page' : undefined}
+                className={`relative inline-flex min-h-11 items-center px-3 text-[15px] font-medium ${aktif(to) ? 'text-tinta after:absolute after:inset-x-3 after:bottom-1 after:h-[3px] after:rounded-full after:bg-biru' : 'text-redup hover:text-tinta'}`}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Tombol varian="garis" to="/masuk">
-              Masuk
+            <Tombol varian="masuk" to="/masuk">
+              Masuk <ArrowRight size={16} weight="bold" className="text-kuning" aria-hidden />
             </Tombol>
             <Tombol to="/daftar" className="hidden sm:inline-flex">
               Daftar
@@ -47,15 +71,15 @@ export function PublikLayout() {
       </div>
       <footer className="border-t border-garis bg-kartu">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-sm text-redup sm:px-6">
-          <p>
+          <p className="flex items-center gap-2">
             <Merek /> · proyek LOGICODIX 2026
           </p>
           <nav aria-label="Tautan situs" className="flex flex-wrap gap-1">
-            <Link to="/bantuan" className="inline-flex min-h-11 items-center px-2 hover:text-tinta md:hidden">
-              Bantuan
-            </Link>
-            <Link to="/tentang" className="inline-flex min-h-11 items-center px-2 hover:text-tinta md:hidden">
+            <Link to="/tentang" className="inline-flex min-h-11 items-center px-2 hover:text-tinta">
               Tentang
+            </Link>
+            <Link to="/bantuan" className="inline-flex min-h-11 items-center px-2 hover:text-tinta md:hidden">
+              FAQ
             </Link>
             <Link to="/privasi" className="inline-flex min-h-11 items-center px-2 hover:text-tinta">
               Kebijakan privasi
@@ -70,58 +94,111 @@ export function PublikLayout() {
   );
 }
 
-// Pratinjau tampilan aplikasi. Angkanya contoh dari akun demo, ditandai di bawahnya.
-const TREN_CABAI = [58750, 58750, 58750, 58750, 60000, 61250, 65000, 65000].map((harga) => ({ harga }));
+// Kartu miring di kiri dan kanan pratinjau (desktop saja). Isinya fitur yang memang ada.
+function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
+  return (
+    <div className={`absolute z-10 hidden w-56 items-center gap-3 rounded-2xl border border-white bg-white/90 p-4 text-left shadow-[0_18px_40px_rgb(13_27_62/0.12)] backdrop-blur xl:flex ${posisi}`} aria-hidden>
+      <IkonKotak ikon={ikon} warna={warna} />
+      <div>
+        <p className="font-bold">{judul}</p>
+        <p className="text-sm text-redup">{teks}</p>
+      </div>
+    </div>
+  );
+}
 
+// Grafik area kecil untuk pratinjau (data demo modal ayam geprek 8 belanja terakhir).
+function Area() {
+  const nilai = [8350, 8420, 8380, 8510, 8470, 8590, 8640, 8708];
+  const min = 8300;
+  const maks = 8750;
+  const titik = nilai.map((v, i) => [(i / (nilai.length - 1)) * 200, 60 - ((v - min) / (maks - min)) * 50]);
+  const garis = titik.map((p) => p.join(',')).join(' ');
+  return (
+    <svg viewBox="0 0 200 64" className="h-16 w-full" preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id="isi-area" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#76b9ff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#76b9ff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={`0,64 ${garis} 200,64`} fill="url(#isi-area)" />
+      <polyline points={garis} fill="none" stroke="#3d86ea" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function KpiMini({ ikon: Ikon, warna, label, nilai }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-garis bg-white p-3 shadow-kartu">
+      <span className={`flex size-9 items-center justify-center rounded-xl ${warna}`}>
+        <Ikon size={20} weight="fill" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs text-redup">{label}</p>
+        <p className="angka truncate font-bold">{nilai}</p>
+      </div>
+    </div>
+  );
+}
+
+// Pratinjau tampilan aplikasi. Angkanya dari akun demo, ditandai di bawahnya.
 function Pratinjau() {
   return (
-    <figure className="mx-auto mt-12 max-w-4xl">
-      <div className="overflow-hidden rounded-[24px] border border-garis bg-kartu text-left shadow-[0_24px_60px_rgb(15_31_61/0.10)]">
-        <div className="flex">
-          <div className="hidden w-44 shrink-0 flex-col gap-1 bg-[#13254a] p-4 text-sm text-white/75 sm:flex" aria-hidden>
-            <Merek className="mb-3 text-base !text-white" />
+    <figure className="mx-auto max-w-3xl">
+      <div className="rounded-[28px] border border-white bg-white/60 p-2 shadow-[0_30px_70px_rgb(29_89_187/0.15)] backdrop-blur">
+        <div className="flex overflow-hidden rounded-[22px] border border-garis bg-white text-left">
+          <div className="hidden w-44 shrink-0 flex-col gap-1 bg-gradient-to-b from-navy to-[#2a3f66] p-4 text-sm text-white/75 sm:flex" aria-hidden>
+            <Merek terang className="mb-4 text-base" />
             {[
-              [ChartBar, 'Ringkasan', true],
+              [House, 'Ringkasan', true],
               [ForkKnife, 'Produk'],
               [Storefront, 'Harga pasar'],
               [Basket, 'Bahan baku'],
-            ].map(([Ikon, l, aktif]) => (
-              <span key={l} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${aktif ? 'bg-white/15 font-semibold text-white' : ''}`}>
-                <Ikon size={16} /> {l}
+            ].map(([Ikon, l, a]) => (
+              <span key={l} className={`flex items-center gap-2 rounded-xl px-3 py-2 ${a ? 'bg-biru-muda font-semibold text-biru' : ''}`}>
+                <Ikon size={16} weight={a ? 'fill' : 'regular'} /> {l}
               </span>
             ))}
           </div>
           <div className="min-w-0 flex-1 p-4 sm:p-6">
-            <p className="text-lg font-bold">Halo, Bu Sari</p>
-            <p className="text-xs text-redup">Warung Bu Sari, Denpasar</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-[1.4fr_1fr]">
-              <div className="rounded-2xl bg-biru-muda/70 p-4">
-                <p className="text-sm text-redup">Ayam Geprek, modal per porsi</p>
-                <p className="angka mt-1 text-2xl font-bold">Rp8.708</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="angka">Jual Rp15.000</span>
-                  <Chip status="aman">Untung 41,9%</Chip>
-                </div>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-lg font-bold">Halo, Bu Sari!</p>
+                <p className="text-xs text-redup">Ringkasan modal Warung Bu Sari hari ini.</p>
               </div>
-              <div className="rounded-2xl border border-garis p-4">
-                <p className="text-sm text-redup">Cabai rawit merah, Denpasar</p>
-                <p className="angka mt-1 text-lg font-bold">Rp65.000/kg</p>
-                <Garis data={TREN_CABAI} label="Tren harga cabai rawit merah naik" />
-              </div>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-kuning-muda px-4 py-3 text-sm">
-              <span>
-                <b>Es Jeruk</b> untung 39,0%, di bawah target 40%.
+              <span className="hidden items-center gap-1.5 rounded-xl border border-garis px-3 py-1.5 text-xs font-medium sm:inline-flex">
+                <CalendarBlank size={14} /> Hari ini <CaretDown size={12} />
               </span>
-              <span className="angka font-semibold text-kuning-tua">Harga aman Rp6.500</span>
+            </div>
+            <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4 rounded-2xl bg-gradient-to-br from-biru-muda to-white p-4">
+              <div>
+                <p className="text-sm font-medium">Modal per porsi, Ayam Geprek</p>
+                <p className="angka mt-1 flex items-baseline gap-2 text-2xl font-extrabold sm:text-3xl">
+                  Rp8.708 <Chip status="aman">Untung 41,9%</Chip>
+                </p>
+              </div>
+              <Area />
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <KpiMini ikon={ForkKnife} warna="bg-biru-muda text-biru" label="Menu dihitung" nilai="4 menu" />
+              <KpiMini ikon={ShoppingCart} warna="bg-kuning-muda text-kuning-tua" label="Belanja bulan ini" nilai="Rp628.750" />
+              <KpiMini ikon={ChartLineUp} warna="bg-biru-muda text-biru" label="Rata-rata untung" nilai="48,4%" />
             </div>
           </div>
         </div>
       </div>
-      <figcaption className="mt-3 text-center text-xs text-redup">Contoh tampilan dengan data akun demo. Harga cabai dari PIHPS Bank Indonesia.</figcaption>
+      <figcaption className="mt-3 text-center text-xs text-redup">Contoh tampilan dengan data akun demo.</figcaption>
     </figure>
   );
 }
+
+const FAKTA = [
+  [Scales, 'Takaran sdm, siung, potong'],
+  [MapPin, 'Harga kota, provinsi, nasional'],
+  [Storefront, '11 komoditas pangan PIHPS'],
+  [Microphone, 'Foto, suara, atau ketik'],
+];
 
 const LANGKAH = [
   {
@@ -178,35 +255,61 @@ const FITUR = [
 export function Beranda() {
   return (
     <main>
-      <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 text-center sm:px-6 lg:pt-20">
-        <h1 className="mx-auto max-w-3xl text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Hitung modal tiap porsi <span className="teks-merek">dari nota belanja</span>
+      <section className="relative mx-auto max-w-6xl px-4 pt-10 pb-16 text-center sm:px-6 lg:pt-16">
+        <span className="inline-flex items-center gap-2 rounded-full border border-garis bg-white/80 px-4 py-1.5 text-sm font-medium shadow-kartu">
+          <ForkKnife size={16} weight="fill" className="text-kuning" aria-hidden /> Untuk warung makan, kedai, kue, dan katering
+        </span>
+        <h1 className="mx-auto mt-5 max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[64px]">
+          Hitung HPP Usahamu
+          <br />
+          dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg text-redup">
-          takarin.ai menghitung HPP setiap menu dari takaran resep dan harga belanja Anda, lalu memberi tahu menu mana yang untungnya menipis dan berapa harga yang aman.
+          Foto nota, ucapkan, atau ketik belanjaan. takarin.ai menghitung modal tiap porsi, membandingkan dengan harga pasar di kotamu, dan memberi tahu harga jual yang aman.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
-            Mulai hitung <ArrowRight size={18} weight="bold" aria-hidden />
+            Mulai Sekarang <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
-          <Tombol varian="garis" to="/#cara-kerja" className="!min-h-12 px-7 text-base">
-            Lihat cara kerja
+          <Tombol varian="garis" to="/#cara-kerja" className="!min-h-12 px-6 text-base">
+            <PlayCircle size={22} weight="fill" className="text-navy" aria-hidden /> Pelajari Cara Kerja
           </Tombol>
         </div>
-        <Pratinjau />
+
+        <div className="relative mt-14">
+          <KartuMelayang posisi="-left-8 top-10 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
+          <KartuMelayang posisi="-right-8 top-24 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Dari PIHPS Bank Indonesia" />
+          <Pratinjau />
+        </div>
+
+        <div className="mt-14">
+          <div className="flex items-center gap-4">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
+            <p className="text-base font-semibold sm:text-lg">Yang sudah bisa dihitung</p>
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent to-kuning/70" />
+          </div>
+          <ul className="mt-6 grid grid-cols-2 gap-4 text-left sm:grid-cols-4">
+            {FAKTA.map(([Ikon, teks]) => (
+              <li key={teks} className="flex items-center justify-center gap-2 text-sm font-semibold text-redup">
+                <Ikon size={26} weight="duotone" className="shrink-0 text-biru" aria-hidden /> {teks}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section id="cara-kerja" className="scroll-mt-20 border-y border-garis bg-kartu">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight">Dari cerita sampai harga aman</h2>
+            <span className="inline-block rounded-full bg-biru-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-biru">CARA KERJA</span>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Hitung HPP dalam <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span></h2>
             <p className="mx-auto mt-2 max-w-2xl text-redup">Tiga langkah. Setelah menu tersimpan, Anda cukup mencatat belanja.</p>
           </div>
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {LANGKAH.map((l) => (
               <li key={l.no} className="flex flex-col gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
                 <div className="flex items-start gap-3">
-                  <span className="angka flex size-11 shrink-0 items-center justify-center rounded-xl bg-biru text-sm font-bold text-white">{l.no}</span>
+                  <span className="angka flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-biru-terang to-biru text-base font-extrabold text-white shadow-[0_6px_14px_rgb(29_89_187/0.3)]">{l.no}</span>
                   <div>
                     <h3 className="font-semibold">{l.judul}</h3>
                     <p className="mt-1 text-sm text-redup">{l.teks}</p>
@@ -220,7 +323,8 @@ export function Beranda() {
       </section>
 
       <section id="fitur" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
-        <h2 className="text-3xl font-bold tracking-tight">Yang dikerjakan untuk Anda</h2>
+        <span className="inline-block rounded-full bg-kuning-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-kuning-tua">FITUR</span>
+        <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Semua Hitungan <span className="teks-biru">dalam</span> <span className="teks-emas">Satu Tempat</span></h2>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2">
           {FITUR.map((f) => (
             <li key={f.judul} className="flex gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">

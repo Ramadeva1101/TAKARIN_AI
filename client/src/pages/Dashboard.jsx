@@ -23,7 +23,7 @@ function Kpi({ ikon, warna, label, children }) {
 function Catatan() {
   const { data, loading, error, muat } = useApi('/dashboard/catatan');
   return (
-    <section className="rounded-[20px] border border-biru/15 bg-gradient-to-br from-biru-muda to-white p-4 sm:p-5">
+    <section className="rounded-[20px] border border-biru/15 bg-gradient-to-br from-biru-muda via-white to-kuning-muda/60 p-4 shadow-kartu sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Catatan hari ini</h2>
         {data && <span className="text-xs text-redup">{data.sumber === 'ai' ? 'Dirangkum AI dari angka hitungan' : 'Ringkasan otomatis'}</span>}
@@ -64,14 +64,15 @@ function Saran({ daftar, sesudah }) {
   return (
     <Kartu>
       <h2 className="mb-3 flex items-center gap-2 font-semibold">
-        <Lightbulb size={20} weight="duotone" className="text-kuning-tua" aria-hidden /> Saran harga
+        <Lightbulb size={20} weight="fill" className="text-kuning" aria-hidden /> Saran harga
       </h2>
       {!daftar.length ? (
         <p className="text-sm text-redup">Semua menu sudah sesuai target untung.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {daftar.map((p) => (
-            <li key={p.id} className="rounded-2xl bg-dasar p-3">
+            <li key={p.id} className="rounded-2xl border border-garis bg-dasar p-3">
+              <span className="mb-1 inline-block rounded-full bg-kuning-muda px-2.5 py-0.5 text-xs font-semibold text-kuning-tua">Saran</span>
               <p className="text-sm">
                 <Link to={`/produk/${p.id}`} className="font-semibold hover:text-biru">
                   {p.nama}
@@ -125,7 +126,7 @@ export default function Dashboard() {
       </header>
 
       {diBawah > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[20px] border border-kuning/40 bg-kuning-muda p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[20px] border border-kuning/50 bg-gradient-to-r from-kuning-muda via-[#fff8d6] to-white p-4 shadow-kartu">
           <Warning size={28} weight="fill" className="shrink-0 text-kuning" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="font-semibold">

@@ -48,22 +48,22 @@ export default function Layout() {
   const lainnyaAktif = LAINNYA.some((m) => lokasi.pathname.startsWith(m.to));
 
   return (
-    <div className="min-h-dvh lg:flex lg:gap-6 lg:p-4">
+    <div className="latar-merek min-h-dvh lg:flex lg:gap-6 lg:p-4">
       <aside className="hidden w-60 shrink-0 flex-col rounded-[24px] border border-garis bg-kartu p-4 shadow-kartu lg:sticky lg:top-4 lg:flex lg:h-[calc(100dvh-2rem)]">
         <Link to="/" className="mb-6 inline-flex min-h-11 items-center px-2">
           <Merek className="text-xl" />
         </Link>
-        <NavLink to="/belanja/baru" className="mb-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-biru px-4 text-sm font-semibold text-white shadow-[0_6px_16px_rgb(37_99_235/0.25)] hover:bg-biru-tua">
+        <NavLink to="/belanja/baru" className="mb-5 inline-flex min-h-11 items-center justify-center gap-2 tombol-merek rounded-full px-4 text-sm font-semibold text-white">
           <Plus size={18} weight="bold" aria-hidden /> Catat belanja
         </NavLink>
         <nav aria-label="Menu utama" className="flex flex-col gap-1">
           {MENU.map(({ to, label, ikon: Ikon, end }) => (
             <NavLink key={to} to={to} end={end} className={kelasNav}>
-              <Ikon size={20} aria-hidden /> {label}
+              <Ikon size={20} weight="duotone" aria-hidden /> {label}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto rounded-2xl bg-dasar p-4">
+        <div className="mt-auto rounded-2xl border border-kuning/40 bg-gradient-to-br from-kuning-muda to-white p-4">
           <p className="text-sm font-semibold">Butuh bantuan?</p>
           <p className="mt-1 text-xs text-redup">Cara menghitung modal, takaran, dan harga pasar.</p>
           <Link to="/bantuan" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-4 text-xs font-semibold text-biru hover:border-biru/40">
@@ -122,7 +122,7 @@ export default function Layout() {
           </NavLink>
         ))}
         <NavLink to="/belanja/baru" className="flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-biru">
-          <span className="flex size-9 items-center justify-center rounded-full bg-biru text-white">
+          <span className="tombol-merek flex size-9 items-center justify-center rounded-full text-white">
             <Plus size={20} weight="bold" aria-hidden />
           </span>
           Belanja
