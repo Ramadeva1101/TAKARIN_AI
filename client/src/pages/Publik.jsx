@@ -116,14 +116,14 @@ function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
 // Tangkapan layar berhenti di tengah halaman; bagian bawahnya dipudarkan agar terbaca sebagai halaman yang berlanjut.
 function Pratinjau() {
   return (
-    <figure className="mx-auto max-w-[680px] [mask-image:linear-gradient(to_bottom,black_72%,transparent)]">
+    <figure className="mx-auto max-w-[620px] [mask-image:linear-gradient(to_bottom,black_72%,transparent)]">
       <div className="rounded-[22px] border border-white bg-white/70 p-1.5 shadow-[0_30px_70px_rgb(29_89_187/0.18)] backdrop-blur">
         <img
           src="/tangkapan-ringkasan.webp"
           width="1490"
           height="716"
           alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,4%, daftar untung per menu terhadap target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
-          className="block h-auto w-full rounded-[16px] border border-garis"
+          className="block aspect-[1490/640] h-auto w-full rounded-[16px] border border-garis object-cover object-top"
           fetchPriority="high"
         />
       </div>
@@ -248,17 +248,17 @@ const PRINSIP = [
 export function Beranda() {
   return (
     <main>
-      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-8 lg:pb-24">
-        <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[52px]">
+      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-6 lg:pb-24">
+        <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[48px]">
           Hitung HPP <br className="sm:hidden" />
           Usaha Anda
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-3xl text-base text-redup sm:text-lg">
+        <p className="mx-auto mt-3 max-w-3xl text-base text-redup sm:text-lg">
           Ceritakan resep sekali, lalu catat belanja dari foto nota, suara, atau ketikan. Takarin AI menghitung modal per porsi dan harga jual sesuai target untung.
         </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-3">
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
             Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
@@ -267,13 +267,13 @@ export function Beranda() {
           </Tombol>
         </div>
 
-        <div className="relative mt-7">
+        <div className="relative mt-6">
           <KartuMelayang posisi="-left-2 top-1/2 -rotate-6" ikon={Camera} warna="biru" judul="Nota terbaca otomatis" teks="Dari foto, suara, atau teks" />
           <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar daerah Anda" teks="Data PIHPS Bank Indonesia" />
           <Pratinjau />
         </div>
 
-        <div className="mt-20">
+        <div className="mt-10 lg:mt-6">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
             <p className="text-base font-semibold">Dirancang sesuai cara kerja usaha kuliner</p>
