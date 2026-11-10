@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
@@ -19,8 +19,6 @@ import {
   ChartLineUp,
   Scales,
   MapPin,
-  TrendUp,
-  Receipt,
   ShieldCheck,
   UserCheck,
   Leaf,
@@ -203,21 +201,51 @@ const FAKTA = [
 
 const MASALAH = [
   {
-    ikon: TrendUp,
-    judul: 'Harga bahan bergerak setiap minggu',
-    teks: 'Cabai rawit merah di Denpasar naik 10,6% dalam seminggu (PIHPS Bank Indonesia, 10 November 2026). Harga jual di papan menu tidak ikut berubah.',
+    judul: 'Takaran memakai sendok, bukan gram',
+    teks: 'Dua sendok gula atau tiga siung bawang sulit diubah menjadi rupiah tanpa alat bantu.',
   },
   {
-    ikon: Scales,
-    judul: 'Resep dicatat dengan sendok, bukan gram',
-    teks: 'Dua sendok gula, tiga siung bawang, satu potong ayam. Takaran seperti ini sulit dihitung menjadi rupiah tanpa alat bantu.',
-  },
-  {
-    ikon: Receipt,
-    judul: 'Nota belanja menumpuk tanpa dihitung',
-    teks: 'Nota disimpan, tetapi tidak pernah dipakai untuk memeriksa apakah setiap porsi masih menghasilkan untung.',
+    judul: 'Nota disimpan, tidak dihitung',
+    teks: 'Nota belanja jarang dipakai untuk memeriksa apakah setiap porsi masih untung.',
   },
 ];
+
+// Kalkulator kecil: berapa untung yang hilang sebulan kalau modal naik tetapi harga jual tetap.
+// Murni hitungan dari angka yang digeser pengunjung, bukan data pengguna.
+function Kebocoran() {
+  const [naik, setNaik] = useState(400);
+  const [porsi, setPorsi] = useState(50);
+  const [harga, setHarga] = useState(15000);
+  const bulan = naik * porsi * 30;
+  const setara = Math.round(bulan / harga);
+  const rp = (n) => `Rp${Math.round(n).toLocaleString('id-ID')}`;
+  const geser = (label, nilai, ubah, min, maks, langkah, tampil) => (
+    <label className="block">
+      <span className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="text-redup">{label}</span>
+        <span className="angka font-bold">{tampil}</span>
+      </span>
+      <input type="range" min={min} max={maks} step={langkah} value={nilai} onChange={(e) => ubah(Number(e.target.value))} className="mt-2 h-11 w-full cursor-pointer accent-biru" />
+    </label>
+  );
+  return (
+    <div className="rounded-[24px] border border-garis bg-kartu p-5 shadow-[0_24px_60px_rgb(29_89_187/0.12)] sm:p-6">
+      <p className="font-bold">Coba hitung untung yang hilang</p>
+      <p className="text-sm text-redup">Modal per porsi naik, harga jual tetap.</p>
+      <div className="mt-4 grid gap-1">
+        {geser('Kenaikan modal per porsi', naik, setNaik, 100, 2000, 50, rp(naik))}
+        {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
+        {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
+      </div>
+      <div className="mt-4 rounded-2xl bg-navy p-4 text-white" aria-live="polite">
+        <p className="text-sm text-white/75">Untung yang hilang dalam 30 hari</p>
+        <p className="angka mt-1 text-3xl font-extrabold text-kuning">{rp(bulan)}</p>
+        <p className="angka mt-1 text-sm text-white/80">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
+      </div>
+      <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
+    </div>
+  );
+}
 
 const LANGKAH = [
   {
@@ -281,17 +309,14 @@ const PRINSIP = [
 export function Beranda() {
   return (
     <main>
-      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-12 text-center sm:px-6 lg:pt-10">
-        <span className="inline-flex items-center gap-2 rounded-full border border-garis bg-white/80 px-4 py-1.5 text-sm font-medium shadow-kartu">
-          <ForkKnife size={16} weight="duotone" className="text-[#c98a00]" aria-hidden /> Untuk UMKM kuliner: warung, kedai, kue, dan katering
-        </span>
-        <h1 className="mx-auto mt-4 max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]">
+      <section className="relative mx-auto max-w-6xl px-4 pt-10 pb-16 text-center sm:px-6 lg:pt-12 lg:pb-20">
+        <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]">
           Hitung HPP Usahamu
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-base text-redup sm:text-lg">
-          Harga bahan berubah setiap minggu, harga jual sering tetap. Takarin AI membaca nota belanja, menghitung modal setiap porsi, dan menunjukkan harga jual yang masih memenuhi target untung.
+          Untuk warung, kedai, kue, dan katering. Takarin AI membaca nota belanja, menghitung modal setiap porsi, dan menunjukkan harga jual yang masih memenuhi target untung.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
@@ -308,7 +333,7 @@ export function Beranda() {
           <Pratinjau />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-12">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
             <p className="text-base font-semibold">Dirancang mengikuti cara warung bekerja</p>
@@ -324,33 +349,39 @@ export function Beranda() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+      <section className="mx-auto max-w-6xl px-4 pt-8 pb-24 sm:px-6">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
             <span className="inline-block rounded-full bg-rugi-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-rugi">MASALAH</span>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Untung tergerus <span className="teks-emas">tanpa terasa</span>
             </h2>
-            <p className="mt-3 text-redup">
-              Banyak usaha kuliner menentukan harga jual sekali di awal, lalu tidak menghitung ulang ketika harga bahan naik. Selisih kecil per porsi menjadi besar ketika dikalikan puluhan porsi setiap hari.
+            <p className="mt-3 max-w-lg text-redup">
+              Harga jual ditentukan sekali di awal, lalu jarang dihitung ulang ketika harga bahan naik. Selisih beberapa ratus rupiah per porsi tidak terasa di kasir, tetapi terasa di akhir bulan.
             </p>
+            <figure className="mt-6 flex items-center gap-4 border-l-4 border-kuning pl-4">
+              <p className="angka text-5xl font-extrabold tracking-tight text-kuning-tua">10,6%</p>
+              <figcaption className="text-sm">
+                <span className="font-semibold">Kenaikan cabai rawit merah di Denpasar dalam seminggu.</span>
+                <span className="block text-redup">PIHPS Bank Indonesia, 10 November 2026</span>
+              </figcaption>
+            </figure>
+            <ol className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+              {MASALAH.map(({ judul, teks }, i) => (
+                <li key={judul} className="border-t-2 border-garis pt-3">
+                  <span className="angka text-xs font-bold text-biru">0{i + 1}</span>
+                  <p className="font-semibold">{judul}</p>
+                  <p className="mt-0.5 text-redup">{teks}</p>
+                </li>
+              ))}
+            </ol>
           </div>
-          <ul className="grid gap-3">
-            {MASALAH.map(({ ikon, judul, teks }) => (
-              <li key={judul} className="flex gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
-                <IkonKotak ikon={ikon} warna="rugi" />
-                <div>
-                  <h3 className="font-semibold">{judul}</h3>
-                  <p className="mt-1 text-sm text-redup">{teks}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <Kebocoran />
         </div>
       </section>
 
       <section id="cara-kerja" className="scroll-mt-20 border-y border-garis bg-kartu">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
           <div className="text-center">
             <span className="inline-block rounded-full bg-biru-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-biru">CARA KERJA</span>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -375,7 +406,7 @@ export function Beranda() {
         </div>
       </section>
 
-      <section id="fitur" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
+      <section id="fitur" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 lg:py-24">
         <div className="text-center">
           <span className="inline-block rounded-full bg-kuning-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-kuning-tua">FITUR</span>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -396,7 +427,7 @@ export function Beranda() {
       </section>
 
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
           <span className="inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold tracking-wide text-biru shadow-kartu">PRINSIP</span>
           <h2 className="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">AI membaca, kode yang menghitung</h2>
           <p className="mt-3 max-w-2xl text-redup">AI dipakai di bagian yang memang sulit bagi manusia: membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita. Angka yang menentukan harga tidak diserahkan kepada AI.</p>

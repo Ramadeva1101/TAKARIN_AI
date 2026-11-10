@@ -62,8 +62,8 @@ export function ringkasan(usaha) {
     info_pasar: infoHarian(usaha, wilayah).slice(0, 4),
     pasar_ringkas: wilayah
       .filter((d) => d.bahan.length)
-      .slice(0, 4)
-      .map(({ komoditas, wilayah: w, harga, satuan, perubahan_mingguan, riwayat }) => ({ komoditas, wilayah: w, harga, satuan, perubahan_mingguan, riwayat })),
+      .slice(0, 5)
+      .map(({ komoditas, wilayah: w, harga, satuan, perubahan_harian, perubahan_mingguan, riwayat, menu }) => ({ komoditas, wilayah: w, harga, satuan, perubahan_harian, perubahan_mingguan, riwayat, menu })),
     bahan_naik: bahanNaik.map(({ id, nama, satuan_dasar, perubahan, harga_terakhir }) => ({ id, nama, satuan_dasar, perubahan, harga_terakhir })),
     harga_pasar: bahan
       .filter((b) => b.acuan)

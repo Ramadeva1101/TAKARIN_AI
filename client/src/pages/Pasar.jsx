@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
+import { GrafikHarga, Segmen } from '../components/Grafik.jsx';
 
 const LEVEL = { kota: 'kota', provinsi: 'rata-rata provinsi', nasional: 'rata-rata nasional' };
 
@@ -22,46 +23,76 @@ export function Perubahan({ nilai, ket }) {
   );
 }
 
-function KartuKomoditas({ d }) {
+// Panel rincian satu komoditas: harga, perubahan, grafik yang bisa disentuh, dan menu yang memakainya.
+function Rincian({ d }) {
   return (
-    <li className="min-w-0 rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
-      <div className="flex items-start justify-between gap-2">
+    <Kartu className="lg:sticky lg:top-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-semibold capitalize">{d.komoditas}</p>
-          <p className="text-xs text-redup">
-            {d.wilayah}, {LEVEL[d.level]}
+          <h2 className="text-xl font-bold capitalize">{d.komoditas}</h2>
+          <p className="text-sm text-redup">
+            {d.wilayah}, {LEVEL[d.level]} · {tanggal(d.tanggal)}
           </p>
         </div>
-        <p className="angka text-right text-lg font-bold">
+        <p className="angka text-right text-2xl font-extrabold">
           {rupiah(d.harga)}
           <span className="text-sm font-normal text-redup">/{d.satuan}</span>
         </p>
       </div>
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        <Perubahan nilai={d.perubahan_harian} ket={d.tanggal_sebelumnya ? `dari ${tanggal(d.tanggal_sebelumnya)}` : 'dari data sebelumnya'} />
-        <Perubahan nilai={d.perubahan_mingguan} ket="seminggu" />
+      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+        <div className="rounded-xl bg-dasar px-3 py-2">
+          <p className="text-xs text-redup">{d.tanggal_sebelumnya ? `Dibanding ${tanggal(d.tanggal_sebelumnya)}` : 'Dibanding data sebelumnya'}</p>
+          <Perubahan nilai={d.perubahan_harian} ket="" />
+        </div>
+        <div className="rounded-xl bg-dasar px-3 py-2">
+          <p className="text-xs text-redup">Dalam seminggu</p>
+          <Perubahan nilai={d.perubahan_mingguan} ket="" />
+        </div>
       </div>
-      <div className="mt-2">
-        <Garis data={d.riwayat} label={`Harga ${d.komoditas} ${d.riwayat.length} hari terakhir`} />
+      <div className="mt-4">
+        <GrafikHarga data={d.riwayat} satuan={d.satuan} label={`Harga ${d.komoditas} di ${d.wilayah}, ${d.riwayat.length} data terakhir`} />
       </div>
-      {d.menu.length > 0 && (
-        <p className="mt-2 text-sm">
-          <span className="text-redup">Dipakai di </span>
-          {d.menu.map((m, i) => (
-            <span key={m.id}>
-              {i > 0 && ', '}
-              <Link to={`/produk/${m.id}`} className="font-medium text-biru hover:underline">
+      {d.menu.length > 0 ? (
+        <div className="mt-4 border-t border-garis pt-3">
+          <p className="text-sm text-redup">Dipakai di menu</p>
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {d.menu.map((m) => (
+              <Link key={m.id} to={`/produk/${m.id}`} className="inline-flex min-h-11 items-center rounded-full bg-biru-muda px-4 text-sm font-semibold text-biru-tua hover:bg-[#dce8ff]">
                 {m.nama}
               </Link>
-            </span>
-          ))}
-        </p>
+            ))}
+          </div>
+          {d.bahan.length > 0 && (
+            <Link to={`/bahan/${d.bahan[0].id}`} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-biru">
+              Bandingkan dengan harga belanja Anda
+            </Link>
+          )}
+        </div>
+      ) : (
+        <p className="mt-4 border-t border-garis pt-3 text-sm text-redup">Belum dipakai di resep Anda. Ditampilkan sebagai gambaran harga di daerah Anda.</p>
       )}
-      {d.bahan.length > 0 && (
-        <Link to={`/bahan/${d.bahan[0].id}`} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-biru">
-          Bandingkan dengan harga belanja Anda
-        </Link>
-      )}
+    </Kartu>
+  );
+}
+
+function BarisKomoditas({ d, aktif, pilih }) {
+  return (
+    <li>
+      <button
+        type="button"
+        aria-pressed={aktif}
+        onClick={pilih}
+        className={`grid w-full grid-cols-[1fr_4.5rem_auto] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors ${aktif ? 'bg-biru-muda ring-1 ring-biru/30' : 'hover:bg-dasar'}`}
+      >
+        <span className="min-w-0">
+          <span className={`block truncate font-semibold capitalize ${aktif ? 'text-biru-tua' : ''}`}>{d.komoditas}</span>
+          <span className="angka block text-xs text-redup">{`${rupiah(d.harga)}/${d.satuan}`}</span>
+        </span>
+        <Garis data={d.riwayat} label={`Tren ${d.komoditas}`} />
+        <span className="w-16 text-right text-sm">
+          <Perubahan nilai={d.perubahan_mingguan} ket="" />
+        </span>
+      </button>
     </li>
   );
 }
@@ -70,6 +101,11 @@ export default function Pasar() {
   const { data, loading, error, muat } = useApi('/pasar');
   const [proses, setProses] = useState(false);
   const [galatPerbarui, setGalatPerbarui] = useState(null);
+  const { state } = useLocation();
+  const [pilih, setPilih] = useState(state?.komoditas ?? null);
+  const [tampil, setTampil] = useState('saya');
+  const [urut, setUrut] = useState('pakai');
+  const rincianRef = useRef(null);
   const berjalan = data?.sinkron?.berjalan;
 
   // Server sedang menarik data: cek lagi sebentar lagi.
@@ -96,7 +132,17 @@ export default function Pasar() {
   if (error) return <Galat error={error} ulang={muat} />;
 
   const dipakai = data.harga.filter((d) => d.bahan.length);
-  const lain = data.harga.filter((d) => !d.bahan.length);
+  const naikMinggu = data.harga.filter((d) => d.perubahan_mingguan > 0.0005).sort((a, b) => b.perubahan_mingguan - a.perubahan_mingguan);
+  const turunMinggu = data.harga.filter((d) => d.perubahan_mingguan < -0.0005).length;
+  const daftar = [...(tampil === 'saya' && dipakai.length ? dipakai : data.harga)].sort(
+    urut === 'naik' ? (a, b) => (b.perubahan_mingguan ?? -9) - (a.perubahan_mingguan ?? -9) : urut === 'nama' ? (a, b) => a.komoditas.localeCompare(b.komoditas, 'id') : () => 0,
+  );
+  const terpilih = data.harga.find((d) => d.komoditas === pilih) || daftar[0];
+  const pilihKomoditas = (k) => {
+    setPilih(k);
+    // Di HP panel rincian ada di atas daftar: gulir ke sana supaya hasil ketukan terlihat.
+    if (window.matchMedia('(max-width: 1023px)').matches) rincianRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   const terbaru = data.harga.reduce((t, d) => (d.tanggal > t ? d.tanggal : t), '');
   const sumber = [...new Set(data.harga.map((d) => d.sumber))].join(', ');
   const tempat = [data.wilayah.kota, data.wilayah.provinsi].filter(Boolean).join(', ');
@@ -136,57 +182,59 @@ export default function Pasar() {
         </Kartu>
       ) : (
         <>
-          <section aria-labelledby="dipakai">
-            <h2 id="dipakai" className="mb-3 font-semibold">
-              Bahan yang Anda pakai
-            </h2>
-            {dipakai.length ? (
-              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {dipakai.map((d) => (
-                  <KartuKomoditas key={d.komoditas} d={d} />
-                ))}
-              </ul>
-            ) : (
-              <Kartu>
-                <Kosong judul="Belum ada bahan yang cocok" teks="Isi kolom komoditas pasar di halaman bahan baku supaya harganya terpantau di sini." />
-              </Kartu>
-            )}
-          </section>
+          <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <button type="button" onClick={() => setUrut('naik')} className="rounded-[20px] bg-rugi-muda p-4 text-left ring-1 ring-rugi/15 transition hover:-translate-y-0.5">
+              <p className="text-sm text-rugi">Naik dalam seminggu</p>
+              <p className="angka mt-1 text-2xl font-extrabold text-rugi">{naikMinggu.length} <span className="text-sm font-semibold">komoditas</span></p>
+              <p className="truncate text-xs text-redup">{naikMinggu.length ? `Tertinggi: ${naikMinggu[0].komoditas} ${persen(naikMinggu[0].perubahan_mingguan)}` : 'Tidak ada'}</p>
+            </button>
+            <div className="rounded-[20px] bg-aman-muda p-4 ring-1 ring-aman/15">
+              <p className="text-sm text-aman">Turun dalam seminggu</p>
+              <p className="angka mt-1 text-2xl font-extrabold text-aman">{turunMinggu} <span className="text-sm font-semibold">komoditas</span></p>
+              <p className="text-xs text-redup">Dari {data.harga.length} komoditas terpantau</p>
+            </div>
+            <div className="rounded-[20px] bg-biru-muda p-4 ring-1 ring-biru/15">
+              <p className="text-sm text-biru-tua">Dipakai di resep Anda</p>
+              <p className="angka mt-1 text-2xl font-extrabold text-biru-tua">{dipakai.length} <span className="text-sm font-semibold">komoditas</span></p>
+              <p className="text-xs text-redup">Harga belanja dibandingkan otomatis</p>
+            </div>
+          </div>
 
-          {lain.length > 0 && (
-            <Kartu className="mt-6">
-              <h2 className="mb-3 font-semibold">Komoditas lain di daerah Anda</h2>
-              <div className="relative -mx-4 overflow-x-auto px-4">
-                <table className="w-full min-w-[32rem] text-sm">
-                  <thead className="text-left text-redup">
-                    <tr>
-                      <th className="py-2 font-medium">Komoditas</th>
-                      <th className="py-2 text-right font-medium">Harga</th>
-                      <th className="py-2 pl-4 font-medium">Hari ini</th>
-                      <th className="py-2 pl-4 font-medium">Seminggu</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-garis">
-                    {lain.map((d) => (
-                      <tr key={d.komoditas}>
-                        <td className="py-2 capitalize">
-                          {d.komoditas}
-                          <span className="block text-xs text-redup">{`${d.wilayah}, ${LEVEL[d.level]}`}</span>
-                        </td>
-                        <td className="angka py-2 text-right">{`${rupiah(d.harga)}/${d.satuan}`}</td>
-                        <td className="py-2 pl-4">
-                          <Perubahan nilai={d.perubahan_harian} ket="" />
-                        </td>
-                        <td className="py-2 pl-4">
-                          <Perubahan nilai={d.perubahan_mingguan} ket="" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-start">
+            <div ref={rincianRef} className="scroll-mt-20 lg:order-last">
+              {terpilih && <Rincian d={terpilih} />}
+            </div>
+            <Kartu>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <Segmen
+                  label="Komoditas yang ditampilkan"
+                  pilihan={[
+                    ['saya', `Bahan saya (${dipakai.length})`],
+                    ['semua', `Semua (${data.harga.length})`],
+                  ]}
+                  nilai={tampil}
+                  ubah={setTampil}
+                />
+                <label className="flex items-center gap-2 text-sm text-redup">
+                  Urutkan
+                  <select value={urut} onChange={(e) => setUrut(e.target.value)} className="min-h-11 rounded-full border border-garis bg-kartu px-3 text-sm text-tinta">
+                    <option value="pakai">Paling sering dipakai</option>
+                    <option value="naik">Naik paling tinggi</option>
+                    <option value="nama">Nama</option>
+                  </select>
+                </label>
               </div>
+              {daftar.length ? (
+                <ul className="flex flex-col gap-1">
+                  {daftar.map((d) => (
+                    <BarisKomoditas key={d.komoditas} d={d} aktif={d.komoditas === terpilih?.komoditas} pilih={() => pilihKomoditas(d.komoditas)} />
+                  ))}
+                </ul>
+              ) : (
+                <Kosong judul="Belum ada bahan yang cocok" teks="Isi kolom komoditas pasar di halaman bahan baku supaya harganya terpantau di sini." />
+              )}
             </Kartu>
-          )}
+          </div>
 
           <p className="mt-6 max-w-2xl text-xs text-redup">
             Sumber: {sumber}

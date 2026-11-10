@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { persen, rupiah } from '../lib/api.js';
 import { Chip, Galat, Judul, Kartu, Kosong, Muat, Tombol, hargaSatuan, inputCls } from '../components/ui.jsx';
+import { Segmen } from '../components/Grafik.jsx';
 
 // Alasan sebuah bahan perlu dilihat. Urutan = urutan pentingnya.
 function alasan(b) {
@@ -13,15 +14,20 @@ function alasan(b) {
   return a;
 }
 
-function Baris({ b }) {
+function Baris({ b, skala }) {
   const h = hargaSatuan(b.harga_rata_rata ?? b.acuan?.harga_per_satuan_dasar, b.satuan_dasar);
   const utama = b.kontribusi[0];
   const masalah = alasan(b);
   return (
     <li>
-      <Link to={`/bahan/${b.id}`} className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 py-3 hover:text-biru">
+      <Link to={`/bahan/${b.id}`} className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 rounded-2xl px-3 py-3 transition-colors hover:bg-dasar">
         <div className="min-w-0 flex-1">
           <p className="font-semibold capitalize">{b.nama}</p>
+          {utama && (
+            <div className="my-1.5 h-2 max-w-sm overflow-hidden rounded-full bg-dasar ring-1 ring-garis" aria-hidden>
+              <div className={`h-full rounded-full ${masalah.length ? 'bg-kuning' : 'bg-biru-terang'}`} style={{ width: `${Math.max(3, (b.bagian_terbesar / skala) * 100)}%` }} />
+            </div>
+          )}
           {utama ? (
             <p className="angka text-sm text-redup">
               {rupiah(utama.biaya)} per porsi {utama.nama}, {persen(utama.bagian)} dari modalnya
@@ -52,13 +58,37 @@ function Baris({ b }) {
 export default function Bahan() {
   const { data, loading, error, muat } = useApi('/bahan');
   const [cari, setCari] = useState('');
+  const [tab, setTab] = useState('semua');
 
   if (loading && !data) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
 
-  const cocok = data.filter((b) => b.nama.toLowerCase().includes(cari.toLowerCase())).sort((a, b) => b.bagian_terbesar - a.bagian_terbesar);
-  const perlu = cocok.filter((b) => alasan(b).length);
-  const aman = cocok.filter((b) => !alasan(b).length);
+  const urut = [...data].sort((a, b) => b.bagian_terbesar - a.bagian_terbesar);
+  const teratas = urut.find((b) => b.kontribusi.length);
+  const jmlNaik = data.filter((b) => b.perubahan > 0.02).length;
+  const jmlAtasPasar = data.filter((b) => b.harga_terakhir && (b.status_acuan === 'di_atas' || b.status_acuan === 'jauh_di_atas')).length;
+  const skala = teratas?.bagian_terbesar || 1;
+  const FILTER = {
+    semua: () => true,
+    perlu: (b) => alasan(b).length > 0,
+    wajar: (b) => !alasan(b).length,
+    naik: (b) => b.perubahan > 0.02,
+    pasar: (b) => b.harga_terakhir && (b.status_acuan === 'di_atas' || b.status_acuan === 'jauh_di_atas'),
+  };
+  const cocok = urut.filter((b) => b.nama.toLowerCase().includes(cari.toLowerCase()) && FILTER[tab](b));
+  const jmlPerlu = data.filter(FILTER.perlu).length;
+  const ubin = (kunci, warna, label, isi, ket) => (
+    <button
+      type="button"
+      aria-pressed={tab === kunci}
+      onClick={() => setTab(tab === kunci ? 'semua' : kunci)}
+      className={`min-w-0 rounded-[20px] p-4 text-left transition hover:-translate-y-0.5 ${warna} ${tab === kunci ? 'ring-2 ring-tinta' : ''}`}
+    >
+      <p className="text-sm font-medium">{label}</p>
+      <p className="mt-1 truncate text-2xl font-extrabold">{isi}</p>
+      <p className="truncate text-xs opacity-80">{ket}</p>
+    </button>
+  );
 
   return (
     <>
@@ -69,31 +99,55 @@ export default function Bahan() {
         </Kartu>
       ) : (
         <>
-          <label className="sr-only" htmlFor="cari-bahan">
-            Cari bahan
-          </label>
-          <input id="cari-bahan" type="search" placeholder="Cari bahan" className={`${inputCls} mb-4 max-w-xs bg-kartu`} value={cari} onChange={(e) => setCari(e.target.value)} />
-          {!cocok.length && <p className="py-6 text-sm text-redup">Tidak ada bahan bernama "{cari}".</p>}
-          {perlu.length > 0 && (
-            <Kartu className="mb-4 border-waspada/40">
-              <h2 className="font-semibold">Perlu dilihat ({perlu.length})</h2>
+          <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Link
+              to={teratas ? `/bahan/${teratas.id}` : '/produk'}
+              className="min-w-0 rounded-[20px] bg-gradient-to-br from-biru to-biru-tua p-4 text-white shadow-[0_14px_30px_rgb(29_89_187/0.25)] transition hover:-translate-y-0.5"
+            >
+              <p className="text-sm font-medium">Paling berpengaruh ke modal</p>
+              <p className="mt-1 truncate text-2xl font-extrabold capitalize">{teratas ? teratas.nama : '–'}</p>
+              <p className="truncate text-xs opacity-80">{teratas ? `${persen(teratas.bagian_terbesar)} dari modal ${teratas.kontribusi[0].nama}` : 'Belum ada resep'}</p>
+            </Link>
+            {ubin('naik', 'bg-kuning text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Harga belanja stabil')}
+            {ubin('pasar', 'bg-kartu text-tinta border border-garis shadow-kartu', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
+          </div>
+
+          <Kartu>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <Segmen
+                label="Saring bahan"
+                pilihan={[
+                  ['semua', `Semua (${data.length})`],
+                  ['perlu', `Perlu dilihat (${jmlPerlu})`],
+                  ['wajar', `Harga wajar (${data.length - jmlPerlu})`],
+                ]}
+                nilai={['naik', 'pasar'].includes(tab) ? null : tab}
+                ubah={setTab}
+              />
+              <label className="sr-only" htmlFor="cari-bahan">
+                Cari bahan
+              </label>
+              <input id="cari-bahan" type="search" placeholder="Cari bahan" className={`${inputCls} max-w-56 rounded-full px-4`} value={cari} onChange={(e) => setCari(e.target.value)} />
+            </div>
+            {['naik', 'pasar'].includes(tab) && (
+              <p className="mb-1 text-sm">
+                Menampilkan bahan yang {tab === 'naik' ? 'naik dari belanja sebelumnya' : 'dibeli di atas harga pasar'}.{' '}
+                <button type="button" className="min-h-11 font-semibold text-biru" onClick={() => setTab('semua')}>
+                  Tampilkan semua
+                </button>
+              </p>
+            )}
+            <p className="px-3 pb-1 text-xs text-redup">Panjang batang = bagian bahan itu dari modal satu porsi menu yang paling banyak memakainya.</p>
+            {cocok.length ? (
               <ul className="divide-y divide-garis">
-                {perlu.map((b) => (
-                  <Baris key={b.id} b={b} />
+                {cocok.map((b) => (
+                  <Baris key={b.id} b={b} skala={skala} />
                 ))}
               </ul>
-            </Kartu>
-          )}
-          {aman.length > 0 && (
-            <Kartu>
-              <h2 className="font-semibold">Harga wajar ({aman.length})</h2>
-              <ul className="divide-y divide-garis">
-                {aman.map((b) => (
-                  <Baris key={b.id} b={b} />
-                ))}
-              </ul>
-            </Kartu>
-          )}
+            ) : (
+              <p className="py-6 text-center text-sm text-redup">{cari ? `Tidak ada bahan bernama "${cari}".` : 'Tidak ada bahan di kelompok ini.'}</p>
+            )}
+          </Kartu>
         </>
       )}
     </>
