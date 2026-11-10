@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, ShoppingCart, Camera, Microphone, TextT, PencilSimple, ArrowUpRight } from '@phosphor-icons/react';
+import { Plus, ShoppingCart, Camera, Microphone, TextT, PencilSimple } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { useAuth } from '../lib/auth.jsx';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Galat, Kartu, Muat, Tombol } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
-import { BatangUntung, Mini } from '../components/Chart.jsx';
+import { Mini } from '../components/Chart.jsx';
 import { Perubahan } from './Pasar.jsx';
 
 const SUMBER = { foto: [Camera, 'Foto nota'], suara: [Microphone, 'Suara'], teks: [TextT, 'Ketik'], manual: [PencilSimple, 'Manual'] };
@@ -36,7 +36,6 @@ function Kpi({ label, nilai, ket, to, utama = false }) {
     <>
       <span className="flex items-start justify-between gap-2">
         <span className={`text-sm font-medium ${utama ? 'text-white/85' : 'text-redup'}`}>{label}</span>
-        {to && <ArrowUpRight size={16} weight="bold" className={utama ? 'text-white/70' : 'text-redup'} aria-hidden />}
       </span>
       <span className="font-judul angka mt-3 block truncate text-[26px] leading-none font-bold">{nilai}</span>
       <span className={`mt-2 block truncate text-xs ${utama ? 'text-white/80' : 'text-redup'}`}>{ket}</span>
@@ -51,73 +50,78 @@ function Kpi({ label, nilai, ket, to, utama = false }) {
   );
 }
 
-// Grafik batang untung per menu dengan sumbu persen dan garis target. Batang terpilih berwarna biru.
-function GrafikUntung({ produk, target }) {
-  const lengkap = produk.filter((p) => p.lengkap);
-  const [pilih, setPilih] = useState(() => [...lengkap].sort((a, b) => a.margin - b.margin)[0]?.id);
-  const p = lengkap.find((x) => x.id === pilih) || lengkap[0];
+// Untung tiap menu sebagai daftar. Bilah menunjukkan untung; tanda tegak menunjukkan target.
+function TabelUntung({ produk, target }) {
+  const [urut, setUrut] = useState('rendah');
+  const lengkap = produk.filter((p) => p.lengkap).sort((a, b) => (urut === 'rendah' ? a.margin - b.margin : b.margin - a.margin));
+  const belum = produk.filter((p) => !p.lengkap);
+  const skala = Math.max(target * 1.5, ...lengkap.map((p) => p.margin), 0.01);
+  const kolom = 'sm:grid-cols-[minmax(0,1.3fr)_5.5rem_5.5rem_5.5rem_minmax(9rem,1.2fr)]';
 
   return (
     <Kartu className="flex flex-col">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Untung per menu</h2>
-          <p className="text-sm text-redup">Klik batang atau nama menu untuk melihat rinciannya</p>
+          <p className="text-sm text-redup">Target untung {persen(target, 0)} dari harga jual</p>
         </div>
-        {p && (
-          <div className="text-right">
-            <p className="font-judul angka text-[26px] leading-none font-bold">{persen(p.margin)}</p>
-            <p className="mt-1 text-xs text-redup">
-              {p.nama} · <span className={p.status === 'aman' ? 'text-aman' : 'text-waspada'}>{p.status === 'aman' ? 'sesuai target' : 'di bawah target'}</span>
-            </p>
-          </div>
-        )}
+        <Segmen
+          label="Urutkan menu"
+          pilihan={[
+            ['rendah', 'Untung terendah'],
+            ['tinggi', 'Tertinggi'],
+          ]}
+          nilai={urut}
+          ubah={setUrut}
+        />
       </div>
 
-      {lengkap.length ? (
-        <>
-          <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Pilih menu">
-            {lengkap.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                aria-pressed={m.id === p?.id}
-                onClick={() => setPilih(m.id)}
-                className={`min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${m.id === p?.id ? 'bg-biru text-white' : 'bg-dasar text-redup ring-1 ring-garis hover:text-tinta'}`}
-              >
-                {m.nama}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3">
-            <BatangUntung data={lengkap} target={target} pilih={p?.id} ubah={setPilih} />
-          </div>
-        </>
-      ) : (
-        <p className="mt-5 text-sm text-redup">Lengkapi harga bahan menu supaya untungnya bisa dihitung.</p>
-      )}
-
-      {p && (
-        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-garis pt-3 text-sm">
-          <span className="angka">
-            <span className="text-redup">Harga jual </span>
-            <b>{rupiah(p.harga_jual)}</b>
-          </span>
-          <span className="angka">
-            <span className="text-redup">Modal/porsi </span>
-            <b>{rupiah(p.hpp)}</b>
-          </span>
-          <span className="angka">
-            <span className="text-redup">Untung/porsi </span>
-            <b>{rupiah(p.harga_jual - p.hpp)}</b>
-          </span>
-          <span className="flex items-center gap-3 text-xs text-redup sm:ml-auto">
-            <Link to={`/produk/${p.id}`} className="inline-flex min-h-11 items-center font-semibold text-biru hover:underline">
-              Rincian
+      <div className={`mt-4 hidden gap-3 px-3 text-xs font-medium text-redup sm:grid ${kolom}`}>
+        <span>Menu</span>
+        <span className="text-right">Harga jual</span>
+        <span className="text-right">Modal</span>
+        <span className="text-right">Untung</span>
+        <span>Untung dari harga jual</span>
+      </div>
+      <ul className="mt-1 flex flex-col">
+        {lengkap.map((p) => {
+          const kurang = p.status !== 'aman';
+          return (
+            <li key={p.id}>
+              <Link to={`/produk/${p.id}`} className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl px-3 py-3 transition-colors hover:bg-dasar ${kolom}`}>
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{p.nama}</span>
+                  <span className="angka block text-xs text-redup sm:hidden">
+                    {rupiah(p.harga_jual)} · modal {rupiah(p.hpp)}
+                  </span>
+                </span>
+                <span className="angka hidden text-right text-sm sm:block">{rupiah(p.harga_jual)}</span>
+                <span className="angka hidden text-right text-sm sm:block">{rupiah(p.hpp)}</span>
+                <span className="angka hidden text-right text-sm font-semibold sm:block">{rupiah(p.harga_jual - p.hpp)}</span>
+                <span className="col-span-2 flex items-center gap-3 sm:col-span-1">
+                  <span className="relative h-2 flex-1 rounded-full bg-dasar" aria-hidden>
+                    <span className={`absolute inset-y-0 left-0 rounded-full ${kurang ? 'bg-kuning' : 'bg-biru'}`} style={{ width: `${(Math.max(0, p.margin) / skala) * 100}%` }} />
+                    <span className="absolute -top-1 -bottom-1 w-0.5 rounded-full bg-tinta/70" style={{ left: `${(target / skala) * 100}%` }} />
+                  </span>
+                  <span className={`angka w-14 text-right text-sm font-semibold ${kurang ? 'text-waspada' : ''}`}>{persen(p.margin)}</span>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+        {belum.map((p) => (
+          <li key={p.id}>
+            <Link to={`/produk/${p.id}`} className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 hover:bg-dasar">
+              <span className="truncate font-semibold">{p.nama}</span>
+              <span className="text-xs text-redup">Harga bahan belum lengkap</span>
             </Link>
-          </span>
-        </div>
-      )}
+          </li>
+        ))}
+      </ul>
+      {!produk.length && <p className="mt-4 text-sm text-redup">Belum ada menu. Tambahkan menu pertama di halaman Produk.</p>}
+      <p className="mt-2 flex items-center gap-2 px-3 text-xs text-redup">
+        <span className="h-3 w-0.5 rounded-full bg-tinta/70" aria-hidden /> Tanda tegak = target {persen(target, 0)}. Bilah kuning berarti di bawah target.
+      </p>
     </Kartu>
   );
 }
@@ -190,9 +194,9 @@ function StatusMenu({ kpi, perlu, catatan, sesudah }) {
       </p>
 
       {perlu.length > 0 && (
-        <ul className="mt-3 flex flex-col divide-y divide-garis">
+        <ul className="mt-3 flex flex-col gap-2">
           {perlu.slice(0, 3).map((p) => (
-            <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+            <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-kuning-muda/60 px-3 py-2">
               <span className="min-w-0">
                 <Link to={`/produk/${p.id}`} className="block truncate font-semibold hover:text-biru">
                   {p.nama}
@@ -217,7 +221,7 @@ function StatusMenu({ kpi, perlu, catatan, sesudah }) {
         </ul>
       )}
       {galat && <p className="mt-2 text-sm font-semibold text-rugi">{galat}</p>}
-      <div className="mt-auto flex flex-wrap gap-2 border-t border-garis pt-3">
+      <div className="mt-auto flex flex-wrap gap-2 pt-4">
         <Tombol varian="lembut" to="/produk" className="flex-1">
           Semua menu
         </Tombol>
@@ -247,10 +251,10 @@ function HargaPasar({ data }) {
         />
       </div>
       {data.length ? (
-        <ul className="divide-y divide-garis">
+        <ul className="flex flex-col">
           {data.map((d) => (
             <li key={d.komoditas}>
-              <Link to="/pasar" state={{ komoditas: d.komoditas }} className="grid grid-cols-[1fr_auto] items-center gap-3 py-2.5 hover:text-biru sm:grid-cols-[1fr_6rem_auto]">
+              <Link to="/pasar" state={{ komoditas: d.komoditas }} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-dasar sm:grid-cols-[1fr_6rem_auto]">
                 <span className="min-w-0">
                   <span className="block truncate font-medium capitalize">{d.komoditas}</span>
                   <span className="block truncate text-xs text-redup">{d.menu.length ? `Dipakai di ${d.menu.map((m) => m.nama).join(', ')}` : d.wilayah}</span>
@@ -286,12 +290,12 @@ function BelanjaTerakhir({ daftar }) {
         )}
       </div>
       {daftar.length ? (
-        <ul className="divide-y divide-garis">
+        <ul className="flex flex-col">
           {daftar.map((n) => {
             const [Ikon, cara] = SUMBER[n.sumber] || SUMBER.manual;
             return (
               <li key={n.id}>
-                <Link to={`/belanja/${n.id}`} className="flex min-h-14 items-center gap-3 py-2 hover:text-biru">
+                <Link to={`/belanja/${n.id}`} className="flex min-h-14 items-center gap-3 rounded-xl px-2 py-2 hover:bg-dasar">
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-biru-muda text-biru" aria-hidden>
                     <Ikon size={16} weight="bold" />
                   </span>
@@ -345,9 +349,6 @@ export default function Dashboard() {
             {usaha.kota ? `, ${usaha.kota}` : ''} · {tanggal(new Date().toISOString())}
           </p>
         </div>
-        <Tombol to="/belanja/baru">
-          <Plus size={16} weight="bold" aria-hidden /> Catat belanja
-        </Tombol>
       </header>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -357,14 +358,15 @@ export default function Dashboard() {
         <Kpi label="Belanja bulan ini" nilai={rupiah(kpi.belanja_bulan_ini)} ket={`${kpi.nota_bulan_ini} catatan belanja`} to="/belanja" />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
-        <GrafikUntung produk={produk} target={usaha.target_margin} />
-        <StatusMenu kpi={kpi} perlu={perlu_tindakan} catatan={catatan} sesudah={muat} />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
-        <HargaPasar data={pasar_ringkas} />
-        <BelanjaTerakhir daftar={belanja_terakhir} />
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)] xl:items-start">
+        <div className="flex min-w-0 flex-col gap-4">
+          <TabelUntung produk={produk} target={usaha.target_margin} />
+          <HargaPasar data={pasar_ringkas} />
+        </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          <StatusMenu kpi={kpi} perlu={perlu_tindakan} catatan={catatan} sesudah={muat} />
+          <BelanjaTerakhir daftar={belanja_terakhir} />
+        </div>
       </div>
     </>
   );

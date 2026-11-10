@@ -114,13 +114,13 @@ function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
 // Pratinjau: tangkapan layar asli halaman Ringkasan dengan akun demo.
 function Pratinjau() {
   return (
-    <figure className="mx-auto max-w-[760px]">
+    <figure className="mx-auto max-w-[680px]">
       <div className="rounded-[22px] border border-white bg-white/70 p-1.5 shadow-[0_30px_70px_rgb(29_89_187/0.18)] backdrop-blur">
         <img
           src="/tangkapan-ringkasan.webp"
           width="1490"
           height="716"
-          alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,4%, grafik untung per menu dengan garis target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
+          alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,4%, daftar untung per menu terhadap target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
           className="block h-auto w-full rounded-[16px] border border-garis"
           fetchPriority="high"
         />
@@ -246,8 +246,8 @@ const PRINSIP = [
 export function Beranda() {
   return (
     <main>
-      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-16 text-center sm:px-6 lg:pt-8 lg:pb-20">
-        <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]">
+      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-8 lg:pb-24">
+        <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[52px]">
           Hitung HPP Usahamu
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
@@ -270,7 +270,7 @@ export function Beranda() {
           <Pratinjau />
         </div>
 
-        <div className="mt-12">
+        <div className="mt-20">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
             <p className="text-base font-semibold">Dirancang mengikuti cara warung bekerja</p>
