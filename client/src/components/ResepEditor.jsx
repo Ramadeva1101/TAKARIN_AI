@@ -3,7 +3,7 @@ import { Field, Tombol, inputCls } from './ui.jsx';
 
 export const resepKosong = () => ({ nama: '', harga_jual: '', porsi_per_batch: 1, bahan: [{ nama: '', qty: '', satuan: '' }] });
 
-const SATUAN = ['g', 'kg', 'ml', 'liter', 'sdm', 'sdt', 'gelas', 'siung', 'butir', 'potong', 'ekor', 'pcs'];
+const SATUAN = ['g', 'kg', 'ons', 'ml', 'liter', 'sdm', 'sdt', 'gelas', 'siung', 'butir', 'potong', 'ekor', 'pcs', 'buah', 'lembar', 'ikat', 'bungkus', 'sachet'];
 
 // Formulir satu produk: nama, harga, porsi per resep, dan daftar bahan dengan takaran bebas.
 export default function ResepEditor({ value, onChange, judul }) {

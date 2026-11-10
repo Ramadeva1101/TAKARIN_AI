@@ -9,7 +9,7 @@ export function Segmen({ pilihan, nilai, ubah, label, gelap = false }) {
         const aktif = kunci === nilai;
         const cls = aktif ? (gelap ? 'bg-white text-biru-tua' : 'bg-kartu text-tinta shadow-kartu') : gelap ? 'text-white/80 hover:text-white' : 'text-redup hover:text-tinta';
         return (
-          <button key={kunci} type="button" aria-pressed={aktif} onClick={() => ubah(kunci)} className={`min-h-9 rounded-full px-3.5 font-semibold whitespace-nowrap transition-colors ${cls}`}>
+          <button key={kunci} type="button" aria-pressed={aktif} onClick={() => ubah(kunci)} className={`min-h-11 sm:min-h-9 rounded-full px-3.5 font-semibold whitespace-nowrap transition-colors ${cls}`}>
             {teks}
           </button>
         );

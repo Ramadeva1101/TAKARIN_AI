@@ -22,6 +22,7 @@ export const profilUsaha = z.object({
   provinsi: z.string().trim().max(60).nullish(),
   target_margin: z.coerce.number().min(0.05).max(0.9),
   porsi_per_hari: z.coerce.number().positive().max(100000),
+  hari_buka: z.coerce.number().int().min(1).max(31).default(30),
 });
 
 const bahanResep = z.object({

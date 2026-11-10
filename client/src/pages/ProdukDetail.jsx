@@ -7,50 +7,49 @@ import ResepEditor, { cekResep, rapikanResep } from '../components/ResepEditor.j
 
 const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar', acuan: 'harga pasar' };
 
+// Rincian modal: daftar bertumpuk, satu baris per bahan, tanpa geser ke samping di HP.
 function Rincian({ p }) {
   const total = p.hpp || 1;
   const baris = [...p.rincian].sort((a, b) => (b.biaya ?? 0) - (a.biaya ?? 0));
   return (
-    <div className="-mx-4 overflow-x-auto px-4">
-      <table className="w-full min-w-[30rem] text-sm">
-        <thead className="text-left text-redup">
-          <tr>
-            <th className="py-2 font-medium">Bahan</th>
-            <th className="py-2 font-medium">Takaran</th>
-            <th className="py-2 text-right font-medium">Biaya/porsi</th>
-            <th className="w-24 py-2 pl-3 font-medium">Bagian dari modal</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-garis">
-          {baris.map((r) => (
-            <tr key={r.bahan_id}>
-              <td className="py-2">
-                <Link to={`/bahan/${r.bahan_id}`} className="font-medium capitalize hover:text-biru">
-                  {r.nama}
-                </Link>
-                <span className="block text-xs text-redup">{r.biaya == null ? 'harga belum ada' : SUMBER[r.sumber_harga] || r.sumber_harga}</span>
-              </td>
-              <td className="angka py-2">
-                {r.qty} {r.satuan}
-                {r.cara_konversi === 'urt' && <span className="block text-xs text-redup">{`≈ ${Math.round(r.qty_dasar_per_porsi)} ${r.satuan_dasar}`}</span>}
-              </td>
-              <td className="angka py-2 text-right font-semibold">{r.biaya == null ? '–' : rupiah(r.biaya)}</td>
-              <td className="py-2 pl-3">
-                <div className="h-2 rounded-full bg-dasar" aria-hidden>
-                  <div className="h-2 rounded-full bg-biru" style={{ width: `${((r.biaya ?? 0) / total) * 100}%` }} />
-                </div>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td className="py-2 font-medium" colSpan={2}>
-              Biaya rutin (listrik, sewa, dan lainnya)
-            </td>
-            <td className="angka py-2 text-right font-semibold">{rupiah(p.biaya_lain)}</td>
-            <td />
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div className="hidden grid-cols-[minmax(0,1fr)_8rem_6rem_6rem] gap-3 py-2 text-sm text-redup sm:grid">
+        <span>Bahan</span>
+        <span>Takaran</span>
+        <span className="text-right">Biaya/porsi</span>
+        <span>Bagian dari modal</span>
+      </div>
+      <ul className="flex flex-col">
+        {baris.map((r) => (
+          <li key={r.bahan_id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-t border-garis py-2.5 text-sm sm:grid-cols-[minmax(0,1fr)_8rem_6rem_6rem]">
+            <span className="min-w-0">
+              <Link to={`/bahan/${r.bahan_id}`} className="font-medium capitalize hover:text-biru">
+                {r.nama}
+              </Link>
+              <span className="block text-xs text-redup">
+                <span className="angka sm:hidden">
+                  {r.qty} {r.satuan} ·{' '}
+                </span>
+                {r.biaya == null ? 'harga belum ada' : SUMBER[r.sumber_harga] || r.sumber_harga}
+              </span>
+            </span>
+            <span className="angka hidden sm:block">
+              {r.qty} {r.satuan}
+              {r.cara_konversi === 'urt' && <span className="block text-xs text-redup">{`≈ ${Math.round(r.qty_dasar_per_porsi)} ${r.satuan_dasar}`}</span>}
+            </span>
+            <span className="angka text-right font-semibold">{r.biaya == null ? '–' : rupiah(r.biaya)}</span>
+            <span className="col-span-2 sm:col-span-1">
+              <span className="block h-2 rounded-full bg-dasar" aria-hidden>
+                <span className="block h-2 rounded-full bg-biru" style={{ width: `${((r.biaya ?? 0) / total) * 100}%` }} />
+              </span>
+            </span>
+          </li>
+        ))}
+        <li className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-t border-garis py-2.5 text-sm sm:grid-cols-[minmax(0,1fr)_8rem_6rem_6rem]">
+          <span className="font-medium sm:col-span-2">Biaya rutin (listrik, sewa, dan lainnya)</span>
+          <span className="angka text-right font-semibold">{rupiah(p.biaya_lain)}</span>
+        </li>
+      </ul>
     </div>
   );
 }

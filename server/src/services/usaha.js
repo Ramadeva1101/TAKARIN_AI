@@ -11,13 +11,14 @@ export function usahaMilik(userId) {
 
 export function ubahProfil(usaha, data) {
   run(
-    `UPDATE usaha SET nama = ?, jenis = ?, kota = ?, provinsi = ?, target_margin = ?, porsi_per_hari = ? WHERE id = ?`,
+    `UPDATE usaha SET nama = ?, jenis = ?, kota = ?, provinsi = ?, target_margin = ?, porsi_per_hari = ?, hari_buka = ? WHERE id = ?`,
     data.nama ?? usaha.nama,
     data.jenis ?? usaha.jenis,
     data.kota ?? usaha.kota,
     data.provinsi ?? usaha.provinsi,
     data.target_margin ?? usaha.target_margin,
     data.porsi_per_hari ?? usaha.porsi_per_hari,
+    data.hari_buka ?? usaha.hari_buka,
     usaha.id,
   );
   return get('SELECT * FROM usaha WHERE id = ?', usaha.id);
@@ -51,7 +52,7 @@ export function simpanSetup(userId, data) {
     const u = data.usaha;
     if (!usaha) {
       const { lastInsertRowid } = run(
-        `INSERT INTO usaha (user_id, nama, jenis, kota, provinsi, target_margin, porsi_per_hari) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO usaha (user_id, nama, jenis, kota, provinsi, target_margin, porsi_per_hari, hari_buka) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         userId,
         u.nama,
         u.jenis ?? null,
@@ -59,6 +60,7 @@ export function simpanSetup(userId, data) {
         u.provinsi ?? null,
         u.target_margin,
         u.porsi_per_hari,
+        u.hari_buka ?? 30,
       );
       usaha = get('SELECT * FROM usaha WHERE id = ?', lastInsertRowid);
     } else {

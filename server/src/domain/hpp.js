@@ -3,14 +3,15 @@ import { margin, markup, hargaAman, statusMargin } from './harga.js';
 
 /**
  * Biaya operasional per porsi.
- * periode: 'porsi' (sudah per porsi), 'hari' (dibagi porsi per hari), 'bulan' (dibagi porsi per hari x 30).
+ * periode: 'porsi' (sudah per porsi), 'hari' (dibagi porsi per hari), 'bulan' (dibagi porsi per hari x hari buka sebulan).
  */
-export function biayaLainPerPorsi(biayaLain, porsiPerHari) {
+export function biayaLainPerPorsi(biayaLain, porsiPerHari, hariBuka = 30) {
   const porsi = Math.max(Number(porsiPerHari) || 1, 1);
+  const hari = Math.min(Math.max(Number(hariBuka) || 30, 1), 31);
   return biayaLain.reduce((total, b) => {
     if (b.periode === 'porsi') return total + b.nominal;
     if (b.periode === 'hari') return total + b.nominal / porsi;
-    if (b.periode === 'bulan') return total + b.nominal / (porsi * 30);
+    if (b.periode === 'bulan') return total + b.nominal / (porsi * hari);
     return total;
   }, 0);
 }

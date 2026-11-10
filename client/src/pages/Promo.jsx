@@ -43,14 +43,14 @@ function Tersimpan({ daftar, muat }) {
             {p.caption && <p className="mt-1 text-sm">{p.caption}</p>}
             {p.galat && <p className="mt-1 text-xs text-rugi">{p.galat}</p>}
             <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => salin(p)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-biru hover:text-biru">
+              <button type="button" onClick={() => salin(p)} className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-biru hover:text-biru">
                 <Copy size={16} aria-hidden /> Salin
               </button>
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(teksBagikan(p))}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-aman hover:text-aman"
+                className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-aman hover:text-aman"
               >
                 <WhatsappLogo size={16} aria-hidden /> Bagikan ke WhatsApp
               </a>

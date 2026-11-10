@@ -49,7 +49,7 @@ export default function BiayaRutin({ value, onChange }) {
             key={p.nama}
             type="button"
             onClick={() => onChange([...value, { nama: p.nama, nominal: '', periode: p.periode }])}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-garis bg-kartu px-3.5 text-sm font-medium hover:border-biru hover:text-biru"
+            className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-garis bg-kartu px-3.5 text-sm font-medium hover:border-biru hover:text-biru"
           >
             <Plus size={14} weight="bold" aria-hidden /> {p.nama}
           </button>
@@ -57,7 +57,7 @@ export default function BiayaRutin({ value, onChange }) {
         <button
           type="button"
           onClick={() => onChange([...value, { nama: '', nominal: '', periode: 'bulan' }])}
-          className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-dashed border-biru/50 px-3.5 text-sm font-semibold text-biru hover:bg-biru-muda"
+          className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-dashed border-biru/50 px-3.5 text-sm font-semibold text-biru hover:bg-biru-muda"
         >
           <Plus size={14} weight="bold" aria-hidden /> Biaya lain
         </button>

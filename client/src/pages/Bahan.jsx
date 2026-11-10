@@ -137,7 +137,7 @@ export default function Bahan() {
                   type="button"
                   aria-pressed={m.id === menuAktif?.id}
                   onClick={() => setMenuPilih(m.id)}
-                  className={`min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${m.id === menuAktif?.id ? 'bg-biru text-white' : 'bg-dasar text-redup ring-1 ring-garis hover:text-tinta'}`}
+                  className={`min-h-11 sm:min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${m.id === menuAktif?.id ? 'bg-biru text-white' : 'bg-dasar text-redup ring-1 ring-garis hover:text-tinta'}`}
                 >
                   {m.nama}
                 </button>

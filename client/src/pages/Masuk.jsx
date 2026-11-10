@@ -67,7 +67,7 @@ export default function Masuk({ mode }) {
   };
 
   const tab = (to, teks, aktif) => (
-    <Link to={to} aria-current={aktif ? 'page' : undefined} className={`flex min-h-10 flex-1 items-center justify-center rounded-full text-sm font-semibold transition-colors ${aktif ? 'bg-kartu text-tinta shadow-kartu' : 'text-redup hover:text-tinta'}`}>
+    <Link to={to} aria-current={aktif ? 'page' : undefined} className={`flex min-h-11 sm:min-h-10 flex-1 items-center justify-center rounded-full text-sm font-semibold transition-colors ${aktif ? 'bg-kartu text-tinta shadow-kartu' : 'text-redup hover:text-tinta'}`}>
       {teks}
     </Link>
   );

@@ -186,7 +186,7 @@ export default function Pasar() {
               <p className="font-semibold">Server PIHPS Bank Indonesia belum bisa dihubungi.</p>
               <p>Harga di bawah adalah data tersimpan terakhir. Coba perbarui lagi beberapa saat lagi.</p>
               <details className="mt-1 text-xs opacity-80">
-                <summary className="inline-flex min-h-9 items-center">Rincian teknis</summary>
+                <summary className="inline-flex min-h-11 sm:min-h-9 items-center">Rincian teknis</summary>
                 {galatPerbarui && <p>{galatPerbarui}</p>}
                 {data.sinkron.galat.map((g) => (
                   <p key={g}>{g}</p>

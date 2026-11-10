@@ -13,7 +13,15 @@ export function openDb(file) {
   db.exec('PRAGMA foreign_keys = ON;');
   if (file !== ':memory:') db.exec('PRAGMA journal_mode = WAL;');
   db.exec(fs.readFileSync(schemaPath, 'utf8'));
+  migrasi(db);
   return db;
+}
+
+// Kolom yang ditambahkan setelah versi awal. CREATE TABLE IF NOT EXISTS tidak menambah kolom ke tabel lama.
+function migrasi(db) {
+  const ada = (tabel, kolom) => db.prepare(`PRAGMA table_info(${tabel})`).all().some((k) => k.name === kolom);
+  const tambah = (tabel, kolom, def) => !ada(tabel, kolom) && db.exec(`ALTER TABLE ${tabel} ADD COLUMN ${kolom} ${def}`);
+  tambah('usaha', 'hari_buka', 'INTEGER NOT NULL DEFAULT 30');
 }
 
 export function getDb() {

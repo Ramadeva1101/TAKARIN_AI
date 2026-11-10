@@ -36,7 +36,7 @@ export default function Onboarding() {
   const [langkah, setLangkah] = useState(0);
   const [wilayah, setWilayah] = useState({ kota: [], provinsi: [] });
   const bersih = (s) => s.toLowerCase().replace(/^(kota administrasi|kota|kabupaten|kab\.?)\s+/, '').trim();
-  const [usaha, setUsaha] = useState({ nama: '', jenis: '', kota: '', provinsi: '', target_margin: 40, porsi_per_hari: '' });
+  const [usaha, setUsaha] = useState({ nama: '', jenis: '', kota: '', provinsi: '', target_margin: 40, porsi_per_hari: '', hari_buka: 30 });
   const [rutin, setRutin] = useState([]);
   // Jenis usaha di luar daftar: diisi sendiri lalu diperiksa AI.
   const [lain, setLain] = useState({ aktif: false, teks: '', hasil: null, cek: false, galat: null });
@@ -69,7 +69,7 @@ export default function Onboarding() {
   const bisaLanjut = [
     usaha.nama.trim() && (lain.aktif ? lain.hasil?.valid && lain.hasil.teks === lain.teks.trim() : usaha.jenis),
     usaha.kota.trim() && usaha.provinsi.trim(),
-    Number(usaha.porsi_per_hari) > 0 && Number(usaha.target_margin) >= 5,
+    Number(usaha.porsi_per_hari) > 0 && Number(usaha.target_margin) >= 5 && Number(usaha.hari_buka) >= 1 && Number(usaha.hari_buka) <= 31,
     true,
   ][langkah];
 
@@ -94,7 +94,7 @@ export default function Onboarding() {
       await api('/usaha/setup', {
         method: 'POST',
         body: {
-          usaha: { ...usaha, target_margin: Number(usaha.target_margin) / 100, porsi_per_hari: Number(usaha.porsi_per_hari) },
+          usaha: { ...usaha, target_margin: Number(usaha.target_margin) / 100, porsi_per_hari: Number(usaha.porsi_per_hari), hari_buka: Number(usaha.hari_buka) },
           produk: [],
           biaya: biayaSurvei(),
         },
@@ -222,16 +222,27 @@ export default function Onboarding() {
       {langkah === 2 && (
         <section>
           <h1 className="mt-1 text-2xl font-bold">Berapa porsi terjual dan berapa untung yang Anda inginkan?</h1>
-          <Field
-            className="mt-5 max-w-xs"
-            label="Rata-rata porsi terjual per hari"
-            type="number"
-            min="1"
-            inputMode="numeric"
-            value={usaha.porsi_per_hari}
-            onChange={u('porsi_per_hari')}
-            hint="Semua menu digabung. Dipakai untuk membagi biaya rutin seperti listrik atau sewa ke tiap porsi."
-          />
+          <div className="mt-5 grid max-w-xl gap-3 sm:grid-cols-2">
+            <Field
+              label="Rata-rata porsi terjual per hari buka"
+              type="number"
+              min="1"
+              inputMode="numeric"
+              value={usaha.porsi_per_hari}
+              onChange={u('porsi_per_hari')}
+              hint="Semua menu digabung, termasuk potong, gelas, atau kotak."
+            />
+            <Field
+              label="Buka berapa hari dalam sebulan"
+              type="number"
+              min="1"
+              max="31"
+              inputMode="numeric"
+              value={usaha.hari_buka}
+              onChange={u('hari_buka')}
+              hint="Contoh: libur tiap Minggu = 26 hari. Biaya bulanan dibagi ke hari buka saja."
+            />
+          </div>
           <p className="mt-5 mb-2 text-sm font-medium">Target untung dari harga jual</p>
           <div role="radiogroup" aria-label="Target untung" className="grid gap-2 sm:grid-cols-3">
             {TARGET.map((t) => (

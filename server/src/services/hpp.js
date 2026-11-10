@@ -50,7 +50,7 @@ export function konteksHitung(usaha) {
   return {
     hargaBahan: petaHarga(usaha),
     konversi: petaKonversi(usaha.id),
-    biayaLainPorsi: biayaLainPerPorsi(biaya, usaha.porsi_per_hari),
+    biayaLainPorsi: biayaLainPerPorsi(biaya, usaha.porsi_per_hari, usaha.hari_buka),
     targetMargin: usaha.target_margin,
   };
 }
