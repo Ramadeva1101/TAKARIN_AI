@@ -30,7 +30,7 @@ function Rincian({ d, belanja }) {
     <Kartu className="lg:sticky lg:top-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl font-bold capitalize">{d.komoditas}</h2>
+          <h2 className="text-xl leading-relaxed font-bold capitalize">{d.komoditas}</h2>
           <p className="text-sm text-redup">
             {d.wilayah}, {LEVEL[d.level]} · {tanggal(d.tanggal)}
           </p>
