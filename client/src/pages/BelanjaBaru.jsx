@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
-import { Camera, Microphone, TextAa, PencilSimple, Stop } from '@phosphor-icons/react';
+import { Camera, Microphone, TextAa, PencilSimple } from '@phosphor-icons/react';
 import { api, pesanGalat } from '../lib/api.js';
 import { Field, Judul, Kartu, Tombol, inputCls } from '../components/ui.jsx';
+import Dikte from '../components/Dikte.jsx';
 
 const CARA = [
   { id: 'foto', label: 'Foto nota', ikon: Camera },
@@ -52,85 +53,20 @@ function Foto({ kirim, proses }) {
   );
 }
 
-function Putar({ blob }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    const u = URL.createObjectURL(blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [blob]);
-  return url ? <audio controls src={url} className="h-11 max-w-full" /> : null;
-}
-
+// Ucapkan belanjaan: suara jadi teks dulu, bisa dikoreksi, lalu dibaca AI.
 function Suara({ kirim, proses }) {
-  const [rekam, setRekam] = useState(false);
-  const [blob, setBlob] = useState(null);
-  const [galat, setGalat] = useState(null);
-  const [detik, setDetik] = useState(0);
-  const rec = useRef(null);
-
-  useEffect(() => {
-    if (!rekam) return;
-    const t = setInterval(() => setDetik((d) => d + 1), 1000);
-    return () => clearInterval(t);
-  }, [rekam]);
-
-  const mulai = async () => {
-    setGalat(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const r = new MediaRecorder(stream);
-      const potong = [];
-      r.ondataavailable = (e) => potong.push(e.data);
-      r.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        setBlob(new Blob(potong, { type: r.mimeType || 'audio/webm' }));
-      };
-      r.start();
-      rec.current = r;
-      setBlob(null);
-      setDetik(0);
-      setRekam(true);
-    } catch {
-      setGalat('Mikrofon tidak bisa dipakai. Izinkan akses mikrofon di browser, atau pakai cara Ketik.');
-    }
-  };
-
-  const berhenti = () => {
-    rec.current?.stop();
-    setRekam(false);
-  };
-
+  const [teks, setTeks] = useState('');
   return (
     <>
       <p className="text-sm text-redup">Sebutkan belanjaan seperti biasa, misalnya: cabe rawit setengah kilo tiga lima ribu, bawang putih seperempat sepuluh ribu.</p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        {rekam ? (
-          <Tombol varian="bahaya" className="border border-rugi" onClick={berhenti}>
-            <Stop size={18} weight="fill" aria-hidden /> Berhenti ({detik} detik)
-          </Tombol>
-        ) : (
-          <Tombol varian="garis" onClick={mulai}>
-            <Microphone size={18} aria-hidden /> {blob ? 'Rekam ulang' : 'Mulai rekam'}
-          </Tombol>
-        )}
-        {blob && !rekam && <Putar blob={blob} />}
+      <div className="mt-4">
+        <Dikte label="Mulai bicara" onTeks={(t) => setTeks((x) => (x.trim() ? `${x.trim()} ${t}` : t))} />
       </div>
-      {galat && (
-        <p role="alert" className="mt-3 text-sm text-rugi">
-          {galat}
-        </p>
+      {teks && (
+        <Field className="mt-4" label="Yang terdengar (bisa diperbaiki)" as="textarea" rows={3} value={teks} onChange={(e) => setTeks(e.target.value)} />
       )}
-      <Tombol
-        className="mt-4"
-        disabled={!blob || proses}
-        onClick={() => {
-          const form = new FormData();
-          form.append('suara', blob, `belanja.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`);
-          kirim('/pembelian/suara', { form });
-        }}
-      >
-        {proses ? 'Mendengarkan' : 'Proses rekaman'}
+      <Tombol className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks, sumber: 'suara' } })}>
+        {proses ? 'Membaca' : 'Proses ucapan'}
       </Tombol>
     </>
   );

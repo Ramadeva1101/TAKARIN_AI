@@ -44,7 +44,7 @@ function Rincian({ p }) {
           ))}
           <tr>
             <td className="py-2 font-medium" colSpan={2}>
-              Gas, listrik, dan biaya lain
+              Biaya rutin (listrik, sewa, dan lainnya)
             </td>
             <td className="angka py-2 text-right font-semibold">{rupiah(p.biaya_lain)}</td>
             <td />

@@ -52,7 +52,7 @@ export const setup = z.object({
 });
 
 export const cerita = z.object({ teks: z.string().trim().min(10, 'Ceritakan lebih lengkap').max(4000) });
-export const teksBelanja = z.object({ teks: z.string().trim().min(3).max(2000) });
+export const teksBelanja = z.object({ teks: z.string().trim().min(3).max(2000), sumber: z.enum(['teks', 'suara']).default('teks') });
 
 const itemBelanja = z.object({
   teks_asli: z.string().max(200).nullish(),

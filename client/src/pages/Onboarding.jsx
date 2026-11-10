@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Trash, WarningCircle } from '@phosphor-icons/react';
+import { CheckCircle, WarningCircle } from '@phosphor-icons/react';
+import BiayaRutin, { biayaValid } from '../components/BiayaRutin.jsx';
 import { api, pesanGalat } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import { Field, Kartu, Merek, Tombol, inputCls } from '../components/ui.jsx';
@@ -36,7 +37,7 @@ export default function Onboarding() {
   const [wilayah, setWilayah] = useState({ kota: [], provinsi: [] });
   const bersih = (s) => s.toLowerCase().replace(/^(kota administrasi|kota|kabupaten|kab\.?)\s+/, '').trim();
   const [usaha, setUsaha] = useState({ nama: '', jenis: '', kota: '', provinsi: '', target_margin: 40, porsi_per_hari: '' });
-  const [rutin, setRutin] = useState({ gas: '', listrik: '', sewa: '' });
+  const [rutin, setRutin] = useState([]);
   // Jenis usaha di luar daftar: diisi sendiri lalu diperiksa AI.
   const [lain, setLain] = useState({ aktif: false, teks: '', hasil: null, cek: false, galat: null });
   const [proses, setProses] = useState(false);
@@ -72,14 +73,7 @@ export default function Onboarding() {
     true,
   ][langkah];
 
-  const biayaSurvei = () =>
-    [
-      ['gas', rutin.gas, 'hari'],
-      ['listrik', rutin.listrik, 'bulan'],
-      ['sewa tempat', rutin.sewa, 'bulan'],
-    ]
-      .filter(([, n]) => Number(n) > 0)
-      .map(([nama, nominal, periode]) => ({ nama, nominal: Number(nominal), periode }));
+  const biayaSurvei = () => biayaValid(rutin);
 
   const periksaJenis = async () => {
     const teks = lain.teks.trim();
@@ -236,7 +230,7 @@ export default function Onboarding() {
             inputMode="numeric"
             value={usaha.porsi_per_hari}
             onChange={u('porsi_per_hari')}
-            hint="Semua menu digabung. Untuk membagi biaya gas dan listrik ke tiap porsi."
+            hint="Semua menu digabung. Dipakai untuk membagi biaya rutin seperti listrik atau sewa ke tiap porsi."
           />
           <p className="mt-5 mb-2 text-sm font-medium">Target untung dari harga jual</p>
           <div role="radiogroup" aria-label="Target untung" className="grid gap-2 sm:grid-cols-3">
@@ -254,12 +248,11 @@ export default function Onboarding() {
       {langkah === 3 && (
         <section>
           <h1 className="mt-1 text-2xl font-bold">Biaya rutin di luar bahan</h1>
-          <p className="mt-2 text-redup">Biaya ini ikut dibagi ke setiap porsi. Kosongkan yang tidak ada. Setelah ini Anda langsung bisa menambahkan menu.</p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Field label="Gas per hari (Rp)" type="number" min="0" inputMode="numeric" value={rutin.gas} onChange={(e) => setRutin({ ...rutin, gas: e.target.value })} hint="Contoh: tabung 3 kg Rp22.000 habis 2 hari = 11000" />
-            <Field label="Listrik per bulan (Rp)" type="number" min="0" inputMode="numeric" value={rutin.listrik} onChange={(e) => setRutin({ ...rutin, listrik: e.target.value })} />
-            <Field label="Sewa tempat per bulan (Rp)" type="number" min="0" inputMode="numeric" value={rutin.sewa} onChange={(e) => setRutin({ ...rutin, sewa: e.target.value })} />
-          </div>
+          <p className="mt-2 text-redup">Biaya selain bahan resep, misalnya bahan bakar memasak, listrik, sewa, atau gaji. Biaya ini dibagi ke setiap porsi. Pilih yang Anda bayar saja; kalau tidak ada, langsung lanjut.</p>
+          <Kartu className="mt-5">
+            <BiayaRutin value={rutin} onChange={setRutin} />
+          </Kartu>
+          <p className="mt-3 text-sm text-redup">Semua biaya bisa diubah nanti di Pengaturan.</p>
         </section>
       )}
 
@@ -286,23 +279,6 @@ export default function Onboarding() {
           </Tombol>
         )}
       </div>
-    </div>
-  );
-}
-
-export function BarisBiaya({ b, i, ubah, hapus }) {
-  return (
-    <div className="grid grid-cols-[1fr_6.5rem_6rem_2.75rem] items-center gap-2">
-      <input aria-label={`Nama biaya ${i + 1}`} placeholder="listrik" className={inputCls} value={b.nama} onChange={(e) => ubah({ ...b, nama: e.target.value })} />
-      <input aria-label={`Nominal biaya ${i + 1}`} placeholder="Rp" type="number" min="0" inputMode="numeric" className={`${inputCls} angka`} value={b.nominal ?? ''} onChange={(e) => ubah({ ...b, nominal: e.target.value })} />
-      <select aria-label={`Periode biaya ${i + 1}`} className={inputCls} value={b.periode} onChange={(e) => ubah({ ...b, periode: e.target.value })}>
-        <option value="porsi">/porsi</option>
-        <option value="hari">/hari</option>
-        <option value="bulan">/bulan</option>
-      </select>
-      <button type="button" aria-label={`Hapus biaya ${b.nama || i + 1}`} onClick={hapus} className="flex size-11 items-center justify-center rounded-lg text-redup hover:bg-rugi-muda hover:text-rugi">
-        <Trash size={18} aria-hidden />
-      </button>
     </div>
   );
 }

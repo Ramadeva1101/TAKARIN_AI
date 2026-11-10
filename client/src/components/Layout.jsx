@@ -7,7 +7,7 @@ import { api } from '../lib/api.js';
 
 const MENU = [
   { to: '/', label: 'Ringkasan', ikon: ChartBar, end: true },
-  { to: '/produk', label: 'Produk', ikon: ForkKnife },
+  { to: '/produk', label: 'Menu', ikon: ForkKnife },
   { to: '/pasar', label: 'Harga pasar', pendek: 'Pasar', ikon: Storefront },
   { to: '/bahan', label: 'Bahan baku', ikon: Basket },
   { to: '/belanja', label: 'Belanja', ikon: Receipt },

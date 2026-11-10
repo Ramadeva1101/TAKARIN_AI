@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { get, run } from '../lib/db.js';
 import { AppError } from '../lib/errors.js';
-import { modeAi, cekJenisUsaha } from '../ai/provider.js';
+import { modeAi, cekJenisUsaha, transkripsi } from '../ai/provider.js';
 import { wajibLogin, wajibUsaha, unggahFoto, unggahSuara, validasi, rahasiaJwt } from '../middleware/index.js';
 import * as S from './skema.js';
 import * as usaha from '../services/usaha.js';
@@ -50,6 +50,13 @@ router.get('/pasar/provinsi', async (_req, res) => res.json(await pasar.daftarPr
 router.get('/pasar/kota', async (req, res) => res.json(await pasar.daftarKotaPilihan(String(req.query.provinsi || ''))));
 
 // ---- Onboarding ----
+// Rekaman suara menjadi teks (cadangan untuk browser tanpa pengenal suara bawaan).
+router.post('/suara/teks', unggahSuara, async (req, res) => {
+  if (!req.file) throw new AppError(400, 'Rekaman suara belum ada');
+  const { teks } = await transkripsi(req.file.buffer, req.file.originalname, req.file.mimetype);
+  if (!teks?.trim()) throw new AppError(422, 'Suara tidak terdengar jelas. Coba rekam lagi.');
+  res.json({ teks: teks.trim() });
+});
 router.post('/usaha/cek-jenis', validasi(S.cekJenis), async (req, res) => res.json((await cekJenisUsaha(req.body.teks)).data));
 router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => res.json(await usaha.draftDariCerita(req.body.teks)));
 router.post('/usaha/setup', validasi(S.setup), (req, res) => {
@@ -106,7 +113,7 @@ router.post('/pembelian/suara', unggahSuara, async (req, res) => {
   if (!req.file) throw new AppError(400, 'Rekaman suara belum ada');
   res.status(201).json(await pembelian.dariSuara(req.usaha, req.file));
 });
-router.post('/pembelian/teks', validasi(S.teksBelanja), async (req, res) => res.status(201).json(await pembelian.dariTeks(req.usaha, req.body.teks)));
+router.post('/pembelian/teks', validasi(S.teksBelanja), async (req, res) => res.status(201).json(await pembelian.dariTeks(req.usaha, req.body.teks, req.body.sumber)));
 router.post('/pembelian/manual', validasi(S.belanjaManual), (req, res) =>
   res.status(201).json(pembelian.buatDraf(req.usaha, { sumber: 'manual', ...req.body, item: req.body.item.map((i) => ({ ...i, yakin: 1 })) })),
 );

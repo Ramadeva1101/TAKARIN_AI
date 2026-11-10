@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Plus } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, pesanGalat } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import { Field, Galat, Judul, Kartu, Muat, Tombol } from '../components/ui.jsx';
-import { BarisBiaya } from './Onboarding.jsx';
+import BiayaRutin, { biayaValid } from '../components/BiayaRutin.jsx';
 
 function Pesan({ p }) {
   if (!p) return null;
@@ -49,7 +48,7 @@ export default function Pengaturan() {
   const simpanBiaya = async (e) => {
     e.preventDefault();
     try {
-      await api('/usaha/biaya', { method: 'PUT', body: biaya.filter((b) => b.nama.trim() && Number(b.nominal) > 0).map((b) => ({ ...b, nominal: Number(b.nominal) })) });
+      await api('/usaha/biaya', { method: 'PUT', body: biayaValid(biaya) });
       setP2({ ok: true, teks: 'Biaya tersimpan.' });
       muat();
     } catch (err) {
@@ -82,16 +81,9 @@ export default function Pengaturan() {
         <div className="flex flex-col gap-4">
           <Kartu>
             <form onSubmit={simpanBiaya}>
-              <h2 className="font-semibold">Biaya lain</h2>
+              <h2 className="font-semibold">Biaya rutin di luar bahan</h2>
               <p className="mb-3 text-sm text-redup">Dibagi ke setiap porsi berdasarkan porsi terjual per hari.</p>
-              <div className="flex flex-col gap-2">
-                {biaya.map((b, i) => (
-                  <BarisBiaya key={i} b={b} i={i} ubah={(v) => setBiaya(biaya.map((x, j) => (j === i ? v : x)))} hapus={() => setBiaya(biaya.filter((_, j) => j !== i))} />
-                ))}
-              </div>
-              <Tombol varian="hantu" className="mt-2" onClick={() => setBiaya([...biaya, { nama: '', nominal: '', periode: 'bulan' }])}>
-                <Plus size={16} weight="bold" aria-hidden /> Tambah biaya
-              </Tombol>
+              <BiayaRutin value={biaya} onChange={setBiaya} />
               <Pesan p={p2} />
               <div>
                 <Tombol type="submit" className="mt-4">

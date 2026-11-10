@@ -7,6 +7,7 @@ import { contohCerita } from '../lib/jenis.js';
 import { Field, Judul, Kartu, Tombol } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
 import ResepEditor, { cekResep, rapikanResep, resepKosong } from '../components/ResepEditor.jsx';
+import Dikte from '../components/Dikte.jsx';
 
 export default function ProdukBaru() {
   const nav = useNavigate();
@@ -70,7 +71,7 @@ export default function ProdukBaru() {
       <Segmen
         label="Cara menambah menu"
         pilihan={[
-          ['cerita', 'Ceritakan ke AI'],
+          ['cerita', 'Ceritakan atau ucapkan'],
           ['manual', 'Isi manual'],
         ]}
         nilai={cara}
@@ -82,6 +83,14 @@ export default function ProdukBaru() {
 
       {cara === 'cerita' && !daftar && (
         <Kartu className="mt-4">
+          <Dikte
+            label="Ucapkan menu"
+            onTeks={(t) => setCerita((c) => (c.trim() ? `${c.trim()} ${t}` : t))}
+            contoh="Tekan, lalu bicara seperti menjelaskan ke karyawan baru. Contoh: es kopi susu dua belas ribu, kopi lima belas gram, susu kental manis dua sendok."
+          />
+          <div className="my-4 flex items-center gap-3 text-xs text-redup" aria-hidden>
+            <span className="h-px flex-1 bg-garis" /> atau ketik <span className="h-px flex-1 bg-garis" />
+          </div>
           <Field
             label="Cerita menu"
             as="textarea"

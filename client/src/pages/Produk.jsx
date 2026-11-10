@@ -7,7 +7,7 @@ export default function Produk() {
   const { data, loading, error, muat } = useApi('/produk');
   return (
     <>
-      <Judul judul="Produk" sub="Modal per porsi dan untung setiap menu" aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
+      <Judul judul="Menu" sub="Modal per porsi dan untung setiap menu" aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
       {loading && !data ? (
         <Muat />
       ) : error ? (
