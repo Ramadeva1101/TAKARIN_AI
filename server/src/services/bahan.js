@@ -1,6 +1,6 @@
 import { all, get, run } from '../lib/db.js';
-import { AppError, tidakDitemukan } from '../lib/errors.js';
-import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR } from '../domain/satuan.js';
+import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
+import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar } from '../domain/satuan.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { hargaRataRata, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { acuanPerSatuanDasar, riwayatAcuan } from './hargaPasar.js';
@@ -128,4 +128,14 @@ export function ubahBahan(usaha, bahanId, data) {
     b.id,
   );
   return detailBahan(usaha, b.id);
+}
+
+// Harga perkiraan yang diisi sendiri (untuk bahan yang belum pernah dicatat belanjanya dan tidak ada di data pasar).
+export function isiHargaManual(usaha, bahanId, { qty, satuan, harga }) {
+  const bahan = get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', bahanId, usaha.id);
+  if (!bahan) throw tidakDitemukan('Bahan');
+  const konv = keSatuanDasar({ qty, satuan, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
+  if (!konv.ok || !konv.nilai) throw new AppError(400, konv.pesan ?? 'Jumlah tidak valid');
+  run('INSERT INTO harga_bahan (bahan_id, harga_per_satuan, tanggal, sumber) VALUES (?, ?, ?, ?)', bahan.id, harga / konv.nilai, tanggalHariIni(), 'manual');
+  return detailBahan(usaha, bahan.id);
 }

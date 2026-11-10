@@ -214,14 +214,14 @@ const LANGKAH = [
   },
   {
     no: '03',
-    judul: 'Lihat modal dan harga aman',
+    judul: 'Lihat modal dan harga minimal',
     teks: 'Modal per porsi dihitung ulang setiap kali belanja disimpan. Menu yang untungnya di bawah target langsung ditandai.',
     isi: (
       <div className="rounded-xl border border-garis bg-dasar p-3">
         <p className="text-xs text-redup">Modal per porsi</p>
         <p className="angka text-xl font-bold">Rp8.708</p>
         <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
-          <span className="angka">Harga aman Rp15.000</span>
+          <span className="angka">Harga minimal Rp15.000</span>
           <span className="angka font-semibold text-aman">Untung 41,9%</span>
         </div>
       </div>
@@ -233,11 +233,11 @@ const FITUR = [
   { ikon: Camera, warna: 'biru', judul: 'Baca nota, suara, dan tulisan', teks: 'Singkatan nota seperti "cbe rwt" dan bahasa lisan seperti goceng, ceban, atau "eh salah" diubah menjadi baris belanja.' },
   { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar daerah', teks: 'Harga pasar tradisional tingkat kota, provinsi, dan nasional dari PIHPS Bank Indonesia sebagai pembanding harga belanja.' },
   { ikon: Calculator, warna: 'aman', judul: 'Saran harga dan simulasi', teks: 'Geser harga jual atau harga bahan dan lihat untungnya berubah. Saran harga bisa diterapkan langsung dari ringkasan.' },
-  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Tiga pilihan harga paket beserta tambahan penjualan yang dibutuhkan agar laba tidak turun. Paket rugi tidak bisa disimpan.' },
+  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Tiga pilihan harga paket beserta tambahan penjualan yang dibutuhkan agar total untung tidak turun. Paket rugi tidak bisa disimpan.' },
 ];
 
 const PRINSIP = [
-  [ShieldCheck, 'Angka dihitung oleh kode', 'Modal, untung, dan harga aman memakai rumus tetap. Teks AI yang memuat angka di luar hasil hitungan dibuang dan diganti penjelasan baku.'],
+  [ShieldCheck, 'Angka dihitung oleh kode', 'Modal, untung, dan harga minimal memakai rumus tetap. Teks AI yang memuat angka di luar hasil hitungan dibuang dan diganti penjelasan baku.'],
   [UserCheck, 'Pemilik usaha tetap memutuskan', 'Setiap hasil AI masuk ke halaman periksa terlebih dahulu. Tidak ada data yang dipakai sebelum disetujui.'],
   [Leaf, 'Hemat sumber daya', 'Foto dikompres di ponsel, AI dipanggil hanya saat membaca atau menulis, dan harga pasar diambil paling sering sekali dalam enam jam.'],
   [Database, 'Data publik yang jelas sumbernya', 'Harga pasar berasal dari PIHPS Bank Indonesia dengan tanggal yang selalu ditampilkan. Tidak ada pengambilan data dari toko atau marketplace.'],
@@ -380,7 +380,7 @@ export function Beranda() {
 
       <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 className="text-3xl font-extrabold tracking-tight">Mulai dari menu yang paling sering terjual</h2>
-        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, jawab enam pertanyaan tentang usaha Anda, lalu ceritakan satu menu. Modal per porsinya langsung terlihat.</p>
+        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, isi 4 langkah singkat tentang usaha Anda, lalu ceritakan atau ucapkan satu menu. Modal per porsinya langsung terlihat.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
             Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
@@ -409,7 +409,7 @@ const FAQ = [
   ['Kalau hasil baca nota salah?', 'Setiap hasil baca masuk ke halaman periksa dulu. Baris yang ragu ditandai kuning, dan harga yang jauh dari harga pasar diberi peringatan. Data baru dipakai setelah Anda simpan.'],
   ['Harga pasar diambil dari mana?', 'Dari PIHPS Nasional milik Bank Indonesia (bi.go.id/hargapangan), harga pasar tradisional per kota dan provinsi. Server mengambilnya secara berkala, dan tanggal serta sumbernya selalu ditampilkan. Kalau kota Anda tidak ada di PIHPS, dipakai harga provinsi, lalu nasional.'],
   ['Kenapa harga bahan saya beda dengan harga pasar?', 'Harga yang dipakai untuk menghitung modal adalah harga belanja Anda sendiri (rata-rata tiga belanja terakhir). Harga pasar hanya pembanding.'],
-  ['Apakah promo paket bisa membuat rugi?', 'Paket dengan harga di bawah modal tidak bisa disimpan. Setiap pilihan harga menunjukkan untung per paket dan berapa banyak lagi paket harus terjual supaya labanya sama.'],
+  ['Apakah promo paket bisa membuat rugi?', 'Paket dengan harga di bawah modal tidak bisa disimpan. Setiap pilihan harga menunjukkan untung per paket dan berapa banyak lagi paket harus terjual supaya total untungnya sama.'],
 ];
 
 export function Bantuan() {
@@ -438,7 +438,7 @@ export function Tentang() {
         <li>Menyusun resep dan takaran dari cerita pemilik usaha.</li>
         <li>Merangkai penjelasan, catatan harian, serta nama dan caption promo.</li>
       </ul>
-      <p>Perhitungan modal, untung, harga aman, dan promo memakai rumus tetap di server, bukan AI. Teks AI yang memuat angka di luar hasil hitungan dibuang.</p>
+      <p>Perhitungan modal, untung, harga minimal, dan promo memakai rumus tetap di server, bukan AI. Teks AI yang memuat angka di luar hasil hitungan dibuang.</p>
       <h2>Hemat sumber daya</h2>
       <ul>
         <li>Foto nota dikompres di ponsel sebelum diunggah, sehingga hemat kuota dan daya server.</li>

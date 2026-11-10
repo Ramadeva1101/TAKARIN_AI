@@ -11,7 +11,7 @@ function itemDenganHpp(usaha, items) {
     const menu = get('SELECT * FROM menu WHERE id = ? AND usaha_id = ?', i.menu_id, usaha.id);
     if (!menu) throw tidakDitemukan('Produk');
     const h = hitungMenu(menu, konteks);
-    if (!h.lengkap) throw new AppError(409, `HPP ${menu.nama} belum lengkap, lengkapi dulu harga bahannya`);
+    if (!h.lengkap) throw new AppError(409, `Modal ${menu.nama} belum bisa dihitung, lengkapi dulu harga bahannya`);
     return { menu_id: menu.id, nama: menu.nama, hpp: h.hpp, harga_jual: menu.harga_jual, qty: i.qty };
   });
 }

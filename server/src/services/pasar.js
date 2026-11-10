@@ -127,6 +127,9 @@ const terlaluPanjang = (teks) => teks.split(/\s+/).length > 22 || (teks.match(/[
 // Catatan singkat untuk hari ini. AI hanya merangkai kalimat dari fakta; angka dicek ulang.
 export async function catatanHarian(usaha) {
   const produk = hitungSemua(usaha);
+  const tanggal = new Date().toISOString().slice(0, 10);
+  if (!produk.length) return { teks: 'Tambahkan menu pertama supaya modal dan untungnya bisa dihitung.', sumber: 'templat', tanggal };
+  if (!produk.some((p) => p.lengkap)) return { teks: 'Lengkapi harga bahan dulu supaya untung menu bisa dinilai.', sumber: 'templat', tanggal };
   const perlu = produk.filter((p) => p.lengkap && p.status !== 'aman').sort((a, b) => a.margin - b.margin);
   const info = infoHarian(usaha).slice(0, 3);
   const fakta = {
@@ -149,5 +152,5 @@ export async function catatanHarian(usaha) {
     teks = catatanTemplat(info, perlu);
     sumber = 'templat';
   }
-  return { teks, sumber, tanggal: new Date().toISOString().slice(0, 10) };
+  return { teks, sumber, tanggal };
 }

@@ -47,10 +47,16 @@ export default function ProdukBaru() {
     setGalat(null);
     try {
       const tersimpan = [];
-      for (const data of semua) tersimpan.push(await api('/produk', { method: 'POST', body: data }));
+      try {
+        for (const data of semua) tersimpan.push(await api('/produk', { method: 'POST', body: data }));
+      } catch (err) {
+        // Menu yang sudah tersimpan dikeluarkan dari daftar supaya tidak tersimpan dua kali saat dicoba lagi.
+        if (tersimpan.length && daftar) setDaftar(daftar.slice(tersimpan.length));
+        throw new Error(`${tersimpan.length ? `${tersimpan.length} menu sudah tersimpan. ` : ''}${pesanGalat(err)}`);
+      }
       nav(tersimpan.length === 1 ? `/produk/${tersimpan[0].id}` : '/', { replace: true });
     } catch (err) {
-      setGalat(pesanGalat(err));
+      setGalat(err.message);
       setProses(false);
     }
   };

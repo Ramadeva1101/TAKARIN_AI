@@ -82,7 +82,7 @@ function penjelasanTemplat(hasil, opsi, target) {
 
 export async function rekomendasi(usaha, menuId) {
   const d = detail(usaha, menuId);
-  if (!d.lengkap) throw new AppError(409, `HPP ${d.nama} belum lengkap: ${d.kurang.map((k) => k.nama).join(', ')}`);
+  if (!d.lengkap) throw new AppError(409, `Modal ${d.nama} belum bisa dihitung. Harga bahan yang belum ada: ${d.kurang.map((k) => k.nama).join(', ')}`);
 
   const fakta = {
     produk: d.nama,

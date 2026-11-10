@@ -3,7 +3,7 @@ import { useApi } from '../lib/hooks.js';
 import { rupiah, tanggal } from '../lib/api.js';
 import { Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
 
-const SUMBER = { foto: 'Foto nota', suara: 'Suara', teks: 'Ketik', manual: 'Manual' };
+const SUMBER = { foto: 'Foto nota', suara: 'Ucapan', teks: 'Ketik', manual: 'Isi tabel' };
 
 export default function Belanja() {
   const { data, loading, error, muat } = useApi('/pembelian');

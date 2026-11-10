@@ -9,7 +9,7 @@ import { Segmen } from '../components/Grafik.jsx';
 import { Mini } from '../components/Chart.jsx';
 import { Perubahan } from './Pasar.jsx';
 
-const SUMBER = { foto: [Camera, 'Foto nota'], suara: [Microphone, 'Suara'], teks: [TextT, 'Ketik'], manual: [PencilSimple, 'Manual'] };
+const SUMBER = { foto: [Camera, 'Foto nota'], suara: [Microphone, 'Ucapan'], teks: [TextT, 'Ketik'], manual: [PencilSimple, 'Isi tabel'] };
 
 const WARNA_STATUS = {
   aman: ['Sesuai target', '#1d59bb'],
@@ -190,7 +190,7 @@ function StatusMenu({ kpi, perlu, catatan, sesudah }) {
       </div>
 
       <p className="mt-4 rounded-2xl bg-dasar px-3 py-2.5 text-sm">
-        <TeksCatatan catatan={catatan} cadangan={perlu.length ? 'Pilih harga baru di bawah untuk mengembalikan untung.' : 'Semua menu sesuai target hari ini.'} />
+        <TeksCatatan catatan={catatan} cadangan={perlu.length ? 'Pilih harga baru di bawah untuk mengembalikan untung.' : kpi.belum_lengkap === kpi.jumlah_produk ? 'Lengkapi harga bahan dulu supaya untung menu bisa dinilai.' : 'Semua menu yang sudah dihitung sesuai target.'} />
       </p>
 
       {perlu.length > 0 && (
@@ -244,7 +244,7 @@ function HargaPasar({ data }) {
           label="Periode perubahan harga"
           pilihan={[
             ['minggu', 'Seminggu'],
-            ['hari', 'Data sebelumnya'],
+            ['hari', 'Dibanding data terakhir'],
           ]}
           nilai={periode}
           ubah={setPeriode}
@@ -388,7 +388,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi utama label="Rata-rata untung" nilai={persen(kpi.rata_margin)} ket={`Target ${persen(usaha.target_margin, 0)} · ${diBawah ? `${diBawah} menu di bawah target` : 'semua menu aman'}`} />
         <Kpi label="Menu paling untung" nilai={terbaik?.nama ?? '–'} ket={terbaik ? `Untung ${persen(terbaik.margin)}` : 'Belum ada hitungan lengkap'} to={terbaik ? `/produk/${terbaik.id}` : undefined} />
-        <Kpi label="Bahan naik tertinggi" nilai={<span className="capitalize">{naik?.nama ?? '–'}</span>} ket={naik ? `Naik ${persen(naik.perubahan)} dari belanja sebelumnya` : 'Harga belanja stabil'} to={naik ? `/bahan/${naik.id}` : undefined} />
+        <Kpi label="Bahan naik tertinggi" nilai={<span className="capitalize">{naik?.nama ?? '–'}</span>} ket={naik ? `Naik ${persen(naik.perubahan)} dari belanja sebelumnya` : belanja_terakhir.length > 1 ? 'Tidak ada yang naik lebih dari 2%' : 'Butuh minimal 2 belanja untuk dibandingkan'} to={naik ? `/bahan/${naik.id}` : undefined} />
         <Kpi label="Belanja bulan ini" nilai={rupiah(kpi.belanja_bulan_ini)} ket={`${kpi.nota_bulan_ini} catatan belanja`} to="/belanja" />
       </div>
 

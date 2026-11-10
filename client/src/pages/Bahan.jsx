@@ -122,7 +122,7 @@ export default function Bahan() {
               <p className="mt-1 truncate text-2xl font-extrabold capitalize">{teratas ? teratas.nama : '–'}</p>
               <p className="truncate text-xs opacity-80">{teratas ? `${persen(teratas.bagian_terbesar)} dari modal ${teratas.kontribusi[0].nama}` : 'Belum ada resep'}</p>
             </Link>
-            {ubin('naik', 'bg-kuning text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Harga belanja stabil')}
+            {ubin('naik', 'bg-kuning text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Belum ada kenaikan dari belanja yang tercatat')}
             {ubin('pasar', 'bg-kartu text-tinta border border-garis shadow-kartu', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
           </div>
 

@@ -73,6 +73,7 @@ export default function App() {
           <Route path="pasar" element={<Pasar />} />
           <Route path="promo" element={<Promo />} />
           <Route path="pengaturan" element={<Pengaturan />} />
+          <Route path="panduan" element={<Bantuan />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

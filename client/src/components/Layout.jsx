@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Merek } from './ui.jsx';
-import { ChartBar, ForkKnife, Receipt, Basket, Tag, Gear, Plus, SignOut, Storefront, DotsThree, X } from '@phosphor-icons/react';
+import { ChartBar, ForkKnife, Receipt, Basket, Tag, Gear, Plus, SignOut, Storefront, DotsThree, X, Question } from '@phosphor-icons/react';
 import { useAuth } from '../lib/auth.jsx';
 import { api } from '../lib/api.js';
 
@@ -14,7 +14,8 @@ const MENU = [
   { to: '/promo', label: 'Promo', ikon: Tag },
   { to: '/pengaturan', label: 'Pengaturan', ikon: Gear },
 ];
-const LAINNYA = MENU.slice(3);
+// Di HP, menu selain empat utama ada di lembar "Lainnya", termasuk bantuan.
+const LAINNYA = [...MENU.slice(3), { to: '/panduan', label: 'Bantuan', ikon: Question }];
 
 function ModeAi() {
   const [mode, setMode] = useState(null);
@@ -24,7 +25,7 @@ function ModeAi() {
   if (mode !== 'fixture') return null;
   return (
     <p className="bg-waspada-muda px-4 py-2 text-center text-xs text-waspada lg:mb-4 lg:rounded-2xl">
-      Mode contoh: hasil baca nota dan suara memakai data contoh, bukan AI sungguhan. Isi kunci API di server/.env lalu set AI_MODE=live.
+      Mode contoh: hasil baca nota, suara, dan cerita memakai data contoh, bukan hasil AI sungguhan.
     </p>
   );
 }
@@ -66,7 +67,7 @@ export default function Layout() {
         <div className="mt-auto rounded-2xl border border-kuning/40 bg-gradient-to-br from-kuning-muda to-white p-4">
           <p className="text-sm font-semibold">Butuh bantuan?</p>
           <p className="mt-1 text-xs text-redup">Cara menghitung modal, takaran, dan harga pasar.</p>
-          <Link to="/bantuan" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-4 text-xs font-semibold text-biru hover:border-biru/40">
+          <Link to="/panduan" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-4 text-xs font-semibold text-biru hover:border-biru/40">
             Pusat bantuan
           </Link>
         </div>

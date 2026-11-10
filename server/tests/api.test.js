@@ -222,3 +222,18 @@ describe('onboarding tanpa menu dan jenis usaha lain', () => {
     expect(d.data.produk).toHaveLength(0);
   });
 });
+
+describe('harga perkiraan bahan', () => {
+  it('bahan tanpa harga bisa diisi perkiraan sehingga modal menu lengkap', async () => {
+    const p = await api('POST', '/produk', { nama: 'Seblak', harga_jual: 12000, porsi_per_batch: 1, bahan: [{ nama: 'kerupuk mentah', qty: 30, satuan: 'gram' }] });
+    expect(p.status).toBe(201);
+    expect(p.data.lengkap).toBe(false);
+    const bahanId = p.data.kurang[0].bahan_id;
+    const r = await api('POST', `/bahan/${bahanId}/harga`, { qty: 1, satuan: 'kg', harga: 30000 });
+    expect(r.status).toBe(201);
+    const d = await api('GET', `/produk/${p.data.id}`);
+    expect(d.data.lengkap).toBe(true);
+    expect(d.data.rincian[0].biaya).toBeCloseTo(900, 3);
+    expect((await api('POST', `/bahan/${bahanId}/harga`, { qty: 0, satuan: 'kg', harga: 1 })).status).toBe(400);
+  });
+});

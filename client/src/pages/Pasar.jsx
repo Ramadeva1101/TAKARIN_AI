@@ -199,7 +199,7 @@ export default function Pasar() {
 
       {!data.harga.length ? (
         <Kartu>
-          <Kosong judul="Belum ada data harga pasar" teks="Data harga diimpor dari berkas CSV harian. Lihat README server untuk cara impor." />
+          <Kosong judul="Belum ada data harga pasar" teks="Harga pasar untuk daerah Anda belum tersedia. Coba tekan Perbarui sekarang, atau kembali beberapa saat lagi." />
         </Kartu>
       ) : (
         <>

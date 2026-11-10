@@ -54,7 +54,7 @@ function Dampak({ hasil }) {
               </div>
               <div className="flex flex-col items-end gap-1">
                 <Chip status={d.status_baru} />
-                {d.status_baru !== 'aman' && d.harga_aman && <span className="angka text-xs">Harga aman {rupiah(d.harga_aman)}</span>}
+                {d.status_baru !== 'aman' && d.harga_aman && <span className="angka text-xs">Harga minimal {rupiah(d.harga_aman)}</span>}
               </div>
             </li>
           ))}
@@ -70,7 +70,7 @@ function Dampak({ hasil }) {
   );
 }
 
-function Tersimpan({ n }) {
+function Tersimpan({ n, hapus, galat }) {
   return (
     <Kartu>
       <ul className="divide-y divide-garis">
@@ -87,6 +87,13 @@ function Tersimpan({ n }) {
           </li>
         ))}
       </ul>
+      <div className="tepi-nota mt-2 flex flex-wrap items-center justify-between gap-3 pt-4">
+        <p className="text-sm text-redup">Salah catat? Hapus belanja ini, lalu catat ulang. Modal menu dihitung ulang tanpa belanja ini.</p>
+        <Tombol varian="bahaya" className="border border-rugi/30" onClick={hapus}>
+          Hapus belanja
+        </Tombol>
+      </div>
+      {galat && <p role="alert" className="mt-2 text-sm text-rugi">{galat}</p>}
     </Kartu>
   );
 }
@@ -95,6 +102,7 @@ export default function BelanjaCek() {
   const { id } = useParams();
   const nav = useNavigate();
   const { data: n, loading, error, muat } = useApi(`/pembelian/${id}`);
+  const daftarBahan = useApi('/bahan');
   const [item, setItem] = useState([]);
   const [toko, setToko] = useState('');
   const [tgl, setTgl] = useState('');
@@ -113,19 +121,46 @@ export default function BelanjaCek() {
   if (error) return <Galat error={error} ulang={muat} />;
   if (hasil) return <Dampak hasil={hasil} />;
 
-  const sumber = { foto: 'foto nota', suara: 'rekaman suara', teks: 'tulisan', manual: 'isian manual' }[n.sumber];
+  const sumber = { foto: 'foto nota', suara: 'ucapan', teks: 'ketikan', manual: 'isian tabel' }[n.sumber];
+  const hapus = async () => {
+    if (!window.confirm(n.status === 'disimpan' ? 'Hapus belanja ini? Harga dari belanja ini tidak dipakai lagi untuk menghitung modal.' : 'Buang catatan belanja ini?')) return;
+    setGalat(null);
+    try {
+      await api(`/pembelian/${id}`, { method: 'DELETE' });
+      nav('/belanja', { replace: true });
+    } catch (err) {
+      setGalat(pesanGalat(err));
+    }
+  };
+
   if (n.status === 'disimpan') {
     return (
       <>
         <Judul judul={n.nama_toko || 'Belanja'} sub={`${tanggal(n.tanggal)} · dari ${sumber}`} kembali="/belanja" />
-        <Tersimpan n={n} />
+        <Tersimpan n={n} hapus={hapus} galat={galat} />
       </>
     );
   }
 
-  const set = (i, k, v) => setItem(item.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
+  const semuaBahan = daftarBahan.data || [];
+  // Baris yang sudah diubah pengguna dianggap sudah dicek: peringatan baca/harga hilang.
+  // Nama bahan dicocokkan ulang ke daftar bahan supaya harga tidak masuk ke bahan yang salah.
+  const set = (i, k, v) =>
+    setItem(
+      item.map((x, j) => {
+        if (j !== i) return x;
+        const baru = { ...x, [k]: v, masalah: (x.masalah || []).filter((m) => m.kode === 'bahan_baru' || m.kode === 'konversi') };
+        if (k === 'nama_bahan') {
+          const cocok = semuaBahan.find((b) => b.nama.toLowerCase() === v.trim().toLowerCase());
+          baru.bahan_id = cocok?.id ?? null;
+          baru.masalah = baru.masalah.filter((m) => m.kode !== 'bahan_baru');
+          if (!cocok && v.trim()) baru.masalah.push({ kode: 'bahan_baru', pesan: `"${v.trim()}" belum ada di daftar bahan. Pilih dari saran kalau sebenarnya sama, atau biarkan untuk disimpan sebagai bahan baru.` });
+        }
+        return baru;
+      }),
+    );
   const total = item.reduce((s, x) => s + (Number(x.harga) || 0), 0);
-  const perluCek = item.filter((x) => x.masalah?.length).length;
+  const perluCek = item.filter((x) => (x.masalah || []).some((m) => m.kode !== 'bahan_baru')).length;
 
   const simpan = async () => {
     setGalat(null);
@@ -158,12 +193,6 @@ export default function BelanjaCek() {
     }
   };
 
-  const hapus = async () => {
-    if (!window.confirm('Buang catatan belanja ini?')) return;
-    await api(`/pembelian/${id}`, { method: 'DELETE' }).catch(() => {});
-    nav('/belanja', { replace: true });
-  };
-
   return (
     <>
       <Judul judul="Periksa belanja" sub={`Hasil baca dari ${sumber}. Baris kuning perlu Anda lihat.`} kembali="/belanja" />
@@ -187,14 +216,20 @@ export default function BelanjaCek() {
           </p>
         )}
 
+        <datalist id="daftar-bahan">
+          {semuaBahan.map((b) => (
+            <option key={b.id} value={b.nama} />
+          ))}
+        </datalist>
         <ul className="tepi-nota mt-4 flex flex-col gap-3 pt-4">
           {item.map((x, i) => {
             const masalah = x.masalah || [];
+            const kuning = masalah.some((m) => m.kode !== 'bahan_baru');
             return (
-              <li key={x.id ?? i} className={`rounded-xl p-3 ${masalah.length ? 'bg-waspada-muda' : 'bg-dasar'}`}>
+              <li key={x.id ?? i} className={`rounded-xl p-3 ${kuning ? 'bg-waspada-muda' : 'bg-dasar'}`}>
                 {x.teks_asli && <p className="mb-2 font-mono text-xs text-redup">Tertulis: {x.teks_asli}</p>}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_5rem_5rem_8rem_2.75rem]">
-                  <input aria-label={`Nama bahan ${i + 1}`} className={`${inputCls} col-span-2 sm:col-span-1`} value={x.nama_bahan} onChange={(e) => set(i, 'nama_bahan', e.target.value)} />
+                  <input aria-label={`Nama bahan ${i + 1}`} list="daftar-bahan" className={`${inputCls} col-span-2 sm:col-span-1`} value={x.nama_bahan} onChange={(e) => set(i, 'nama_bahan', e.target.value)} />
                   <input aria-label={`Jumlah ${i + 1}`} type="number" min="0" step="any" className={`${inputCls} angka`} value={x.qty} onChange={(e) => set(i, 'qty', e.target.value)} />
                   <input aria-label={`Satuan ${i + 1}`} className={inputCls} value={x.satuan} onChange={(e) => set(i, 'satuan', e.target.value)} />
                   <input aria-label={`Harga total ${i + 1}`} type="number" min="0" placeholder="Rp" className={`${inputCls} angka`} value={x.harga} onChange={(e) => set(i, 'harga', e.target.value)} />
@@ -209,7 +244,7 @@ export default function BelanjaCek() {
                   </button>
                 </div>
                 {masalah.map((m) => (
-                  <p key={m.kode} className="mt-2 flex items-start gap-1.5 text-sm text-waspada">
+                  <p key={m.kode} className={`mt-2 flex items-start gap-1.5 text-sm ${m.kode === 'bahan_baru' ? 'text-redup' : 'text-waspada'}`}>
                     <WarningCircle size={18} className="mt-0.5 shrink-0" aria-hidden /> {m.pesan}
                   </p>
                 ))}

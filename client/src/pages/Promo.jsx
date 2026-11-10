@@ -1,13 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Trash } from '@phosphor-icons/react';
+import { Copy, Trash, WhatsappLogo } from '@phosphor-icons/react';
+import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
 import { Chip, Field, Galat, Judul, Kartu, Kosong, Muat, Tombol, inputCls } from '../components/ui.jsx';
 
-const NAMA_OPSI = { aman: 'Aman', seimbang: 'Seimbang', agresif: 'Agresif' };
+const NAMA_OPSI = { aman: 'Sesuai target', seimbang: 'Diskon sedang', agresif: 'Diskon besar' };
+
+const teksBagikan = (p) => `${p.nama}: ${rupiah(p.harga_paket)}${p.caption ? `\n${p.caption}` : ''}`;
 
 function Tersimpan({ daftar, muat }) {
-  if (!daftar.length) return <Kosong judul="Belum ada paket tersimpan" />;
+  const [info, setInfo] = useState(null);
+  if (!daftar.length) return <Kosong judul="Belum ada paket tersimpan" teks="Paket yang disimpan bisa disalin atau dibagikan ke WhatsApp dari sini." />;
+  const salin = async (p) => {
+    try {
+      await navigator.clipboard.writeText(teksBagikan(p));
+      setInfo({ id: p.id, teks: 'Teks promo disalin.' });
+    } catch {
+      setInfo({ id: p.id, teks: 'Tidak bisa menyalin otomatis. Tekan lama teks caption untuk menyalin.' });
+    }
+  };
+  const hapus = async (p) => {
+    if (!window.confirm(`Hapus paket ${p.nama}?`)) return;
+    try {
+      await api(`/promo/${p.id}`, { method: 'DELETE' });
+      muat();
+    } catch (e) {
+      setInfo({ id: p.id, teks: pesanGalat(e) });
+    }
+  };
   return (
     <ul className="divide-y divide-garis">
       {daftar.map((p) => (
@@ -21,14 +42,24 @@ function Tersimpan({ daftar, muat }) {
             {p.items && <p className="text-xs text-redup">{p.items.map((i) => `${i.qty}× ${i.nama ?? `menu ${i.menu_id}`}`).join(', ')}</p>}
             {p.caption && <p className="mt-1 text-sm">{p.caption}</p>}
             {p.galat && <p className="mt-1 text-xs text-rugi">{p.galat}</p>}
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => salin(p)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-biru hover:text-biru">
+                <Copy size={16} aria-hidden /> Salin
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(teksBagikan(p))}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-aman hover:text-aman"
+              >
+                <WhatsappLogo size={16} aria-hidden /> Bagikan ke WhatsApp
+              </a>
+            </div>
+            {info?.id === p.id && <p role="status" className="mt-1 text-xs text-redup">{info.teks}</p>}
           </div>
           <button
             aria-label={`Hapus paket ${p.nama}`}
-            onClick={async () => {
-              if (!window.confirm(`Hapus paket ${p.nama}?`)) return;
-              await api(`/promo/${p.id}`, { method: 'DELETE' }).catch(() => {});
-              muat();
-            }}
+            onClick={() => hapus(p)}
             className="flex size-11 shrink-0 items-center justify-center rounded-lg text-redup hover:bg-rugi-muda hover:text-rugi"
           >
             <Trash size={18} aria-hidden />
@@ -51,6 +82,7 @@ export default function Promo() {
   const [caption, setCaption] = useState('');
   const [galat, setGalat] = useState(null);
   const [proses, setProses] = useState(null);
+  const [tersimpan, setTersimpan] = useState(null);
 
   const items = Object.entries(pilih)
     .filter(([, q]) => q > 0)
@@ -96,8 +128,10 @@ export default function Promo() {
   const simpan = async () => {
     setProses('simpan');
     setGalat(null);
+    setTersimpan(null);
     try {
       await api('/promo', { method: 'POST', body: { items, nama, caption: caption || null, harga_paket: Number(harga), biaya_kemasan: Number(kemasan) || 0 } });
+      setTersimpan(`Paket ${nama.trim()} tersimpan. Salin atau bagikan dari daftar Paket tersimpan.`);
       setPilih({});
       setNama('');
       setCaption('');
@@ -125,6 +159,18 @@ export default function Promo() {
               <ul className="divide-y divide-garis">
                 {produk.data.map((p) => {
                   const q = pilih[p.id] || 0;
+                  if (!p.lengkap)
+                    return (
+                      <li key={p.id} className="flex items-center justify-between gap-3 py-2 opacity-70">
+                        <div className="min-w-0">
+                          <p className="font-medium">{p.nama}</p>
+                          <p className="text-xs text-redup">Modal belum bisa dihitung, harga bahan belum lengkap.</p>
+                        </div>
+                        <Link to={`/produk/${p.id}`} className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-biru">
+                          Lengkapi
+                        </Link>
+                      </li>
+                    );
                   return (
                     <li key={p.id} className="flex items-center justify-between gap-3 py-2">
                       <div className="min-w-0">
@@ -173,9 +219,9 @@ export default function Promo() {
                     <p className="text-sm font-semibold">{NAMA_OPSI[o.jenis]}</p>
                     <p className="angka text-xl font-bold">{rupiah(o.harga)}</p>
                     <p className="angka text-xs text-redup">
-                      Untung {persen(o.margin)} ({rupiah(o.laba)}), hemat {rupiah(o.hemat_pelanggan)}
+                      Untung {persen(o.margin)} ({rupiah(o.laba)}), pembeli hemat {rupiah(o.hemat_pelanggan)}
                     </p>
-                    <p className="angka mt-1 text-xs">Perlu terjual {persen(o.kenaikan_volume)} lebih banyak supaya laba sama</p>
+                    <p className="angka mt-1 text-xs">Perlu terjual {persen(o.kenaikan_volume)} lebih banyak supaya total untung sama</p>
                     <div className="mt-2">
                       <Chip status={o.status} />
                     </div>
@@ -213,6 +259,11 @@ export default function Promo() {
               </Tombol>
               {(marginManual ?? 0) < 0 && <p className="mt-2 text-sm text-rugi">Harga di bawah modal. Paket rugi tidak bisa disimpan.</p>}
             </Kartu>
+          )}
+          {tersimpan && (
+            <p role="status" className="rounded-xl bg-aman-muda px-3 py-2 text-sm text-aman">
+              {tersimpan}
+            </p>
           )}
           {galat && (
             <p role="alert" className="rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">

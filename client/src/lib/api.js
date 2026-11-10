@@ -41,7 +41,14 @@ export async function api(path, { method = 'GET', body, form } = {}) {
 
 export const pesanGalat = (err) => {
   const d = err?.data?.detail;
-  if (Array.isArray(d) && d.length) return `${err.message}: ${d.map((x) => `${x.field} ${x.pesan}`).join('; ')}`;
+  if (Array.isArray(d) && d.length) {
+    // "item.0.harga" menjadi "baris 1"; nama kolom teknis tidak ditampilkan.
+    const posisi = (f) => {
+      const m = /\.(\d+)\./.exec(`.${f || ''}.`);
+      return m ? `Baris ${Number(m[1]) + 1}: ` : '';
+    };
+    return [...new Set(d.map((x) => `${posisi(x.field)}${x.pesan}`))].join('. ');
+  }
   return err?.message || 'Terjadi kesalahan';
 };
 

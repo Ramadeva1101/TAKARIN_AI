@@ -18,7 +18,7 @@ function Rincian({ p }) {
             <th className="py-2 font-medium">Bahan</th>
             <th className="py-2 font-medium">Takaran</th>
             <th className="py-2 text-right font-medium">Biaya/porsi</th>
-            <th className="w-24 py-2 pl-3 font-medium">Porsi modal</th>
+            <th className="w-24 py-2 pl-3 font-medium">Bagian dari modal</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-garis">
@@ -57,6 +57,14 @@ function Rincian({ p }) {
 
 function Simulasi({ p }) {
   const [harga, setHarga] = useState(p.harga_jual);
+  // Rentang geser: dari sekitar modal sampai 1,6x harga jual (minimal 1,5x modal). Langkah mengikuti besar harga.
+  const langkahHarga = p.harga_jual < 5000 ? 100 : p.harga_jual < 20000 ? 250 : 500;
+  const bulat = (n) => Math.round(n / langkahHarga) * langkahHarga;
+  const batas = {
+    min: Math.max(langkahHarga, bulat(Math.min(p.hpp || p.harga_jual, p.harga_jual) * 0.9)),
+    max: bulat(Math.max(p.harga_jual * 1.6, (p.hpp || 0) * 1.5)),
+    langkah: langkahHarga,
+  };
   const [faktor, setFaktor] = useState({});
   const [hasil, setHasil] = useState(null);
   const [galat, setGalat] = useState(null);
@@ -84,9 +92,9 @@ function Simulasi({ p }) {
       <input
         id="sim-harga"
         type="range"
-        min={Math.max(500, Math.round((p.hpp || p.harga_jual) / 500) * 500)}
-        max={Math.round((p.harga_jual * 1.6) / 500) * 500}
-        step="500"
+        min={batas.min}
+        max={batas.max}
+        step={batas.langkah}
         value={harga}
         onChange={(e) => setHarga(Number(e.target.value))}
         className="mt-2 h-11 w-full accent-biru"
@@ -121,7 +129,7 @@ function Simulasi({ p }) {
           <p className="angka text-lg font-bold">{persen(hasil?.margin ?? p.margin)}</p>
         </div>
         <div>
-          <p className="text-redup">Rp per porsi</p>
+          <p className="text-redup">Untung per porsi</p>
           <p className="angka text-lg font-bold">{rupiah(harga - (hasil?.hpp ?? p.hpp))}</p>
         </div>
       </div>
@@ -131,6 +139,76 @@ function Simulasi({ p }) {
         </div>
       )}
       {galat && <p className="mt-2 text-sm text-rugi">{galat}</p>}
+    </Kartu>
+  );
+}
+
+// Bahan tanpa harga: isi perkiraan harga belinya di sini supaya modal bisa dihitung.
+const SATUAN_BELI = { g: ['kg', 'ons', 'gram'], ml: ['liter', 'ml'], butir: ['butir'], pcs: ['pcs'] };
+
+function BarisHarga({ k, satuanDasar, sesudah }) {
+  const pilihan = SATUAN_BELI[satuanDasar] || ['pcs'];
+  const [f, setF] = useState({ qty: 1, satuan: pilihan[0], harga: '' });
+  const [proses, setProses] = useState(false);
+  const [galat, setGalat] = useState(null);
+  const simpan = async () => {
+    setProses(true);
+    setGalat(null);
+    try {
+      await api(`/bahan/${k.bahan_id}/harga`, { method: 'POST', body: { qty: Number(f.qty), satuan: f.satuan, harga: Number(f.harga) } });
+      await sesudah();
+    } catch (err) {
+      setGalat(pesanGalat(err));
+      setProses(false);
+    }
+  };
+  return (
+    <li className="rounded-xl bg-kartu p-3">
+      <p className="font-semibold capitalize">{k.nama}</p>
+      {k.alasan === 'konversi' ? (
+        <p className="mt-1 text-sm text-redup">
+          {k.pesan}{' '}
+          <Link to={`/bahan/${k.bahan_id}`} className="font-semibold text-biru">
+            Atur takarannya
+          </Link>
+        </p>
+      ) : (
+        <>
+          <div className="mt-2 grid grid-cols-[4.5rem_6rem_1fr] gap-2 sm:grid-cols-[4.5rem_6rem_1fr_auto]">
+            <input aria-label={`Jumlah ${k.nama}`} type="number" min="0" step="any" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.qty} onChange={(e) => setF({ ...f, qty: e.target.value })} />
+            <select aria-label={`Satuan ${k.nama}`} className="min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.satuan} onChange={(e) => setF({ ...f, satuan: e.target.value })}>
+              {pilihan.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+            <input aria-label={`Harga ${k.nama} (Rp)`} type="number" min="0" inputMode="numeric" placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => setF({ ...f, harga: e.target.value })} />
+            <Tombol varian="polos" className="col-span-3 sm:col-span-1" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={simpan}>
+              {proses ? 'Menyimpan' : 'Simpan'}
+            </Tombol>
+          </div>
+          {galat && <p className="mt-1 text-sm text-rugi">{galat}</p>}
+        </>
+      )}
+    </li>
+  );
+}
+
+function LengkapiHarga({ p, sesudah }) {
+  return (
+    <Kartu className="bg-kuning-muda">
+      <h2 className="font-semibold">Lengkapi harga bahan</h2>
+      <p className="mt-1 text-sm">
+        Modal {p.nama} belum bisa dihitung karena {p.kurang.length} bahan belum punya harga dan tidak ada di data pasar. Isi perkiraan harga belinya, atau{' '}
+        <Link to="/belanja/baru" className="font-semibold text-biru">
+          catat belanja
+        </Link>{' '}
+        untuk harga sebenarnya.
+      </p>
+      <ul className="mt-3 flex flex-col gap-2">
+        {p.kurang.map((k) => (
+          <BarisHarga key={`${k.bahan_id}-${k.alasan}`} k={k} satuanDasar={p.rincian.find((r) => r.bahan_id === k.bahan_id)?.satuan_dasar} sesudah={sesudah} />
+        ))}
+      </ul>
     </Kartu>
   );
 }
@@ -256,7 +334,7 @@ export default function ProdukDetail() {
               <p className="mt-1 text-xs text-redup">Target {persen(p.target_margin)}</p>
             </div>
             <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
-              <p className="text-sm text-redup">Harga aman</p>
+              <p className="text-sm text-redup">Harga minimal</p>
               <p className="angka mt-1 text-2xl font-bold">{rupiah(p.harga_aman)}</p>
               <div className="mt-1">
                 <Chip status={p.status} />
@@ -271,7 +349,17 @@ export default function ProdukDetail() {
               <Rincian p={p} />
             </Kartu>
             <div className="flex flex-col gap-4 lg:col-span-2">
-              <Rekomendasi key={versi} id={id} onTerapkan={(harga) => simpan({ harga_jual: harga })} />
+              {p.lengkap ? (
+                <Rekomendasi key={versi} id={id} onTerapkan={(harga) => simpan({ harga_jual: harga })} />
+              ) : (
+                <LengkapiHarga
+                  p={p}
+                  sesudah={async () => {
+                    await muat();
+                    setVersi((v) => v + 1);
+                  }}
+                />
+              )}
             </div>
           </div>
           <div className="mt-4">

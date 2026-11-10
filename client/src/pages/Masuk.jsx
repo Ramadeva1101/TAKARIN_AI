@@ -81,7 +81,7 @@ export default function Masuk({ mode }) {
         </Link>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8">
           <h1 className="text-[28px] font-bold">{daftar ? 'Buat akun usaha' : 'Selamat datang kembali'}</h1>
-          <p className="mt-1 text-sm text-redup">{daftar ? 'Satu akun untuk satu usaha. Setelah daftar, ada enam pertanyaan singkat tentang usaha Anda.' : 'Masuk untuk melihat modal dan untung menu hari ini.'}</p>
+          <p className="mt-1 text-sm text-redup">{daftar ? 'Satu akun untuk satu usaha. Setelah daftar, ada 4 langkah singkat tentang usaha Anda.' : 'Masuk untuk melihat modal dan untung menu hari ini.'}</p>
 
           <nav aria-label="Pilih masuk atau daftar" className="mt-6 flex rounded-full bg-dasar p-1 ring-1 ring-garis">
             {tab('/masuk', 'Masuk', !daftar)}

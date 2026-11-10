@@ -86,7 +86,7 @@ router.get('/pasar', (req, res) => {
 });
 // Tarik harga terbaru sekarang dan tunggu hasilnya.
 router.post('/pasar/perbarui', async (req, res) => {
-  if (!pihps.hargaLiveAktif()) throw new AppError(409, 'Pengambilan harga otomatis belum diaktifkan di server (HARGA_LIVE=on)');
+  if (!pihps.hargaLiveAktif()) throw new AppError(409, 'Pengambilan harga pasar otomatis sedang tidak aktif. Harga yang tampil adalah data tersimpan terakhir.');
   const hasil = await pihps.perbarui(req.usaha, { paksa: true });
   res.json({ hasil, sinkron: pihps.statusSinkron(req.usaha), harga: pasar.hargaWilayah(req.usaha) });
 });
@@ -128,6 +128,7 @@ router.delete('/pembelian/:id', (req, res) => {
 router.get('/bahan', (req, res) => res.json(dashboard.bahanDenganKontribusi(req.usaha)));
 router.get('/bahan/:id', (req, res) => res.json(bahan.detailBahan(req.usaha, id(req))));
 router.put('/bahan/:id', validasi(S.ubahBahan), (req, res) => res.json(bahan.ubahBahan(req.usaha, id(req), req.body)));
+router.post('/bahan/:id/harga', validasi(S.hargaManual), (req, res) => res.status(201).json(bahan.isiHargaManual(req.usaha, id(req), req.body)));
 router.post('/bahan/:id/konversi', validasi(S.konversi), (req, res) => {
   bahan.detailBahan(req.usaha, id(req));
   simpanKonversi(id(req), req.body.satuan, req.body.faktor);
