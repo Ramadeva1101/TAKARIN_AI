@@ -1,70 +1,165 @@
 import { useEffect, useState } from 'react';
-import { Copy, Trash, WhatsappLogo } from '@phosphor-icons/react';
+import { Check, Copy, Minus, Plus, Sparkle, Trash, WhatsappLogo } from '@phosphor-icons/react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
-import { Chip, Field, Galat, Judul, Kartu, Kosong, Muat, Tombol, inputCls } from '../components/ui.jsx';
+import { Field, Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
+import { Segmen } from '../components/Grafik.jsx';
 
 const NAMA_OPSI = { aman: 'Sesuai target', seimbang: 'Diskon sedang', agresif: 'Diskon besar' };
 
 const teksBagikan = (p) => `${p.nama}: ${rupiah(p.harga_paket)}${p.caption ? `\n${p.caption}` : ''}`;
+const teksIsi = (items) => items.map((i) => `${i.qty}× ${i.nama ?? `menu ${i.menu_id}`}`).join(', ');
 
-function Tersimpan({ daftar, muat }) {
+// Judul langkah: nomor bulat biru, lalu judul dan keterangan singkat.
+function Langkah({ no, judul, sub, children }) {
+  return (
+    <Kartu>
+      <div className="mb-4 flex items-start gap-3">
+        <span className="angka flex size-8 shrink-0 items-center justify-center rounded-full bg-biru text-sm font-bold text-white">{no}</span>
+        <div className="min-w-0">
+          <h2 className="font-semibold">{judul}</h2>
+          {sub && <p className="text-sm text-redup">{sub}</p>}
+        </div>
+      </div>
+      {children}
+    </Kartu>
+  );
+}
+
+function Stepper({ nama, q, ubah }) {
+  const tombol = 'flex size-11 items-center justify-center rounded-full border border-garis bg-kartu text-tinta hover:border-biru hover:text-biru disabled:opacity-30 sm:size-9';
+  return (
+    <div className="flex items-center gap-1">
+      <button type="button" aria-label={`Kurangi ${nama}`} disabled={!q} onClick={() => ubah(q - 1)} className={tombol}>
+        <Minus size={14} weight="bold" aria-hidden />
+      </button>
+      <span className="angka w-8 text-center font-semibold" aria-live="polite">
+        {q}
+      </span>
+      <button type="button" aria-label={`Tambah ${nama}`} onClick={() => ubah(q + 1)} className={tombol}>
+        <Plus size={14} weight="bold" aria-hidden />
+      </button>
+    </div>
+  );
+}
+
+// Pratinjau: wujud paket seperti yang dilihat pembeli, lalu rincian untung untuk pemilik usaha.
+function Pratinjau({ isi, hasil, nama, caption, hargaN, margin }) {
+  if (!hasil)
+    return (
+      <Kartu>
+        <p className="font-semibold">Pratinjau paket</p>
+        <p className="mt-1 text-sm text-redup">Tambahkan menu di langkah 1. Harga, modal, dan untung paket muncul di sini.</p>
+      </Kartu>
+    );
+  const modal = hasil.hpp_paket;
+  const untung = hargaN > 0 ? hargaN - modal : null;
+  const hemat = hargaN > 0 ? hasil.harga_normal - hargaN : null;
+  const baris = [
+    ['Harga normal', rupiah(hasil.harga_normal)],
+    ['Modal paket', rupiah(modal)],
+    ['Untung per paket', untung == null ? '–' : `${rupiah(untung)} (${persen(margin)})`],
+  ];
+  return (
+    <Kartu>
+      <p className="text-sm font-medium text-redup">Pratinjau paket</p>
+      <div className="mt-3 rounded-2xl bg-biru p-5 text-white">
+        <p className="text-lg font-bold">{nama.trim() || 'Nama paket'}</p>
+        <p className="mt-1 text-sm text-white/80">{teksIsi(isi)}</p>
+        <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="angka text-3xl font-extrabold">{hargaN > 0 ? rupiah(hargaN) : '–'}</span>
+          {hemat > 0 && <span className="angka text-sm text-white/70 line-through">{rupiah(hasil.harga_normal)}</span>}
+        </div>
+        {hemat > 0 && <span className="angka mt-3 inline-block rounded-full bg-kuning px-3 py-1 text-xs font-bold text-tinta">Hemat {rupiah(hemat)}</span>}
+        {caption.trim() && <p className="mt-4 border-t border-white/20 pt-3 text-sm whitespace-pre-line text-white/90">{caption}</p>}
+      </div>
+      <dl className="mt-4 divide-y divide-garis text-sm">
+        {baris.map(([k, v]) => (
+          <div key={k} className="flex items-center justify-between gap-3 py-2">
+            <dt className="text-redup">{k}</dt>
+            <dd className="angka font-semibold">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </Kartu>
+  );
+}
+
+function KartuTersimpan({ p, baru, muat }) {
   const [info, setInfo] = useState(null);
-  if (!daftar.length) return <Kosong judul="Belum ada paket tersimpan" teks="Paket yang disimpan bisa disalin atau dibagikan ke WhatsApp dari sini." />;
-  const salin = async (p) => {
+  const salin = async () => {
     try {
       await navigator.clipboard.writeText(teksBagikan(p));
-      setInfo({ id: p.id, teks: 'Teks promo disalin.' });
+      setInfo('Teks promo disalin.');
     } catch {
-      setInfo({ id: p.id, teks: 'Tidak bisa menyalin otomatis. Tekan lama teks caption untuk menyalin.' });
+      setInfo('Tidak bisa menyalin otomatis. Tekan lama teks caption untuk menyalin.');
     }
   };
-  const hapus = async (p) => {
+  const hapus = async () => {
     if (!window.confirm(`Hapus paket ${p.nama}?`)) return;
     try {
       await api(`/promo/${p.id}`, { method: 'DELETE' });
       muat();
     } catch (e) {
-      setInfo({ id: p.id, teks: pesanGalat(e) });
+      setInfo(pesanGalat(e));
     }
   };
+  const margin = p.hpp_paket != null ? (p.harga_paket - p.hpp_paket) / p.harga_paket : null;
+  const hemat = p.harga_normal != null ? p.harga_normal - p.harga_paket : null;
+  const tombol = 'inline-flex min-h-11 items-center gap-1.5 rounded-full border border-garis bg-kartu px-3.5 text-sm font-semibold hover:border-biru hover:text-biru sm:min-h-10';
   return (
-    <ul className="divide-y divide-garis">
-      {daftar.map((p) => (
-        <li key={p.id} className="flex items-start justify-between gap-3 py-3">
-          <div className="min-w-0">
-            <p className="font-semibold">{p.nama}</p>
-            <p className="angka text-sm text-redup">
-              {rupiah(p.harga_paket)}
-              {p.hpp_paket != null && `, modal ${rupiah(p.hpp_paket)}, untung ${persen((p.harga_paket - p.hpp_paket) / p.harga_paket)}`}
-            </p>
-            {p.items && <p className="text-xs text-redup">{p.items.map((i) => `${i.qty}× ${i.nama ?? `menu ${i.menu_id}`}`).join(', ')}</p>}
-            {p.caption && <p className="mt-1 text-sm">{p.caption}</p>}
-            {p.galat && <p className="mt-1 text-xs text-rugi">{p.galat}</p>}
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => salin(p)} className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-biru hover:text-biru">
-                <Copy size={16} aria-hidden /> Salin
-              </button>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(teksBagikan(p))}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-11 sm:min-h-10 items-center gap-1.5 rounded-full border border-garis px-3 text-sm font-semibold hover:border-aman hover:text-aman"
-              >
-                <WhatsappLogo size={16} aria-hidden /> Bagikan ke WhatsApp
-              </a>
-            </div>
-            {info?.id === p.id && <p role="status" className="mt-1 text-xs text-redup">{info.teks}</p>}
-          </div>
-          <button
-            aria-label={`Hapus paket ${p.nama}`}
-            onClick={() => hapus(p)}
-            className="flex size-11 shrink-0 items-center justify-center rounded-lg text-redup hover:bg-rugi-muda hover:text-rugi"
-          >
-            <Trash size={18} aria-hidden />
-          </button>
-        </li>
+    <li className={`flex min-w-0 flex-col rounded-[20px] border bg-kartu p-4 ${baru ? 'border-biru ring-1 ring-biru' : 'border-garis'}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          {baru && <p className="mb-1 text-xs font-semibold text-biru">Baru disimpan</p>}
+          <p className="truncate font-semibold">{p.nama}</p>
+          {p.items && <p className="truncate text-xs text-redup">{teksIsi(p.items)}</p>}
+        </div>
+        <button type="button" aria-label={`Hapus paket ${p.nama}`} onClick={hapus} className="flex size-11 shrink-0 items-center justify-center rounded-full text-redup hover:bg-dasar hover:text-rugi sm:size-9">
+          <Trash size={18} aria-hidden />
+        </button>
+      </div>
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
+        <span className="angka text-2xl font-extrabold">{rupiah(p.harga_paket)}</span>
+        {hemat > 0 && <span className="angka text-sm text-redup line-through">{rupiah(p.harga_normal)}</span>}
+      </div>
+      <p className="angka mt-1 text-xs text-redup">
+        {margin != null ? `Untung ${persen(margin)} per paket` : 'Untung belum bisa dihitung'}
+        {hemat > 0 && ` · pembeli hemat ${rupiah(hemat)}`}
+      </p>
+      {p.galat && <p className="mt-1 text-xs text-rugi">{p.galat}</p>}
+      {p.caption && <p className="mt-3 rounded-xl bg-dasar px-3 py-2 text-sm whitespace-pre-line">{p.caption}</p>}
+      <div className="mt-auto flex flex-wrap gap-2 pt-3">
+        <button type="button" onClick={salin} className={tombol}>
+          <Copy size={16} aria-hidden /> Salin teks
+        </button>
+        <a href={`https://wa.me/?text=${encodeURIComponent(teksBagikan(p))}`} target="_blank" rel="noreferrer" className={tombol}>
+          <WhatsappLogo size={16} aria-hidden /> WhatsApp
+        </a>
+      </div>
+      {info && (
+        <p role="status" className="mt-2 text-xs text-redup">
+          {info}
+        </p>
+      )}
+    </li>
+  );
+}
+
+function DaftarTersimpan({ promo, baruId, keBuat }) {
+  if (promo.loading && !promo.data) return <Muat />;
+  if (promo.error) return <Galat error={promo.error} ulang={promo.muat} />;
+  if (!promo.data.length)
+    return (
+      <Kartu>
+        <Kosong judul="Belum ada paket tersimpan" teks="Paket yang disimpan bisa disalin atau dibagikan ke WhatsApp dari sini." aksi={<Tombol onClick={keBuat}>Buat paket</Tombol>} />
+      </Kartu>
+    );
+  return (
+    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {promo.data.map((p) => (
+        <KartuTersimpan key={p.id} p={p} baru={p.id === baruId} muat={promo.muat} />
       ))}
     </ul>
   );
@@ -73,6 +168,7 @@ function Tersimpan({ daftar, muat }) {
 export default function Promo() {
   const produk = useApi('/produk');
   const promo = useApi('/promo');
+  const [tab, setTab] = useState('buat');
   const [pilih, setPilih] = useState({});
   const [kemasan, setKemasan] = useState('');
   const [hasil, setHasil] = useState(null);
@@ -82,7 +178,7 @@ export default function Promo() {
   const [caption, setCaption] = useState('');
   const [galat, setGalat] = useState(null);
   const [proses, setProses] = useState(null);
-  const [tersimpan, setTersimpan] = useState(null);
+  const [baruId, setBaruId] = useState(null);
 
   const items = Object.entries(pilih)
     .filter(([, q]) => q > 0)
@@ -128,14 +224,15 @@ export default function Promo() {
   const simpan = async () => {
     setProses('simpan');
     setGalat(null);
-    setTersimpan(null);
     try {
-      await api('/promo', { method: 'POST', body: { items, nama, caption: caption || null, harga_paket: Number(harga), biaya_kemasan: Number(kemasan) || 0 } });
-      setTersimpan(`Paket ${nama.trim()} tersimpan. Salin atau bagikan dari daftar Paket tersimpan.`);
+      const r = await api('/promo', { method: 'POST', body: { items, nama, caption: caption || null, harga_paket: Number(harga), biaya_kemasan: Number(kemasan) || 0 } });
+      setBaruId(r?.id ?? null);
       setPilih({});
+      setKemasan('');
       setNama('');
       setCaption('');
-      promo.muat();
+      await promo.muat();
+      setTab('tersimpan');
     } catch (e) {
       setGalat(pesanGalat(e));
     } finally {
@@ -144,138 +241,155 @@ export default function Promo() {
   };
 
   const hargaN = Number(harga);
-  const marginManual = hasil && hargaN > 0 ? (hargaN - hasil.hpp_paket) / hargaN : null;
+  const margin = hasil && hargaN > 0 ? (hargaN - hasil.hpp_paket) / hargaN : null;
+  const rugi = margin != null && margin < 0;
+  const siap = nama.trim() && hargaN > 0 && !rugi;
+  const lengkap = produk.data.filter((p) => p.lengkap);
+  const belum = produk.data.filter((p) => !p.lengkap);
+  const isi = items.map((i) => ({ ...i, nama: produk.data.find((p) => p.id === i.menu_id)?.nama }));
+  const jumlahTersimpan = promo.data?.length ?? 0;
 
   return (
     <>
       <Judul judul="Promo paket" sub="Gabungkan menu jadi paket, lalu pilih harga yang tetap untung" />
-      <div className="grid gap-4 lg:grid-cols-5">
-        <div className="flex flex-col gap-4 lg:col-span-3">
-          <Kartu>
-            <h2 className="mb-3 font-semibold">1. Pilih isi paket</h2>
-            {!produk.data.length ? (
-              <Kosong judul="Belum ada menu" aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
-            ) : (
+      <div className="mb-4">
+        <Segmen
+          label="Bagian promo"
+          nilai={tab}
+          ubah={setTab}
+          pilihan={[
+            ['buat', 'Buat paket'],
+            ['tersimpan', `Paket tersimpan${jumlahTersimpan ? ` (${jumlahTersimpan})` : ''}`],
+          ]}
+        />
+      </div>
+
+      {tab === 'tersimpan' ? (
+        <DaftarTersimpan promo={promo} baruId={baruId} keBuat={() => setTab('buat')} />
+      ) : !produk.data.length ? (
+        <Kartu>
+          <Kosong judul="Belum ada menu" teks="Paket disusun dari menu yang sudah punya resep." aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
+        </Kartu>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
+          <div className="flex min-w-0 flex-col gap-4">
+            <Langkah no="1" judul="Pilih isi paket" sub="Tentukan jumlah tiap menu dalam satu paket.">
               <ul className="divide-y divide-garis">
-                {produk.data.map((p) => {
+                {lengkap.map((p) => {
                   const q = pilih[p.id] || 0;
-                  if (!p.lengkap)
-                    return (
-                      <li key={p.id} className="flex items-center justify-between gap-3 py-2 opacity-70">
-                        <div className="min-w-0">
-                          <p className="font-medium">{p.nama}</p>
-                          <p className="text-xs text-redup">Modal belum bisa dihitung, harga bahan belum lengkap.</p>
-                        </div>
-                        <Link to={`/produk/${p.id}`} className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-biru">
-                          Lengkapi
-                        </Link>
-                      </li>
-                    );
                   return (
-                    <li key={p.id} className="flex items-center justify-between gap-3 py-2">
+                    <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
-                        <p className="font-medium">{p.nama}</p>
+                        <p className={`font-medium ${q ? 'text-biru' : ''}`}>{p.nama}</p>
                         <p className="angka text-xs text-redup">
-                          Jual {rupiah(p.harga_jual)}, modal {rupiah(p.hpp)}
+                          Jual {rupiah(p.harga_jual)} · modal {rupiah(p.hpp)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button aria-label={`Kurangi ${p.nama}`} disabled={!q} onClick={() => setPilih({ ...pilih, [p.id]: q - 1 })} className="size-11 rounded-lg border border-garis text-lg disabled:opacity-30">
-                          −
-                        </button>
-                        <span className="angka w-8 text-center font-semibold" aria-live="polite">
-                          {q}
-                        </span>
-                        <button aria-label={`Tambah ${p.nama}`} onClick={() => setPilih({ ...pilih, [p.id]: q + 1 })} className="size-11 rounded-lg border border-garis text-lg">
-                          +
-                        </button>
-                      </div>
+                      <Stepper nama={p.nama} q={q} ubah={(v) => setPilih({ ...pilih, [p.id]: v })} />
                     </li>
                   );
                 })}
               </ul>
+              {belum.length > 0 && (
+                <details className="mt-2 rounded-xl bg-dasar px-3 text-sm">
+                  <summary className="flex min-h-11 items-center text-redup">{belum.length} menu belum bisa dipakai karena harga bahannya belum lengkap</summary>
+                  <ul className="pb-2">
+                    {belum.map((p) => (
+                      <li key={p.id} className="flex items-center justify-between gap-3 py-1">
+                        <span className="min-w-0 truncate">{p.nama}</span>
+                        <Link to={`/produk/${p.id}`} className="inline-flex min-h-11 shrink-0 items-center font-semibold text-biru">
+                          Lengkapi
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              <Field className="mt-4 max-w-xs" label="Biaya kemasan paket (Rp)" type="number" min="0" inputMode="numeric" value={kemasan} onChange={(e) => setKemasan(e.target.value)} hint="Kotak atau kantong khusus paket, kalau ada." />
+            </Langkah>
+
+            {hasil && (
+              <Langkah no="2" judul="Pilih harga paket" sub={`Modal paket ${rupiah(hasil.hpp_paket)}. Dibeli terpisah ${rupiah(hasil.harga_normal)}.`}>
+                <div role="radiogroup" aria-label="Pilihan harga" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {hasil.opsi.map((o) => {
+                    const aktif = opsi === o.jenis;
+                    return (
+                      <button
+                        key={o.jenis}
+                        type="button"
+                        role="radio"
+                        aria-checked={aktif}
+                        onClick={() => {
+                          setOpsi(o.jenis);
+                          setHarga(o.harga);
+                        }}
+                        className={`relative rounded-2xl border p-4 text-left transition-colors ${aktif ? 'border-biru bg-biru-muda ring-1 ring-biru' : 'border-garis bg-kartu hover:border-biru/50'}`}
+                      >
+                        {aktif && (
+                          <span className="absolute top-3 right-3 flex size-6 items-center justify-center rounded-full bg-biru text-white" aria-hidden>
+                            <Check size={14} weight="bold" />
+                          </span>
+                        )}
+                        <p className="text-sm font-semibold">{NAMA_OPSI[o.jenis]}</p>
+                        <p className="angka mt-2 text-2xl font-extrabold">{rupiah(o.harga)}</p>
+                        <p className="angka mt-2 text-xs text-redup">Untung {persen(o.margin)} · hemat {rupiah(o.hemat_pelanggan)}</p>
+                        <p className={`angka mt-1 text-xs font-medium ${o.status === 'aman' ? 'text-biru' : o.status === 'rugi' ? 'text-rugi' : 'text-kuning-tua'}`}>
+                          {o.kenaikan_volume == null ? 'Rugi, tidak disarankan' : o.kenaikan_volume > 0 ? `Perlu terjual ${persen(o.kenaikan_volume)} lebih banyak` : 'Untung total tidak turun'}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+                <Field
+                  className="mt-4 max-w-xs"
+                  label="Atau tentukan sendiri (Rp)"
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={harga}
+                  onChange={(e) => {
+                    setHarga(e.target.value);
+                    setOpsi(null);
+                  }}
+                  hint={margin != null ? `Untung ${persen(margin)}${rugi ? ', di bawah modal' : ''}` : undefined}
+                />
+              </Langkah>
             )}
-            <Field className="mt-3 max-w-xs" label="Biaya kemasan paket (Rp)" type="number" min="0" value={kemasan} onChange={(e) => setKemasan(e.target.value)} />
-          </Kartu>
 
-          {hasil && (
-            <Kartu>
-              <h2 className="font-semibold">2. Pilih harga paket</h2>
-              <p className="angka mb-3 text-sm text-redup">
-                Modal paket {rupiah(hasil.hpp_paket)}. Kalau dibeli terpisah {rupiah(hasil.harga_normal)}, untung {persen(hasil.margin_normal)}.
+            {hasil && (
+              <Langkah no="3" judul="Nama dan caption" sub="Isi sendiri, atau minta usulan dari AI lalu ubah seperlunya.">
+                <Tombol varian="lembut" onClick={saran} disabled={proses === 'saran' || !(hargaN > 0)}>
+                  <Sparkle size={16} aria-hidden /> {proses === 'saran' ? 'Menyusun usulan' : 'Usulkan nama dan caption'}
+                </Tombol>
+                <Field className="mt-4" label="Nama paket" value={nama} onChange={(e) => setNama(e.target.value)} />
+                <Field className="mt-3" label="Caption untuk WhatsApp atau Instagram" as="textarea" rows={3} value={caption} onChange={(e) => setCaption(e.target.value)} />
+              </Langkah>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
+            <Pratinjau isi={isi} hasil={hasil} nama={nama} caption={caption} hargaN={hargaN} margin={margin} />
+            {hasil && (
+              <>
+                <Tombol className="w-full !min-h-12" onClick={simpan} disabled={proses === 'simpan' || !siap}>
+                  {proses === 'simpan' ? 'Menyimpan' : 'Simpan paket'}
+                </Tombol>
+                {!nama.trim() && !rugi && <p className="text-center text-xs text-redup">Isi nama paket di langkah 3 untuk menyimpan.</p>}
+                {rugi && (
+                  <p role="alert" className="rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
+                    Harga di bawah modal. Paket rugi tidak bisa disimpan.
+                  </p>
+                )}
+              </>
+            )}
+            {galat && (
+              <p role="alert" className="rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
+                {galat}
               </p>
-              <div role="radiogroup" aria-label="Pilihan harga" className="grid gap-2 sm:grid-cols-3">
-                {hasil.opsi.map((o) => (
-                  <button
-                    key={o.jenis}
-                    role="radio"
-                    aria-checked={opsi === o.jenis}
-                    onClick={() => {
-                      setOpsi(o.jenis);
-                      setHarga(o.harga);
-                    }}
-                    className={`rounded-xl border p-3 text-left ${opsi === o.jenis ? 'border-biru bg-biru-muda' : 'border-garis bg-kartu hover:border-biru'}`}
-                  >
-                    <p className="text-sm font-semibold">{NAMA_OPSI[o.jenis]}</p>
-                    <p className="angka text-xl font-bold">{rupiah(o.harga)}</p>
-                    <p className="angka text-xs text-redup">
-                      Untung {persen(o.margin)} ({rupiah(o.laba)}), pembeli hemat {rupiah(o.hemat_pelanggan)}
-                    </p>
-                    <p className="angka mt-1 text-xs">Perlu terjual {persen(o.kenaikan_volume)} lebih banyak supaya total untung sama</p>
-                    <div className="mt-2">
-                      <Chip status={o.status} />
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <Field
-                className="mt-4 max-w-xs"
-                label="Atau tentukan sendiri (Rp)"
-                type="number"
-                min="0"
-                value={harga}
-                onChange={(e) => {
-                  setHarga(e.target.value);
-                  setOpsi(null);
-                }}
-                hint={marginManual != null ? `Untung ${persen(marginManual)}${marginManual < 0 ? ', rugi' : ''}` : undefined}
-              />
-            </Kartu>
-          )}
+            )}
+          </div>
         </div>
-
-        <div className="flex flex-col gap-4 lg:col-span-2">
-          {hasil && (
-            <Kartu className="bg-kuning-muda">
-              <h2 className="font-semibold">3. Nama dan caption</h2>
-              <p className="mb-3 text-sm text-redup">Bisa diisi sendiri atau minta usulan.</p>
-              <Tombol varian="garis" onClick={saran} disabled={proses === 'saran' || !(hargaN > 0)}>
-                {proses === 'saran' ? 'Menyusun' : 'Usulkan nama dan caption'}
-              </Tombol>
-              <Field className="mt-3" label="Nama paket" value={nama} onChange={(e) => setNama(e.target.value)} />
-              <Field className="mt-3" label="Caption untuk WhatsApp atau Instagram" as="textarea" rows={3} value={caption} onChange={(e) => setCaption(e.target.value)} />
-              <Tombol className="mt-4" onClick={simpan} disabled={proses === 'simpan' || !nama.trim() || !(hargaN > 0) || (marginManual ?? 0) < 0}>
-                Simpan paket
-              </Tombol>
-              {(marginManual ?? 0) < 0 && <p className="mt-2 text-sm text-rugi">Harga di bawah modal. Paket rugi tidak bisa disimpan.</p>}
-            </Kartu>
-          )}
-          {tersimpan && (
-            <p role="status" className="rounded-xl bg-aman-muda px-3 py-2 text-sm text-aman">
-              {tersimpan}
-            </p>
-          )}
-          {galat && (
-            <p role="alert" className="rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
-              {galat}
-            </p>
-          )}
-          <Kartu>
-            <h2 className="mb-2 font-semibold">Paket tersimpan</h2>
-            {promo.loading && !promo.data ? <Muat /> : promo.error ? <Galat error={promo.error} ulang={promo.muat} /> : <Tersimpan daftar={promo.data} muat={promo.muat} />}
-          </Kartu>
-        </div>
-      </div>
+      )}
     </>
   );
 }

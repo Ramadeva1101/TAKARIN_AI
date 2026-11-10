@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, ShoppingCart, Camera, Microphone, TextT, PencilSimple, ChartLineUp, ForkKnife, TrendUp, Receipt } from '@phosphor-icons/react';
+import { Plus, ShoppingCart, Camera, Microphone, TextT, PencilSimple } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { useAuth } from '../lib/auth.jsx';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
@@ -29,37 +29,33 @@ function TeksCatatan({ catatan, cadangan }) {
   );
 }
 
-const NADA_PIL = {
-  aman: 'bg-aman-muda text-aman',
-  waspada: 'bg-kuning-muda text-kuning-tua',
-  rugi: 'bg-rugi-muda text-rugi',
-};
-
-// Kartu angka di baris atas. Datar tanpa bayangan; hierarki lewat ikon, angka besar, dan pil status.
-// Kartu pertama (angka utama) diberi dasar biru muda dan ikon biru solid.
-function Kpi({ label, nilai, ket, pil, ikon: Ikon, to, utama = false }) {
-  const cls = utama ? 'border-biru/25 bg-biru-muda/70 hover:border-biru/50' : 'border-garis bg-kartu hover:border-biru/40';
+// Kartu angka di baris atas, mengikuti pola dasbor tenang: label dan perubahan di atas, angka besar,
+// keterangan di bawah. Tanpa ikon atau pil; warna hanya biru (baik) dan kuning (perlu perhatian).
+// Kartu untung memakai bilah yang sama dengan tabel di bawahnya: isi = untung, tanda tegak = target.
+function Kpi({ label, nilai, ket, sudut, meter, to }) {
   const isi = (
     <>
-      <span className="flex items-start justify-between gap-2">
-        <span className={`pt-1 text-sm font-medium ${utama ? 'text-biru-tua' : 'text-redup'}`}>{label}</span>
-        <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${utama ? 'bg-biru text-white' : 'bg-biru-muda text-biru'}`} aria-hidden>
-          <Ikon size={22} weight="duotone" />
+      <span className="flex items-baseline justify-between gap-2">
+        <span className="truncate text-sm text-redup">{label}</span>
+        {sudut && <span className={`angka shrink-0 text-xs font-semibold ${sudut.nada === 'kuning' ? 'text-kuning-tua' : 'text-biru'}`}>{sudut.teks}</span>}
+      </span>
+      <span className="font-judul angka mt-2 block truncate pb-1 text-[28px] leading-snug font-bold">{nilai}</span>
+      {meter && (
+        <span className="relative mt-1 block h-1.5 rounded-full bg-dasar" aria-hidden>
+          <span className={`absolute inset-y-0 left-0 rounded-full ${meter.nilai < meter.target ? 'bg-kuning' : 'bg-biru'}`} style={{ width: `${Math.min(1, Math.max(0, meter.nilai) / meter.skala) * 100}%` }} />
+          <span className="absolute -top-1 h-3.5 w-0.5 rounded-full bg-tinta/70" style={{ left: `${(meter.target / meter.skala) * 100}%` }} />
         </span>
-      </span>
-      <span className={`font-judul angka mt-1 block truncate pb-1 text-[28px] leading-snug font-bold ${utama ? 'text-biru' : ''}`}>{nilai}</span>
-      <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-        {pil && <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${NADA_PIL[pil.nada]}`}>{pil.teks}</span>}
-        <span className="min-w-0 truncate text-xs text-redup">{ket}</span>
-      </span>
+      )}
+      <span className="mt-auto block truncate pt-2 text-xs text-redup">{ket}</span>
     </>
   );
+  const cls = 'flex min-w-0 flex-col rounded-[20px] border border-garis bg-kartu p-4';
   return to ? (
-    <Link to={to} className={`block min-w-0 rounded-[20px] border p-4 transition-colors ${cls}`}>
+    <Link to={to} className={`${cls} transition-colors hover:border-biru/40`}>
       {isi}
     </Link>
   ) : (
-    <div className={`min-w-0 rounded-[20px] border p-4 ${cls}`}>{isi}</div>
+    <div className={cls}>{isi}</div>
   );
 }
 
@@ -399,10 +395,29 @@ export default function Dashboard() {
       </header>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi utama ikon={ChartLineUp} label="Rata-rata untung" nilai={persen(kpi.rata_margin)} pil={diBawah ? { teks: `${diBawah} menu di bawah target`, nada: 'waspada' } : { teks: 'Semua menu aman', nada: 'aman' }} ket={`Target ${persen(usaha.target_margin, 0)}`} />
-        <Kpi ikon={ForkKnife} label="Menu paling untung" nilai={terbaik?.nama ?? '–'} pil={terbaik ? { teks: `Untung ${persen(terbaik.margin)}`, nada: 'aman' } : undefined} ket={terbaik ? 'dari harga jual' : 'Belum ada hitungan lengkap'} to={terbaik ? `/produk/${terbaik.id}` : undefined} />
-        <Kpi ikon={TrendUp} label="Bahan naik tertinggi" nilai={<span className="capitalize">{naik?.nama ?? '–'}</span>} pil={naik ? { teks: `Naik ${persen(naik.perubahan)}`, nada: 'rugi' } : undefined} ket={naik ? 'dari belanja sebelumnya' : belanja_terakhir.length > 1 ? 'Tidak ada yang naik lebih dari 2%' : 'Butuh minimal 2 belanja untuk dibandingkan'} to={naik ? `/bahan/${naik.id}` : undefined} />
-        <Kpi ikon={Receipt} label="Belanja bulan ini" nilai={rupiah(kpi.belanja_bulan_ini)} ket={`${kpi.nota_bulan_ini} catatan belanja`} to="/belanja" />
+        <Kpi
+          label="Rata-rata untung"
+          nilai={persen(kpi.rata_margin)}
+          sudut={diBawah ? { teks: `${diBawah} di bawah target`, nada: 'kuning' } : { teks: 'Semua sesuai target' }}
+          meter={{ nilai: kpi.rata_margin, target: usaha.target_margin, skala: Math.max(usaha.target_margin * 1.5, kpi.rata_margin) }}
+          ket={`Target ${persen(usaha.target_margin, 0)} dari harga jual`}
+        />
+        <Kpi
+          label="Menu paling untung"
+          nilai={terbaik?.nama ?? '–'}
+          sudut={terbaik ? { teks: persen(terbaik.margin) } : undefined}
+          meter={terbaik ? { nilai: terbaik.margin, target: usaha.target_margin, skala: Math.max(usaha.target_margin * 1.5, terbaik.margin) } : undefined}
+          ket={terbaik ? 'Untung dari harga jual' : 'Belum ada hitungan lengkap'}
+          to={terbaik ? `/produk/${terbaik.id}` : undefined}
+        />
+        <Kpi
+          label="Bahan naik tertinggi"
+          nilai={<span className="capitalize">{naik?.nama ?? '–'}</span>}
+          sudut={naik ? { teks: `+${persen(naik.perubahan)}`, nada: 'kuning' } : undefined}
+          ket={naik ? 'Dibanding belanja sebelumnya' : belanja_terakhir.length > 1 ? 'Tidak ada yang naik lebih dari 2%' : 'Butuh minimal 2 belanja untuk dibandingkan'}
+          to={naik ? `/bahan/${naik.id}` : undefined}
+        />
+        <Kpi label="Belanja bulan ini" nilai={rupiah(kpi.belanja_bulan_ini)} sudut={{ teks: `${kpi.nota_bulan_ini} catatan` }} ket="Total semua catatan belanja" to="/belanja" />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)] xl:items-start">
