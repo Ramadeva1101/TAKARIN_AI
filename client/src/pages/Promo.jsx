@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Check, Copy, Minus, Plus, Sparkle, Trash, WhatsappLogo } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, Copy, Minus, PencilSimple, Plus, Sparkle, Trash, WhatsappLogo } from '@phosphor-icons/react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
 import { Field, Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
+import { hargaAsing } from '../lib/harga.js';
 
 const NAMA_OPSI = { aman: 'Sesuai target', seimbang: 'Diskon sedang', agresif: 'Diskon besar' };
 
@@ -86,7 +87,7 @@ function Pratinjau({ isi, hasil, nama, caption, hargaN, margin }) {
   );
 }
 
-function KartuTersimpan({ p, baru, muat }) {
+function KartuTersimpan({ p, baru, muat, ubah }) {
   const [info, setInfo] = useState(null);
   const salin = async () => {
     try {
@@ -112,7 +113,7 @@ function KartuTersimpan({ p, baru, muat }) {
     <li className={`flex min-w-0 flex-col rounded-[20px] border bg-kartu p-4 ${baru ? 'border-biru ring-1 ring-biru' : 'border-garis'}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          {baru && <p className="mb-1 text-xs font-semibold text-biru">Baru disimpan</p>}
+          {baru && <p className="mb-1 text-xs font-semibold text-biru">{baru}</p>}
           <p className="truncate font-semibold">{p.nama}</p>
           {p.items && <p className="truncate text-xs text-redup">{teksIsi(p.items)}</p>}
         </div>
@@ -137,6 +138,11 @@ function KartuTersimpan({ p, baru, muat }) {
         <a href={`https://wa.me/?text=${encodeURIComponent(teksBagikan(p))}`} target="_blank" rel="noreferrer" className={tombol}>
           <WhatsappLogo size={16} aria-hidden /> WhatsApp
         </a>
+        {!p.galat && (
+          <button type="button" onClick={() => ubah(p)} className={tombol}>
+            <PencilSimple size={16} aria-hidden /> Ubah
+          </button>
+        )}
       </div>
       {info && (
         <p role="status" className="mt-2 text-xs text-redup">
@@ -147,7 +153,7 @@ function KartuTersimpan({ p, baru, muat }) {
   );
 }
 
-function DaftarTersimpan({ promo, baruId, keBuat }) {
+function DaftarTersimpan({ promo, baru, keBuat, ubah }) {
   if (promo.loading && !promo.data) return <Muat />;
   if (promo.error) return <Galat error={promo.error} ulang={promo.muat} />;
   if (!promo.data.length)
@@ -159,7 +165,7 @@ function DaftarTersimpan({ promo, baruId, keBuat }) {
   return (
     <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {promo.data.map((p) => (
-        <KartuTersimpan key={p.id} p={p} baru={p.id === baruId} muat={promo.muat} />
+        <KartuTersimpan key={p.id} p={p} baru={p.id === baru?.id ? baru.teks : null} muat={promo.muat} ubah={ubah} />
       ))}
     </ul>
   );
@@ -178,7 +184,11 @@ export default function Promo() {
   const [caption, setCaption] = useState('');
   const [galat, setGalat] = useState(null);
   const [proses, setProses] = useState(null);
-  const [baruId, setBaruId] = useState(null);
+  const [baru, setBaru] = useState(null);
+  // Paket yang sedang diubah, dan harganya: dipakai sekali setelah hitungan ulang selesai
+  // supaya harga tersimpan tidak tertimpa pilihan bawaan "Diskon sedang".
+  const [editP, setEditP] = useState(null);
+  const hargaMuat = useRef(null);
 
   const items = Object.entries(pilih)
     .filter(([, q]) => q > 0)
@@ -193,6 +203,13 @@ export default function Promo() {
         .then((r) => {
           setHasil(r);
           setGalat(null);
+          if (hargaMuat.current != null) {
+            const h = hargaMuat.current;
+            hargaMuat.current = null;
+            setOpsi(r.opsi.find((o) => o.harga === h)?.jenis ?? null);
+            setHarga(h);
+            return;
+          }
           const awal = r.opsi.find((o) => o.jenis === 'seimbang') || r.opsi[0];
           setOpsi(awal?.jenis);
           setHarga(awal?.harga ?? '');
@@ -221,12 +238,36 @@ export default function Promo() {
     }
   };
 
+  const kosongkan = () => {
+    setEditP(null);
+    hargaMuat.current = null;
+    setPilih({});
+    setKemasan('');
+    setNama('');
+    setCaption('');
+    setGalat(null);
+  };
+
+  const mulaiUbah = (p) => {
+    kosongkan();
+    hargaMuat.current = p.harga_paket;
+    setEditP(p);
+    setPilih(Object.fromEntries(p.items.map((i) => [i.menu_id, i.qty])));
+    setKemasan(p.biaya_kemasan ? String(p.biaya_kemasan) : '');
+    setNama(p.nama);
+    setCaption(p.caption || '');
+    setTab('buat');
+    window.scrollTo({ top: 0 });
+  };
+
   const simpan = async () => {
     setProses('simpan');
     setGalat(null);
     try {
-      const r = await api('/promo', { method: 'POST', body: { items, nama, caption: caption || null, harga_paket: Number(harga), biaya_kemasan: Number(kemasan) || 0 } });
-      setBaruId(r?.id ?? null);
+      const body = { items, nama, caption: caption || null, harga_paket: Number(harga), biaya_kemasan: Number(kemasan) || 0 };
+      const r = editP ? await api(`/promo/${editP.id}`, { method: 'PUT', body }) : await api('/promo', { method: 'POST', body });
+      setBaru({ id: r?.id ?? editP?.id, teks: editP ? 'Baru diubah' : 'Baru disimpan' });
+      setEditP(null);
       setPilih({});
       setKemasan('');
       setNama('');
@@ -243,7 +284,9 @@ export default function Promo() {
   const hargaN = Number(harga);
   const margin = hasil && hargaN > 0 ? (hargaN - hasil.hpp_paket) / hargaN : null;
   const rugi = margin != null && margin < 0;
-  const siap = nama.trim() && hargaN > 0 && !rugi;
+  // Harga yang boleh disebut di caption: harga paket, harga normal, dan selisih hematnya.
+  const captionAsing = hasil && hargaN > 0 ? hargaAsing(caption, [hargaN, hasil.harga_normal, hasil.harga_normal - hargaN]) : [];
+  const siap = nama.trim() && hargaN > 0 && !rugi && !captionAsing.length;
   const lengkap = produk.data.filter((p) => p.lengkap);
   const belum = produk.data.filter((p) => !p.lengkap);
   const isi = items.map((i) => ({ ...i, nama: produk.data.find((p) => p.id === i.menu_id)?.nama }));
@@ -265,7 +308,7 @@ export default function Promo() {
       </div>
 
       {tab === 'tersimpan' ? (
-        <DaftarTersimpan promo={promo} baruId={baruId} keBuat={() => setTab('buat')} />
+        <DaftarTersimpan promo={promo} baru={baru} keBuat={() => setTab('buat')} ubah={mulaiUbah} />
       ) : !produk.data.length ? (
         <Kartu>
           <Kosong judul="Belum ada menu" teks="Paket disusun dari menu yang sudah punya resep." aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
@@ -273,6 +316,16 @@ export default function Promo() {
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
           <div className="flex min-w-0 flex-col gap-4">
+            {editP && (
+              <div role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-biru/30 bg-biru-muda px-4 py-2.5 text-sm">
+                <span>
+                  Mengubah paket <span className="font-semibold">{editP.nama}</span>
+                </span>
+                <button type="button" onClick={kosongkan} className="inline-flex min-h-11 items-center font-semibold text-biru sm:min-h-9">
+                  Batal ubah
+                </button>
+              </div>
+            )}
             <Langkah no="1" judul="Pilih isi paket" sub="Tentukan jumlah tiap menu dalam satu paket.">
               <ul className="divide-y divide-garis">
                 {lengkap.map((p) => {
@@ -362,7 +415,16 @@ export default function Promo() {
                   <Sparkle size={16} aria-hidden /> {proses === 'saran' ? 'Menyusun usulan' : 'Usulkan nama dan caption'}
                 </Tombol>
                 <Field className="mt-4" label="Nama paket" value={nama} onChange={(e) => setNama(e.target.value)} />
-                <Field className="mt-3" label="Caption untuk WhatsApp atau Instagram" as="textarea" rows={3} value={caption} onChange={(e) => setCaption(e.target.value)} />
+                <Field
+                  className="mt-3"
+                  label="Caption untuk WhatsApp atau Instagram"
+                  as="textarea"
+                  rows={3}
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  error={captionAsing.length ? `Caption menyebut ${captionAsing[0].teks}, padahal harga paket ${rupiah(hargaN)}. Ubah angkanya atau hapus dari caption.` : undefined}
+                  hint="Harga yang boleh disebut: harga paket, harga normal, dan besar hematnya."
+                />
               </Langkah>
             )}
           </div>
@@ -372,9 +434,10 @@ export default function Promo() {
             {hasil && (
               <>
                 <Tombol className="w-full !min-h-12" onClick={simpan} disabled={proses === 'simpan' || !siap}>
-                  {proses === 'simpan' ? 'Menyimpan' : 'Simpan paket'}
+                  {proses === 'simpan' ? 'Menyimpan' : editP ? 'Simpan perubahan' : 'Simpan paket'}
                 </Tombol>
                 {!nama.trim() && !rugi && <p className="text-center text-xs text-redup">Isi nama paket di langkah 3 untuk menyimpan.</p>}
+                {captionAsing.length > 0 && !rugi && <p className="text-center text-xs text-kuning-tua">Harga di caption belum sesuai harga paket.</p>}
                 {rugi && (
                   <p role="alert" className="rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
                     Harga di bawah modal. Paket rugi tidak bisa disimpan.

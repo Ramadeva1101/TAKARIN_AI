@@ -140,6 +140,7 @@ router.post('/promo/hitung', validasi(S.promoHitung), (req, res) => res.json(pro
 router.post('/promo/saran', validasi(S.promoHitung), async (req, res) => res.json(await promo.saran(req.usaha, req.body)));
 router.get('/promo', (req, res) => res.json(promo.daftar(req.usaha)));
 router.post('/promo', validasi(S.promoSimpan), (req, res) => res.status(201).json(promo.simpan(req.usaha, req.body)));
+router.put('/promo/:id', validasi(S.promoSimpan), (req, res) => res.json(promo.ubah(req.usaha, id(req), req.body)));
 router.delete('/promo/:id', (req, res) => {
   promo.hapus(req.usaha, id(req));
   res.status(204).end();

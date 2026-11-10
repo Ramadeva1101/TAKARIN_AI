@@ -178,6 +178,16 @@ describe('alur utama end-to-end (AI fixture)', () => {
     expect((await api('POST', '/promo', { nama: 'Rugi', items, harga_paket: 5000 })).status).toBe(400);
     expect((await api('POST', '/promo', { nama: 'Paket Hemat', items, harga_paket: 17000 })).status).toBe(201);
     expect((await api('GET', '/promo')).data).toHaveLength(1);
+    // Caption dengan harga lain ditolak, harga paket dan harga normal boleh.
+    const salah = await api('POST', '/promo', { nama: 'Salah', items, harga_paket: 17000, caption: 'Cuma 15rb saja!' });
+    expect(salah.status).toBe(400);
+    expect(salah.data.error ?? salah.data.pesan ?? JSON.stringify(salah.data)).toMatch(/15rb/);
+    const idPaket = (await api('GET', '/promo')).data[0].id;
+    const ubah = await api('PUT', `/promo/${idPaket}`, { nama: 'Paket Hemat Baru', items, harga_paket: 18000, caption: 'Sekarang Rp18.000 saja' });
+    expect(ubah.status).toBe(200);
+    const sesudah = (await api('GET', '/promo')).data;
+    expect(sesudah).toHaveLength(1);
+    expect(sesudah[0]).toMatchObject({ nama: 'Paket Hemat Baru', harga_paket: 18000 });
   });
 
   it('dashboard dan bahan baku', async () => {
