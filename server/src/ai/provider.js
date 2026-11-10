@@ -117,8 +117,11 @@ export async function bacaCerita(teks) {
   return chatJson(modelTeks(), [{ role: 'system', content: prompt.CERITA }, { role: 'user', content: teks }], skema.cerita);
 }
 
-// Mengembalikan teks penjelasan, atau null kalau mode fixture / AI gagal (pemanggil memakai templat).
-export async function tulisPenjelasan(fakta) {
+// Mengembalikan teks, atau null kalau mode fixture / AI gagal (pemanggil memakai templat).
+export const tulisPenjelasan = (fakta) => tulisTeks(prompt.PENJELASAN, fakta);
+export const tulisCatatan = (fakta) => tulisTeks(prompt.CATATAN, fakta);
+
+async function tulisTeks(sistem, fakta) {
   if (modeAi() === 'fixture') return null;
   try {
     const { data } = await cobaModel(modelTeks(), async (model) => {
@@ -126,7 +129,7 @@ export async function tulisPenjelasan(fakta) {
         model,
         temperature: 0.3,
         messages: [
-          { role: 'system', content: prompt.PENJELASAN },
+          { role: 'system', content: sistem },
           { role: 'user', content: JSON.stringify(fakta) },
         ],
       });

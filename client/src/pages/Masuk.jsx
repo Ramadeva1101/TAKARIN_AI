@@ -32,7 +32,9 @@ export default function Masuk({ mode }) {
       </div>
       <div className="flex items-center justify-center px-4 py-10">
         <form onSubmit={submit} className="w-full max-w-sm" noValidate>
-          <p className="mb-6 text-lg font-bold text-teal">Dapur Untung</p>
+          <Link to="/" className="mb-6 inline-flex min-h-11 items-center text-lg font-bold text-teal">
+            Dapur Untung
+          </Link>
           <h1 className="text-2xl font-bold">{daftar ? 'Buat akun' : 'Masuk'}</h1>
           <p className="mt-1 mb-6 text-sm text-redup">{daftar ? 'Satu akun untuk satu usaha.' : 'Lanjutkan hitungan usaha Anda.'}</p>
           <div className="flex flex-col gap-4">

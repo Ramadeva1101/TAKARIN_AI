@@ -17,7 +17,7 @@ export default function Produk() {
           <Kosong judul="Belum ada menu" teks="Tambahkan menu beserta bahan dan takarannya." aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />
         </Kartu>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {data.map((p) => (
             <li key={p.id}>
               <Link to={`/produk/${p.id}`} className="block h-full rounded-2xl border border-garis bg-kartu p-4 hover:border-teal">

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { persen, rupiah, tanggal } from '../lib/api.js';
 import { Chip, Galat, Judul, Kartu, Kosong, Muat, Tombol, hargaSatuan } from '../components/ui.jsx';
+import { Perubahan } from './Pasar.jsx';
 
 function Kpi({ label, nilai, ket, warna = 'bg-kartu' }) {
   return (
@@ -10,6 +11,32 @@ function Kpi({ label, nilai, ket, warna = 'bg-kartu' }) {
       <p className="angka mt-1 text-2xl font-bold">{nilai}</p>
       {ket && <p className="mt-1 text-xs text-redup">{ket}</p>}
     </div>
+  );
+}
+
+function Catatan() {
+  const { data, loading, error, muat } = useApi('/dashboard/catatan');
+  return (
+    <Kartu className="mb-4 bg-teal text-white">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-semibold">Catatan hari ini</h2>
+        {data && <span className="text-xs text-white/75">{data.sumber === 'ai' ? 'Dirangkum AI dari angka hitungan' : 'Ringkasan otomatis'}</span>}
+      </div>
+      {loading && !data ? (
+        <p role="status" className="mt-2 text-sm text-white/80">
+          Merangkum kondisi usaha hari ini
+        </p>
+      ) : error ? (
+        <p className="mt-2 text-sm">
+          Catatan belum bisa dibuat.{' '}
+          <button className="min-h-11 font-semibold underline" onClick={muat}>
+            Coba lagi
+          </button>
+        </p>
+      ) : (
+        <p className="mt-2 max-w-3xl leading-relaxed">{data.teks}</p>
+      )}
+    </Kartu>
   );
 }
 
@@ -44,20 +71,22 @@ export default function Dashboard() {
   const { data, loading, error, muat } = useApi('/dashboard');
   if (loading && !data) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
-  const { usaha, kpi, produk, perlu_tindakan, bahan_naik, harga_pasar } = data;
+  const { usaha, kpi, produk, perlu_tindakan, bahan_naik, info_pasar, belanja_terakhir } = data;
   const diBawah = kpi.waspada + kpi.rugi;
 
   return (
     <>
       <Judul
         judul="Ringkasan"
-        sub={`${usaha.nama}${usaha.kota ? `, ${usaha.kota}` : ''}`}
+        sub={`${usaha.nama}${usaha.kota ? `, ${usaha.kota}` : ''} · ${tanggal(new Date().toISOString())}`}
         aksi={
           <Tombol to="/belanja/baru" className="lg:hidden">
             Catat belanja
           </Tombol>
         }
       />
+
+      <Catatan />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi label="Rata-rata untung" nilai={persen(kpi.rata_margin)} ket={`Target ${persen(usaha.target_margin)}`} warna="bg-lime/40" />
@@ -97,20 +126,48 @@ export default function Dashboard() {
           {produk.length ? <GrafikMargin produk={produk} target={usaha.target_margin} /> : <Kosong judul="Belum ada menu" aksi={<Tombol to="/produk/baru">Tambah menu</Tombol>} />}
         </Kartu>
 
-        <Kartu className="bg-teal text-white lg:col-span-2">
-          <h2 className="font-semibold">Harga bahan naik</h2>
-          <p className="mb-3 text-sm text-white/75">Dibanding belanja sebelumnya</p>
+        <Kartu className="lg:col-span-2">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h2 className="font-semibold">Kabar harga pasar</h2>
+            <Link to="/pasar" className="inline-flex min-h-11 items-center text-sm font-semibold text-teal">
+              Harga pasar
+            </Link>
+          </div>
+          {info_pasar.length ? (
+            <ul className="divide-y divide-garis">
+              {info_pasar.map((i) => (
+                <li key={i.komoditas} className="py-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-medium capitalize">{i.komoditas}</span>
+                    <span className="angka text-sm">{`${rupiah(i.harga)}/${i.satuan}`}</span>
+                  </div>
+                  <div className="text-sm">
+                    <Perubahan nilai={i.perubahan} ket={i.periode === 'hari' ? 'dari kemarin' : 'seminggu'} />
+                  </div>
+                  {i.menu.length > 0 && <p className="text-xs text-redup">Dipakai di {i.menu.map((m) => m.nama).join(', ')}</p>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-redup">Harga bahan yang Anda pakai stabil di pasar daerah.</p>
+          )}
+        </Kartu>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Kartu>
+          <h2 className="mb-2 font-semibold">Naik dari belanja sebelumnya</h2>
           {bahan_naik.length ? (
-            <ul className="flex flex-col divide-y divide-white/15">
+            <ul className="divide-y divide-garis">
               {bahan_naik.map((b) => {
                 const h = hargaSatuan(b.harga_terakhir?.harga_per_satuan, b.satuan_dasar);
                 return (
                   <li key={b.id}>
-                    <Link to={`/bahan/${b.id}`} className="flex min-h-11 items-center justify-between gap-2 py-2 hover:underline">
+                    <Link to={`/bahan/${b.id}`} className="flex min-h-11 items-center justify-between gap-2 py-2 hover:text-teal">
                       <span className="capitalize">{b.nama}</span>
                       <span className="angka text-right text-sm">
-                        <span className="font-semibold">naik {persen(b.perubahan, 1)}</span>
-                        {h && <span className="block text-white/75">{`${rupiah(h.harga)}/${h.satuan}`}</span>}
+                        <span className="font-semibold text-rugi">naik {persen(b.perubahan)}</span>
+                        {h && <span className="block text-redup">{`${rupiah(h.harga)}/${h.satuan}`}</span>}
                       </span>
                     </Link>
                   </li>
@@ -118,57 +175,39 @@ export default function Dashboard() {
               })}
             </ul>
           ) : (
-            <p className="text-sm text-white/85">Tidak ada bahan yang naik dari belanja terakhir.</p>
+            <p className="text-sm text-redup">Tidak ada bahan yang naik dari belanja terakhir.</p>
+          )}
+        </Kartu>
+
+        <Kartu>
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h2 className="font-semibold">Belanja terakhir</h2>
+            <Link to="/belanja" className="inline-flex min-h-11 items-center text-sm font-semibold text-teal">
+              Semua
+            </Link>
+          </div>
+          {belanja_terakhir.length ? (
+            <ul className="divide-y divide-garis">
+              {belanja_terakhir.map((n) => (
+                <li key={n.id}>
+                  <Link to={`/belanja/${n.id}`} className="flex min-h-11 items-center justify-between gap-2 py-2 hover:text-teal">
+                    <span>
+                      {n.nama_toko || 'Tanpa nama toko'}
+                      <span className="block text-xs text-redup">{tanggal(n.tanggal)}</span>
+                    </span>
+                    <span className="angka text-right text-sm font-semibold">
+                      {rupiah(n.total)}
+                      {n.status === 'draf' && <span className="block text-xs font-semibold text-waspada">Belum dicek</span>}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Kosong judul="Belum ada belanja" aksi={<Tombol to="/belanja/baru">Catat belanja</Tombol>} />
           )}
         </Kartu>
       </div>
-
-      <Kartu className="mt-4">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-semibold">Harga beli dibanding pasar daerah</h2>
-          <Link to="/bahan" className="inline-flex min-h-11 items-center text-sm font-semibold text-teal">
-            Semua bahan
-          </Link>
-        </div>
-        {harga_pasar.length ? (
-          <div className="-mx-4 overflow-x-auto px-4">
-            <table className="w-full min-w-[34rem] text-sm">
-              <thead className="text-left text-redup">
-                <tr>
-                  <th className="py-2 font-medium">Bahan</th>
-                  <th className="py-2 text-right font-medium">Harga beli</th>
-                  <th className="py-2 text-right font-medium">Acuan pasar</th>
-                  <th className="py-2 pl-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-garis">
-                {harga_pasar.map((b) => {
-                  const beli = hargaSatuan(b.harga_terakhir?.harga_per_satuan, b.satuan_dasar);
-                  return (
-                    <tr key={b.id}>
-                      <td className="py-2">
-                        <Link to={`/bahan/${b.id}`} className="font-medium capitalize hover:text-teal">
-                          {b.nama}
-                        </Link>
-                      </td>
-                      <td className="angka py-2 text-right">{beli ? `${rupiah(beli.harga)}/${beli.satuan}` : '–'}</td>
-                      <td className="angka py-2 text-right">
-                        {b.acuan ? `${rupiah(b.acuan.harga)}/${b.acuan.satuan}` : '–'}
-                        {b.acuan && <span className="block text-xs text-redup">{`${b.acuan.wilayah}, ${tanggal(b.acuan.tanggal)}`}</span>}
-                      </td>
-                      <td className="py-2 pl-3">
-                        {b.harga_terakhir ? <Chip status={b.status_acuan} /> : <Chip status="tanpa_acuan">Belum dibeli</Chip>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <Kosong judul="Belum ada acuan" teks="Harga acuan muncul untuk bahan yang cocok dengan komoditas pasar, misalnya cabai, bawang, ayam." />
-        )}
-      </Kartu>
     </>
   );
 }

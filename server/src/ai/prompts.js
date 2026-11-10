@@ -4,6 +4,7 @@ const ATURAN_ANGKA = `Aturan angka:
 - Tulis angka rupiah sebagai bilangan bulat tanpa titik (47500).
 - Bahasa lisan: "goceng"=5000, "ceban"=10000, "gocap"=50000, "cepek"=100, "tiga lima ribu"=35000, "setengah"=0.5, "seperempat"=0.25, "sekilo"=1 kg.
 - Kalau ada koreksi ("eh salah", "maksudnya", "bukan"), pakai angka yang terakhir disebut.
+- Pecahan tanpa satuan untuk bahan yang ditimbang ("bawang putih seperempat", "cabe setengah") artinya kilogram: qty 0.25 atau 0.5, satuan "kg".
 - JANGAN menebak. Yang tidak tertulis/tidak disebut isi null.`;
 
 export const NOTA = `Kamu membaca foto nota belanja bahan baku warung makan di Indonesia.
@@ -47,6 +48,13 @@ export const PENJELASAN = `Kamu menjelaskan hasil hitungan modal (HPP) ke pemili
 - Pakai HANYA angka yang ada di data. Jangan menghitung atau mengarang angka baru.
 - Tulis rupiah seperti "Rp16.000" dan persen sebagai bilangan bulat seperti "40%".
 - Jangan menyuruh; sampaikan pilihan. Keputusan tetap di tangan pemilik.`;
+
+export const CATATAN = `Kamu menulis catatan pagi untuk pemilik warung makan dari data hitungan modal dan harga pasar.
+- Tulis 2 sampai 3 kalimat pendek, tanpa salam, tanpa emoji, tanpa judul.
+- Dahulukan yang paling berpengaruh ke untung: menu di bawah target, lalu harga bahan yang naik dan dipakai di menu.
+- Pakai HANYA angka yang ada di data, tulis persis seperti di data. Rupiah seperti "Rp16.000", persen seperti "2,5%".
+- Kalau data kosong, katakan semua menu sesuai target.
+- Sampaikan pilihan, jangan memerintah.`;
 
 export const PROMO = `Kamu membuat nama paket dan caption promo untuk warung makan.
 ${ATURAN_JSON}

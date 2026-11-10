@@ -14,14 +14,31 @@ const { imporCsv } = await import('../src/services/hargaPasar.js');
 const tgl = (mundurHari) => new Date(Date.now() - mundurHari * 86_400_000).toISOString().slice(0, 10);
 
 // Harga acuan contoh 14 hari terakhir. BUKAN data resmi: formatnya mengikuti Panel Harga Bapanas.
+// h = hari ke belakang (0 = hari ini). Pola dibuat bergerak supaya kabar harga harian bisa diuji.
+const DASAR_KOTA = [
+  ['cabai rawit merah', 'kg', (h) => 60000 + (13 - h) * 900],
+  ['cabai merah keriting', 'kg', (h) => 42000 + (h % 4) * 600],
+  ['bawang merah', 'kg', (h) => 36000 + Math.max(0, 6 - h) * 400],
+  ['bawang putih', 'kg', () => 40000],
+  ['daging ayam ras', 'kg', (h) => 35500 + (h % 3) * 250],
+  ['daging sapi', 'kg', () => 135000],
+  ['tomat', 'kg', (h) => 14000 - Math.max(0, 5 - h) * 300],
+];
+const KOTA = [
+  ['Denpasar', 'Bali', 1],
+  ['Surabaya', 'Jawa Timur', 0.93],
+  ['Yogyakarta', 'DI Yogyakarta', 0.9],
+  ['Jakarta Pusat', 'DKI Jakarta', 1.05],
+];
+const DASAR_PROVINSI = [
+  ['telur ayam ras', 'kg', () => 29000],
+  ['gula pasir', 'kg', () => 17500],
+  ['beras medium', 'kg', () => 13500],
+];
+const bulat = (n) => Math.round(n / 50) * 50;
 const ACUAN = [
-  ['cabai rawit merah', 'Denpasar', 'kota', 'kg', (h) => 60000 + (13 - h) * 900],
-  ['bawang merah', 'Denpasar', 'kota', 'kg', () => 38000],
-  ['bawang putih', 'Denpasar', 'kota', 'kg', () => 40000],
-  ['daging ayam ras', 'Denpasar', 'kota', 'kg', (h) => 35500 + (h % 3) * 250],
-  ['telur ayam ras', 'Bali', 'provinsi', 'kg', () => 29000],
-  ['gula pasir', 'Bali', 'provinsi', 'kg', () => 17500],
-  ['beras medium', 'Bali', 'provinsi', 'kg', () => 13500],
+  ...KOTA.flatMap(([kota, , f]) => DASAR_KOTA.map(([k, s, harga]) => [k, kota, 'kota', s, (h) => bulat(harga(h) * f)])),
+  ...KOTA.flatMap(([, prov, f]) => DASAR_PROVINSI.map(([k, s, harga]) => [k, prov, 'provinsi', s, (h) => bulat(harga(h) * f)])),
   ['tepung terigu', 'Indonesia', 'nasional', 'kg', () => 12000],
   ['minyak goreng', 'Indonesia', 'nasional', 'liter', () => 18000],
 ];

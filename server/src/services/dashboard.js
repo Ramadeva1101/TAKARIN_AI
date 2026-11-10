@@ -2,6 +2,24 @@ import { all, get } from '../lib/db.js';
 import { hitungSemua } from './hpp.js';
 import { daftarBahan } from './bahan.js';
 import { opsiPerbaikan } from '../domain/rekomendasi.js';
+import { infoHarian } from './pasar.js';
+
+// Biaya tiap bahan di setiap menu dan bagiannya dari modal menu itu.
+export function bahanDenganKontribusi(usaha) {
+  const peta = new Map();
+  for (const p of hitungSemua(usaha)) {
+    for (const r of p.rincian) {
+      if (r.biaya == null) continue;
+      const daftar = peta.get(r.bahan_id) || [];
+      daftar.push({ menu_id: p.id, nama: p.nama, biaya: r.biaya, bagian: p.hpp ? r.biaya / p.hpp : null });
+      peta.set(r.bahan_id, daftar);
+    }
+  }
+  return daftarBahan(usaha).map((b) => {
+    const k = (peta.get(b.id) || []).sort((x, y) => y.bagian - x.bagian);
+    return { ...b, kontribusi: k, bagian_terbesar: k[0]?.bagian ?? 0 };
+  });
+}
 
 export function ringkasan(usaha) {
   const produk = hitungSemua(usaha);
@@ -40,6 +58,7 @@ export function ringkasan(usaha) {
     },
     produk: produk.map(({ id, nama, harga_jual, hpp, margin, status, harga_aman, lengkap: l, kurang }) => ({ id, nama, harga_jual, hpp, margin, status, harga_aman, lengkap: l, kurang })),
     perlu_tindakan: perluTindakan,
+    info_pasar: infoHarian(usaha).slice(0, 4),
     bahan_naik: bahanNaik.map(({ id, nama, satuan_dasar, perubahan, harga_terakhir }) => ({ id, nama, satuan_dasar, perubahan, harga_terakhir })),
     harga_pasar: bahan
       .filter((b) => b.acuan)

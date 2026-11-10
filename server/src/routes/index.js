@@ -12,6 +12,7 @@ import * as pembelian from '../services/pembelian.js';
 import * as bahan from '../services/bahan.js';
 import * as dashboard from '../services/dashboard.js';
 import * as promo from '../services/promo.js';
+import * as pasar from '../services/pasar.js';
 import { simpanKonversi } from '../services/bahan.js';
 
 export const router = Router();
@@ -44,6 +45,8 @@ router.get('/auth/saya', (req, res) => {
   res.json({ user, usaha: usaha.usahaMilik(req.user.id) });
 });
 
+router.get('/pasar/wilayah', (_req, res) => res.json(pasar.wilayahTersedia()));
+
 // ---- Onboarding ----
 router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => res.json(await usaha.draftDariCerita(req.body.teks)));
 router.post('/usaha/setup', validasi(S.setup), (req, res) => res.status(201).json(usaha.simpanSetup(req.user.id, req.body)));
@@ -55,6 +58,8 @@ router.put('/usaha', validasi(S.profilUsaha), (req, res) => res.json(usaha.ubahP
 router.put('/usaha/biaya', validasi(S.biaya.array()), (req, res) => res.json(usaha.gantiBiaya(req.usaha.id, req.body)));
 
 router.get('/dashboard', (req, res) => res.json(dashboard.ringkasan(req.usaha)));
+router.get('/dashboard/catatan', async (req, res) => res.json(await pasar.catatanHarian(req.usaha)));
+router.get('/pasar', (req, res) => res.json({ wilayah: { kota: req.usaha.kota, provinsi: req.usaha.provinsi }, harga: pasar.hargaWilayah(req.usaha) }));
 
 // ---- Produk ----
 router.get('/produk', (req, res) => res.json(produk.daftar(req.usaha)));
@@ -90,7 +95,7 @@ router.delete('/pembelian/:id', (req, res) => {
 });
 
 // ---- Bahan baku ----
-router.get('/bahan', (req, res) => res.json(bahan.daftarBahan(req.usaha)));
+router.get('/bahan', (req, res) => res.json(dashboard.bahanDenganKontribusi(req.usaha)));
 router.get('/bahan/:id', (req, res) => res.json(bahan.detailBahan(req.usaha, id(req))));
 router.put('/bahan/:id', validasi(S.ubahBahan), (req, res) => res.json(bahan.ubahBahan(req.usaha, id(req), req.body)));
 router.post('/bahan/:id/konversi', validasi(S.konversi), (req, res) => {
