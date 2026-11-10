@@ -204,19 +204,19 @@ export default function Pasar() {
       ) : (
         <>
           <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <button type="button" onClick={() => setUrut('naik')} className="rounded-[20px] bg-rugi-muda p-4 text-left ring-1 ring-rugi/15 transition hover:-translate-y-0.5">
-              <p className="text-sm text-rugi">Naik dalam seminggu</p>
+            <button type="button" onClick={() => setUrut('naik')} className="rounded-[20px] border border-garis bg-kartu p-4 text-left transition-colors hover:border-biru/40">
+              <p className="text-sm text-redup">Naik dalam seminggu</p>
               <p className="angka mt-1 text-2xl font-extrabold text-rugi">{naikMinggu.length} <span className="text-sm font-semibold">komoditas</span></p>
               <p className="truncate text-xs text-redup">{naikMinggu.length ? `Tertinggi: ${naikMinggu[0].komoditas} ${persen(naikMinggu[0].perubahan_mingguan)}` : 'Tidak ada'}</p>
             </button>
-            <div className="rounded-[20px] bg-aman-muda p-4 ring-1 ring-aman/15">
-              <p className="text-sm text-aman">Turun dalam seminggu</p>
+            <div className="rounded-[20px] border border-garis bg-kartu p-4">
+              <p className="text-sm text-redup">Turun dalam seminggu</p>
               <p className="angka mt-1 text-2xl font-extrabold text-aman">{turunMinggu} <span className="text-sm font-semibold">komoditas</span></p>
               <p className="text-xs text-redup">Dari {data.harga.length} komoditas terpantau</p>
             </div>
-            <div className="rounded-[20px] bg-biru-muda p-4 ring-1 ring-biru/15">
-              <p className="text-sm text-biru-tua">Dipakai di resep Anda</p>
-              <p className="angka mt-1 text-2xl font-extrabold text-biru-tua">{dipakai.length} <span className="text-sm font-semibold">komoditas</span></p>
+            <div className="rounded-[20px] border border-garis bg-kartu p-4">
+              <p className="text-sm text-redup">Dipakai di resep Anda</p>
+              <p className="angka mt-1 text-2xl font-extrabold text-biru">{dipakai.length} <span className="text-sm font-semibold">komoditas</span></p>
               <p className="text-xs text-redup">Harga belanja dibandingkan otomatis</p>
             </div>
           </div>

@@ -74,7 +74,7 @@ export function AreaHarga({ data, satuan, label, tinggi = 220 }) {
   const maks = Math.max(...nilai);
   const jarak = Math.max((maks - min) * 0.25, maks * 0.02);
   const naik = nilai.at(-1) > nilai[0];
-  const warna = naik ? '#c0261a' : '#1d59bb';
+  const warna = naik ? '#b83f2b' : '#1d59bb';
   const id = `area-${naik ? 'naik' : 'turun'}`;
   return (
     <div style={{ height: tinggi }} role="img" aria-label={`${label}. Dari ${rupiah(nilai[0])} pada ${tanggal(data[0].tanggal)} menjadi ${rupiah(nilai.at(-1))} pada ${tanggal(data.at(-1).tanggal)}.`}>
@@ -157,7 +157,7 @@ export function Mini({ data, label }) {
   if (!data || data.length < 2) return null;
   const naik = data.at(-1).harga > data[0].harga;
   const turun = data.at(-1).harga < data[0].harga;
-  const warna = naik ? '#c0261a' : turun ? '#157f3b' : '#8894aa';
+  const warna = naik ? '#b83f2b' : turun ? '#0e7c66' : '#8894aa';
   const id = `mini-${naik ? 'n' : turun ? 't' : 's'}`;
   return (
     <div className="h-10 w-full" role="img" aria-label={label}>

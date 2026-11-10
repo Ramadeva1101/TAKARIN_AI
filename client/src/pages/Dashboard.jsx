@@ -14,7 +14,7 @@ const SUMBER = { foto: [Camera, 'Foto nota'], suara: [Microphone, 'Ucapan'], tek
 const WARNA_STATUS = {
   aman: ['Sesuai target', '#1d59bb'],
   waspada: ['Di bawah target', '#febd19'],
-  rugi: ['Rugi', '#c0261a'],
+  rugi: ['Rugi', '#b83f2b'],
   belum_lengkap: ['Belum lengkap', '#c9d3e3'],
 };
 

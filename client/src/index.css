@@ -18,12 +18,13 @@
   --color-kuning-tua: #8a5a00;
   --color-kuning-muda: #fef3b3;
   --color-navy: #13254a;
-  --color-aman: #157f3b;
-  --color-aman-muda: #e6f6ec;
+  /* Hijau dan merah disesuaikan ke palet: hijau toska dekat biru, merah terakota dekat kuning. */
+  --color-aman: #0e7c66;
+  --color-aman-muda: #e3f4ef;
   --color-waspada: #8a5a00;
   --color-waspada-muda: #fff4d6;
-  --color-rugi: #c0261a;
-  --color-rugi-muda: #fdecea;
+  --color-rugi: #b83f2b;
+  --color-rugi-muda: #fcefe9;
   --shadow-kartu: 0 1px 2px rgb(15 31 61 / 0.04), 0 6px 20px rgb(15 31 61 / 0.05);
 }
 
