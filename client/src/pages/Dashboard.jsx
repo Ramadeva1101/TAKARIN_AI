@@ -37,7 +37,7 @@ function Kpi({ label, nilai, ket, to, utama = false }) {
       <span className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium text-redup">{label}</span>
       </span>
-      <span className={`font-judul angka mt-3 block truncate text-[26px] leading-none font-bold ${utama ? 'text-biru' : ''}`}>{nilai}</span>
+      <span className={`font-judul angka mt-2 block truncate pb-1 text-[26px] leading-snug font-bold ${utama ? 'text-biru' : ''}`}>{nilai}</span>
       <span className="mt-2 block truncate text-xs text-redup">{ket}</span>
     </>
   );
