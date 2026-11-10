@@ -70,40 +70,41 @@ export function Chip({ status, children }) {
 }
 
 // Nama produk sebagai teks: "takarin" gelap, ".ai" biru. Bukan logo gambar.
-// Tanda empat bulatan dari palet Sicily. Pengganti sementara sampai ada file logo resmi dari tim UI.
-export function TandaMerek({ ukuran = 22 }) {
-  const warna = ['#1d59bb', '#76b9ff', '#fef3b3', '#febd19'];
-  return (
-    <span className="inline-flex shrink-0 items-center" aria-hidden>
-      {warna.map((w, i) => (
-        <span key={w} className="rounded-full ring-2 ring-white" style={{ width: ukuran, height: ukuran, background: w, marginLeft: i ? -ukuran * 0.38 : 0 }} />
-      ))}
-    </span>
-  );
+// Logo resmi dari tim UI (client/public). Ukuran mengikuti kelas teks yang dikirim pemanggil.
+const TINGGI_LOGO = { "text-2xl": 36, "text-xl": 32, "text-lg": 28, "text-base": 24, "text-sm": 20 };
+
+export function TandaMerek({ ukuran = 28, className = "" }) {
+  return <img src="/logo-tanda.webp" alt="" width={ukuran} height={ukuran} className={`shrink-0 ${className}`} />;
 }
 
-export function Merek({ className = '', tanda = true, terang = false }) {
-  return (
-    <span className={`inline-flex items-center gap-2 font-bold tracking-tight ${terang ? 'text-white' : 'text-tinta'} ${className}`}>
-      {tanda && <TandaMerek ukuran={18} />}
-      <span>
-        takarin<span className={terang ? 'text-biru-terang' : 'text-biru'}>.ai</span>
+// terang = di atas latar gelap: simbol + teks putih, karena huruf logo berwarna navy.
+export function Merek({ className = "", terang = false }) {
+  const kelas = className.split(" ").find((k) => TINGGI_LOGO[k]);
+  const tinggi = TINGGI_LOGO[kelas] ?? 24;
+  if (terang)
+    return (
+      <span className={`inline-flex items-center gap-2 font-bold tracking-tight text-white ${className}`}>
+        <TandaMerek ukuran={tinggi} />
+        <span>
+          Takarin <span className="text-biru-terang">AI</span>
+        </span>
       </span>
-    </span>
-  );
+    );
+  return <img src="/logo-takarin.webp" alt="Takarin AI" height={tinggi} style={{ height: tinggi, width: "auto" }} className="inline-block shrink-0" />;
 }
 
 // Kotak ikon berwarna di kartu angka.
 export function IkonKotak({ ikon: Ikon, warna = 'biru' }) {
+  // Kotak berwarna muda dengan ikon duotone, seperti contoh desain. Tanpa gradasi atau bayangan tebal.
   const cls = {
-    biru: 'bg-gradient-to-br from-biru-terang to-biru text-white shadow-[0_6px_14px_rgb(29_89_187/0.3)]',
-    kuning: 'bg-gradient-to-br from-[#ffd75e] to-kuning text-navy shadow-[0_6px_14px_rgb(254_189_25/0.35)]',
-    rugi: 'bg-gradient-to-br from-[#ff8a7a] to-rugi text-white shadow-[0_6px_14px_rgb(192_38_26/0.25)]',
-    aman: 'bg-gradient-to-br from-[#5fd08a] to-aman text-white shadow-[0_6px_14px_rgb(21_127_59/0.25)]',
+    biru: "bg-biru-muda text-biru",
+    kuning: "bg-kuning-muda text-[#c98a00]",
+    rugi: "bg-rugi-muda text-rugi",
+    aman: "bg-aman-muda text-aman",
   }[warna];
   return (
     <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${cls}`} aria-hidden>
-      <Ikon size={24} weight="fill" />
+      <Ikon size={26} weight="duotone" />
     </span>
   );
 }

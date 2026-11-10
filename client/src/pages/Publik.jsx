@@ -19,6 +19,12 @@ import {
   ChartLineUp,
   Scales,
   MapPin,
+  TrendUp,
+  Receipt,
+  ShieldCheck,
+  UserCheck,
+  Leaf,
+  Database,
 } from '@phosphor-icons/react';
 import { Chip, IkonKotak, Merek, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
@@ -145,50 +151,50 @@ function KpiMini({ ikon: Ikon, warna, label, nilai }) {
 // Pratinjau tampilan aplikasi. Angkanya dari akun demo, ditandai di bawahnya.
 function Pratinjau() {
   return (
-    <figure className="mx-auto max-w-3xl">
-      <div className="rounded-[28px] border border-white bg-white/60 p-2 shadow-[0_30px_70px_rgb(29_89_187/0.15)] backdrop-blur">
-        <div className="flex overflow-hidden rounded-[22px] border border-garis bg-white text-left">
-          <div className="hidden w-44 shrink-0 flex-col gap-1 bg-gradient-to-b from-navy to-[#2a3f66] p-4 text-sm text-white/75 sm:flex" aria-hidden>
-            <Merek terang className="mb-4 text-base" />
+    <figure className="mx-auto max-w-[720px]">
+      <div className="rounded-[26px] border border-white bg-white/60 p-2 shadow-[0_30px_70px_rgb(29_89_187/0.15)] backdrop-blur">
+        <div className="flex overflow-hidden rounded-[20px] border border-garis bg-white text-left">
+          <div className="hidden w-40 shrink-0 flex-col gap-1 bg-gradient-to-b from-navy to-[#2a3f66] p-3 text-[13px] text-white/75 sm:flex" aria-hidden>
+            <Merek terang className="mb-3 text-sm" />
             {[
               [House, 'Ringkasan', true],
               [ForkKnife, 'Produk'],
               [Storefront, 'Harga pasar'],
               [Basket, 'Bahan baku'],
             ].map(([Ikon, l, a]) => (
-              <span key={l} className={`flex items-center gap-2 rounded-xl px-3 py-2 ${a ? 'bg-biru-muda font-semibold text-biru' : ''}`}>
-                <Ikon size={16} weight={a ? 'fill' : 'regular'} /> {l}
+              <span key={l} className={`flex items-center gap-2 rounded-xl px-2.5 py-1.5 ${a ? 'bg-biru-muda font-semibold text-biru' : ''}`}>
+                <Ikon size={15} weight={a ? 'fill' : 'regular'} /> {l}
               </span>
             ))}
           </div>
-          <div className="min-w-0 flex-1 p-4 sm:p-6">
+          <div className="min-w-0 flex-1 p-4 sm:p-5">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-lg font-bold">Halo, Bu Sari!</p>
+                <p className="font-bold">Halo, Bu Sari!</p>
                 <p className="text-xs text-redup">Ringkasan modal Warung Bu Sari hari ini.</p>
               </div>
-              <span className="hidden items-center gap-1.5 rounded-xl border border-garis px-3 py-1.5 text-xs font-medium sm:inline-flex">
+              <span className="hidden items-center gap-1.5 rounded-xl border border-garis px-2.5 py-1 text-xs font-medium sm:inline-flex">
                 <CalendarBlank size={14} /> Hari ini <CaretDown size={12} />
               </span>
             </div>
-            <div className="mt-4 grid grid-cols-[auto_1fr] items-end gap-4 rounded-2xl bg-gradient-to-br from-biru-muda to-white p-4">
+            <div className="mt-3 grid grid-cols-[auto_1fr] items-end gap-4 rounded-2xl bg-gradient-to-br from-biru-muda to-white p-3.5">
               <div>
-                <p className="text-sm font-medium">Modal per porsi, Ayam Geprek</p>
-                <p className="angka mt-1 flex items-baseline gap-2 text-2xl font-extrabold sm:text-3xl">
+                <p className="text-xs font-medium">Modal per porsi, Ayam Geprek</p>
+                <p className="angka mt-1 flex flex-wrap items-baseline gap-2 text-2xl font-extrabold">
                   Rp8.708 <Chip status="aman">Untung 41,9%</Chip>
                 </p>
               </div>
               <Area />
             </div>
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <KpiMini ikon={ForkKnife} warna="bg-biru-muda text-biru" label="Menu dihitung" nilai="4 menu" />
-              <KpiMini ikon={ShoppingCart} warna="bg-kuning-muda text-kuning-tua" label="Belanja bulan ini" nilai="Rp628.750" />
+              <KpiMini ikon={ShoppingCart} warna="bg-kuning-muda text-[#c98a00]" label="Belanja bulan ini" nilai="Rp628.750" />
               <KpiMini ikon={ChartLineUp} warna="bg-biru-muda text-biru" label="Rata-rata untung" nilai="48,4%" />
             </div>
           </div>
         </div>
       </div>
-      <figcaption className="mt-3 text-center text-xs text-redup">Contoh tampilan dengan data akun demo.</figcaption>
+      <figcaption className="mt-2 text-center text-xs text-redup">Contoh tampilan dengan data akun demo.</figcaption>
     </figure>
   );
 }
@@ -200,11 +206,29 @@ const FAKTA = [
   [Microphone, 'Foto, suara, atau ketik'],
 ];
 
+const MASALAH = [
+  {
+    ikon: TrendUp,
+    judul: 'Harga bahan bergerak setiap minggu',
+    teks: 'Cabai rawit merah di Denpasar naik 10,6% dalam seminggu (PIHPS Bank Indonesia, 10 November 2026). Harga jual di papan menu tidak ikut berubah.',
+  },
+  {
+    ikon: Scales,
+    judul: 'Resep dicatat dengan sendok, bukan gram',
+    teks: 'Dua sendok gula, tiga siung bawang, satu potong ayam. Takaran seperti ini sulit dihitung menjadi rupiah tanpa alat bantu.',
+  },
+  {
+    ikon: Receipt,
+    judul: 'Nota belanja menumpuk tanpa dihitung',
+    teks: 'Nota disimpan, tetapi tidak pernah dipakai untuk memeriksa apakah setiap porsi masih menghasilkan untung.',
+  },
+];
+
 const LANGKAH = [
   {
     no: '01',
     judul: 'Ceritakan menu',
-    teks: 'Tulis menu, harga jual, dan takaran seperti biasa. Sendok, siung, dan potong boleh.',
+    teks: 'Tulis menu, harga jual, dan takaran dengan bahasa sehari-hari. AI menyusunnya menjadi resep yang bisa Anda periksa.',
     isi: (
       <div className="rounded-xl border border-garis bg-dasar p-3 text-sm text-redup">"Ayam geprek 15 ribu, ayam 1 potong, cabai rawit 20 gram, minyak 1 sdm, nasi 100 gram..."</div>
     ),
@@ -212,7 +236,7 @@ const LANGKAH = [
   {
     no: '02',
     judul: 'Catat belanja',
-    teks: 'Foto nota, ucapkan, atau ketik. Hasil bacaan diperiksa dulu sebelum disimpan.',
+    teks: 'Foto nota, ucapkan, atau ketik. Baris yang meragukan dan harga yang jauh dari pasar ditandai sebelum disimpan.',
     isi: (
       <ul className="tepi-nota rounded-xl border border-garis bg-dasar p-3 font-mono text-xs">
         {[
@@ -231,7 +255,7 @@ const LANGKAH = [
   {
     no: '03',
     judul: 'Lihat modal dan harga aman',
-    teks: 'Modal per porsi dihitung ulang setiap belanja. Menu yang untungnya menipis langsung ditandai.',
+    teks: 'Modal per porsi dihitung ulang setiap kali belanja disimpan. Menu yang untungnya di bawah target langsung ditandai.',
     isi: (
       <div className="rounded-xl border border-garis bg-dasar p-3">
         <p className="text-xs text-redup">Modal per porsi</p>
@@ -246,52 +270,84 @@ const LANGKAH = [
 ];
 
 const FITUR = [
-  { ikon: Camera, warna: 'biru', judul: 'Baca nota dan suara', teks: 'Singkatan seperti "cbe rwt" dan bahasa lisan seperti goceng atau ceban diubah jadi baris belanja.' },
-  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar daerah', teks: 'Harga pasar tradisional di kota Anda dari PIHPS Bank Indonesia, untuk membandingkan harga belanja.' },
-  { ikon: Calculator, warna: 'aman', judul: 'Saran harga dan simulasi', teks: 'Geser harga jual atau harga bahan, lihat untungnya berubah. Pilih saran harga dengan satu ketukan.' },
-  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Gabungkan menu jadi paket. Tiga pilihan harga lengkap dengan berapa banyak lagi harus terjual.' },
+  { ikon: Camera, warna: 'biru', judul: 'Baca nota, suara, dan tulisan', teks: 'Singkatan nota seperti "cbe rwt" dan bahasa lisan seperti goceng, ceban, atau "eh salah" diubah menjadi baris belanja.' },
+  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar daerah', teks: 'Harga pasar tradisional tingkat kota, provinsi, dan nasional dari PIHPS Bank Indonesia sebagai pembanding harga belanja.' },
+  { ikon: Calculator, warna: 'aman', judul: 'Saran harga dan simulasi', teks: 'Geser harga jual atau harga bahan dan lihat untungnya berubah. Saran harga bisa diterapkan langsung dari ringkasan.' },
+  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Tiga pilihan harga paket beserta tambahan penjualan yang dibutuhkan agar laba tidak turun. Paket rugi tidak bisa disimpan.' },
+];
+
+const PRINSIP = [
+  [ShieldCheck, 'Angka dihitung oleh kode', 'Modal, untung, dan harga aman memakai rumus tetap. Teks AI yang memuat angka di luar hasil hitungan dibuang dan diganti penjelasan baku.'],
+  [UserCheck, 'Pemilik usaha tetap memutuskan', 'Setiap hasil AI masuk ke halaman periksa terlebih dahulu. Tidak ada data yang dipakai sebelum disetujui.'],
+  [Leaf, 'Hemat sumber daya', 'Foto dikompres di ponsel, AI dipanggil hanya saat membaca atau menulis, dan harga pasar diambil paling sering sekali dalam enam jam.'],
+  [Database, 'Data publik yang jelas sumbernya', 'Harga pasar berasal dari PIHPS Bank Indonesia dengan tanggal yang selalu ditampilkan. Tidak ada pengambilan data dari toko atau marketplace.'],
 ];
 
 export function Beranda() {
   return (
     <main>
-      <section className="relative mx-auto max-w-6xl px-4 pt-10 pb-16 text-center sm:px-6 lg:pt-16">
+      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-12 text-center sm:px-6 lg:pt-10">
         <span className="inline-flex items-center gap-2 rounded-full border border-garis bg-white/80 px-4 py-1.5 text-sm font-medium shadow-kartu">
-          <ForkKnife size={16} weight="fill" className="text-kuning" aria-hidden /> Untuk warung makan, kedai, kue, dan katering
+          <ForkKnife size={16} weight="duotone" className="text-[#c98a00]" aria-hidden /> Untuk UMKM kuliner: warung, kedai, kue, dan katering
         </span>
-        <h1 className="mx-auto mt-5 max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[64px]">
+        <h1 className="mx-auto mt-4 max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]">
           Hitung HPP Usahamu
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-redup">
-          Foto nota, ucapkan, atau ketik belanjaan. takarin.ai menghitung modal tiap porsi, membandingkan dengan harga pasar di kotamu, dan memberi tahu harga jual yang aman.
+        <p className="mx-auto mt-4 max-w-2xl text-base text-redup sm:text-lg">
+          Harga bahan berubah setiap minggu, harga jual sering tetap. Takarin AI membaca nota belanja, menghitung modal setiap porsi, dan menunjukkan harga jual yang masih memenuhi target untung.
         </p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
-            Mulai Sekarang <ArrowRight size={18} weight="bold" aria-hidden />
+            Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
           <Tombol varian="garis" to="/#cara-kerja" className="!min-h-12 px-6 text-base">
-            <PlayCircle size={22} weight="fill" className="text-navy" aria-hidden /> Pelajari Cara Kerja
+            <PlayCircle size={22} weight="fill" className="text-navy" aria-hidden /> Lihat cara kerja
           </Tombol>
         </div>
 
-        <div className="relative mt-14">
-          <KartuMelayang posisi="-left-8 top-10 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
-          <KartuMelayang posisi="-right-8 top-24 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Dari PIHPS Bank Indonesia" />
+        <div className="relative mt-8">
+          <KartuMelayang posisi="left-0 top-12 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
+          <KartuMelayang posisi="right-0 top-20 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Data PIHPS Bank Indonesia" />
           <Pratinjau />
         </div>
 
-        <div className="mt-14">
+        <div className="mt-8">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
-            <p className="text-base font-semibold sm:text-lg">Yang sudah bisa dihitung</p>
+            <p className="text-base font-semibold">Dirancang mengikuti cara warung bekerja</p>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-kuning/70" />
           </div>
-          <ul className="mt-6 grid grid-cols-2 gap-4 text-left sm:grid-cols-4">
+          <ul className="mt-4 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
             {FAKTA.map(([Ikon, teks]) => (
               <li key={teks} className="flex items-center justify-center gap-2 text-sm font-semibold text-redup">
-                <Ikon size={26} weight="duotone" className="shrink-0 text-biru" aria-hidden /> {teks}
+                <Ikon size={24} weight="duotone" className="shrink-0 text-biru" aria-hidden /> {teks}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+          <div>
+            <span className="inline-block rounded-full bg-rugi-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-rugi">MASALAH</span>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Untung tergerus <span className="teks-emas">tanpa terasa</span>
+            </h2>
+            <p className="mt-3 text-redup">
+              Banyak usaha kuliner menentukan harga jual sekali di awal, lalu tidak menghitung ulang ketika harga bahan naik. Selisih kecil per porsi menjadi besar ketika dikalikan puluhan porsi setiap hari.
+            </p>
+          </div>
+          <ul className="grid gap-3">
+            {MASALAH.map(({ ikon, judul, teks }) => (
+              <li key={judul} className="flex gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
+                <IkonKotak ikon={ikon} warna="rugi" />
+                <div>
+                  <h3 className="font-semibold">{judul}</h3>
+                  <p className="mt-1 text-sm text-redup">{teks}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -302,14 +358,16 @@ export function Beranda() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <div className="text-center">
             <span className="inline-block rounded-full bg-biru-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-biru">CARA KERJA</span>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Hitung HPP dalam <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span></h2>
-            <p className="mx-auto mt-2 max-w-2xl text-redup">Tiga langkah. Setelah menu tersimpan, Anda cukup mencatat belanja.</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Hitung HPP dalam <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span>
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-redup">Setelah menu tersimpan, pekerjaan rutin Anda hanya mencatat belanja. Sisanya dihitung otomatis.</p>
           </div>
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {LANGKAH.map((l) => (
               <li key={l.no} className="flex flex-col gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
                 <div className="flex items-start gap-3">
-                  <span className="angka flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-biru-terang to-biru text-base font-extrabold text-white shadow-[0_6px_14px_rgb(29_89_187/0.3)]">{l.no}</span>
+                  <span className="angka flex size-11 shrink-0 items-center justify-center rounded-xl bg-biru-muda text-base font-extrabold text-biru">{l.no}</span>
                   <div>
                     <h3 className="font-semibold">{l.judul}</h3>
                     <p className="mt-1 text-sm text-redup">{l.teks}</p>
@@ -323,8 +381,12 @@ export function Beranda() {
       </section>
 
       <section id="fitur" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
-        <span className="inline-block rounded-full bg-kuning-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-kuning-tua">FITUR</span>
-        <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Semua Hitungan <span className="teks-biru">dalam</span> <span className="teks-emas">Satu Tempat</span></h2>
+        <div className="text-center">
+          <span className="inline-block rounded-full bg-kuning-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-kuning-tua">FITUR</span>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Semua Hitungan <span className="teks-biru">dalam</span> <span className="teks-emas">Satu Tempat</span>
+          </h2>
+        </div>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2">
           {FITUR.map((f) => (
             <li key={f.judul} className="flex gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
@@ -336,34 +398,33 @@ export function Beranda() {
             </li>
           ))}
         </ul>
+      </section>
 
-        <div className="mt-10 grid gap-6 rounded-[24px] border border-biru/15 bg-gradient-to-br from-biru-muda to-white p-6 sm:p-8 lg:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">AI membaca, kode yang menghitung</h2>
-            <p className="mt-3 text-redup">
-              AI membaca nota, memahami ucapan, menyusun resep dari cerita, dan merangkai penjelasan. Modal, untung, dan harga dihitung dengan rumus tetap. Kalimat AI yang memuat angka di luar hasil hitungan dibuang.
-            </p>
-          </div>
-          <ul className="flex flex-col gap-3 text-sm">
-            {[
-              [Camera, 'Foto nota dikompres di ponsel sebelum dikirim'],
-              [Microphone, 'Suara diubah jadi teks, lalu jadi baris belanja'],
-              [ChatText, 'Setiap hasil AI bisa diperiksa dan diubah'],
-            ].map(([Ikon, t]) => (
-              <li key={t} className="flex items-center gap-3 rounded-2xl bg-kartu p-3">
-                <Ikon size={22} weight="duotone" className="shrink-0 text-biru" aria-hidden /> {t}
+      <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <span className="inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold tracking-wide text-biru shadow-kartu">PRINSIP</span>
+          <h2 className="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">AI membaca, kode yang menghitung</h2>
+          <p className="mt-3 max-w-2xl text-redup">AI dipakai di bagian yang memang sulit bagi manusia: membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita. Angka yang menentukan harga tidak diserahkan kepada AI.</p>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+            {PRINSIP.map(([Ikon, judul, teks]) => (
+              <li key={judul} className="flex gap-4 rounded-[20px] border border-white bg-white/80 p-5 shadow-kartu">
+                <IkonKotak ikon={Ikon} warna="biru" />
+                <div>
+                  <h3 className="font-semibold">{judul}</h3>
+                  <p className="mt-1 text-sm text-redup">{teks}</p>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-16 text-center sm:px-6">
-        <h2 className="text-3xl font-bold tracking-tight">Mulai dari menu yang paling sering terjual</h2>
-        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, jawab beberapa pertanyaan tentang usaha, lalu ceritakan satu menu.</p>
+      <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
+        <h2 className="text-3xl font-extrabold tracking-tight">Mulai dari menu yang paling sering terjual</h2>
+        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, jawab enam pertanyaan tentang usaha Anda, lalu ceritakan satu menu. Modal per porsinya langsung terlihat.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
-            Daftar
+            Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
           <Tombol varian="garis" to="/bantuan" className="!min-h-12 px-7 text-base">
             Pertanyaan umum
@@ -409,8 +470,8 @@ export function Bantuan() {
 
 export function Tentang() {
   return (
-    <Halaman judul="Tentang takarin.ai">
-      <p>Banyak warung menentukan harga jual dengan perkiraan, lalu tidak sadar untungnya menipis ketika harga bahan naik. takarin.ai dibuat untuk menjawab satu pertanyaan: berapa modal satu porsi hari ini, dan apakah harga jual masih aman.</p>
+    <Halaman judul="Tentang Takarin AI">
+      <p>Banyak warung menentukan harga jual dengan perkiraan, lalu tidak sadar untungnya menipis ketika harga bahan naik. Takarin AI dibuat untuk menjawab satu pertanyaan: berapa modal satu porsi hari ini, dan apakah harga jual masih aman.</p>
       <h2>Cara kerja AI</h2>
       <ul>
         <li>Membaca foto nota dan tulisan tangan menjadi baris belanja.</li>
@@ -427,7 +488,7 @@ export function Tentang() {
       </ul>
       <h2>Etika data</h2>
       <ul>
-        <li>Data resep dan belanja hanya terlihat oleh akun Anda. takarin.ai tidak memakainya untuk melatih model.</li>
+        <li>Data resep dan belanja hanya terlihat oleh akun Anda. Takarin AI tidak memakainya untuk melatih model.</li>
         <li>Harga pasar berasal dari data publik PIHPS Bank Indonesia, diambil secukupnya (satu wilayah paling sering sekali dalam beberapa jam) dan selalu disebut sumbernya. Aplikasi tidak mengambil data toko, marketplace, atau aplikasi pesan antar tanpa izin.</li>
         <li>Semua hasil AI bisa diperiksa dan diubah sebelum dipakai.</li>
       </ul>
@@ -438,7 +499,7 @@ export function Tentang() {
 export function Privasi() {
   return (
     <Halaman judul="Kebijakan privasi">
-      <p>Halaman ini menjelaskan data yang disimpan takarin.ai dan cara memakainya.</p>
+      <p>Halaman ini menjelaskan data yang disimpan Takarin AI dan cara memakainya.</p>
       <h2>Data yang disimpan</h2>
       <ul>
         <li>Nama, email, dan password untuk masuk. Password disimpan dalam bentuk hash, bukan teks asli.</li>
@@ -458,7 +519,7 @@ export function Privasi() {
 export function Syarat() {
   return (
     <Halaman judul="Syarat dan ketentuan">
-      <p>takarin.ai adalah alat bantu menghitung. Keputusan harga jual tetap di tangan pemilik usaha.</p>
+      <p>Takarin AI adalah alat bantu menghitung. Keputusan harga jual tetap di tangan pemilik usaha.</p>
       <h2>Ketepatan angka</h2>
       <p>Modal dihitung dari takaran dan harga yang Anda masukkan atau setujui. Konversi takaran rumah tangga memakai perkiraan umum, sehingga hasilnya bisa berbeda dengan timbangan sebenarnya.</p>
       <h2>Hasil AI</h2>
