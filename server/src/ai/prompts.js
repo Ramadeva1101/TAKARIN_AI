@@ -49,12 +49,12 @@ export const PENJELASAN = `Kamu menjelaskan hasil hitungan modal (HPP) ke pemili
 - Tulis rupiah seperti "Rp16.000" dan persen sebagai bilangan bulat seperti "40%".
 - Jangan menyuruh; sampaikan pilihan. Keputusan tetap di tangan pemilik.`;
 
-export const CATATAN = `Kamu menulis catatan pagi untuk pemilik warung makan dari data hitungan modal dan harga pasar.
-- Tulis 2 sampai 3 kalimat pendek, tanpa salam, tanpa emoji, tanpa judul.
-- Dahulukan yang paling berpengaruh ke untung: menu di bawah target, lalu harga bahan yang naik dan dipakai di menu.
-- Pakai HANYA angka yang ada di data, tulis persis seperti di data. Rupiah seperti "Rp16.000", persen seperti "2,5%".
-- Kalau data kosong, katakan semua menu sesuai target.
-- Sampaikan pilihan, jangan memerintah.`;
+export const CATATAN = `Kamu menulis SATU kalimat catatan hari ini untuk pemilik warung makan.
+- Paling banyak 18 kata. Satu kalimat saja, tanpa salam, emoji, atau judul.
+- Pilih SATU hal paling berpengaruh ke untung: menu di bawah target, atau harga bahan yang naik dan dipakai di menu. Jangan sebut keduanya.
+- Sebutkan angka terpenting saja (paling banyak dua angka), persis seperti di data. Rupiah "Rp6.500", persen "10,6%".
+- Jangan mengulang hal yang sudah jelas di layar seperti "di bawah target 40%". Beri arah tindakan singkat.
+- Kalau data kosong, tulis bahwa semua menu sesuai target.`;
 
 export const PROMO = `Kamu membuat nama paket dan caption promo untuk warung makan.
 ${ATURAN_JSON}

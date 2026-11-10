@@ -1,48 +1,31 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChartLineUp, Trophy, TrendUp, Receipt, Warning, Lightbulb, Plus, ShoppingCart } from '@phosphor-icons/react';
+import { Warning, Lightbulb, Plus, ShoppingCart } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { useAuth } from '../lib/auth.jsx';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
-import { Chip, Galat, IkonKotak, Kartu, Muat, Tombol } from '../components/ui.jsx';
+import { Chip, Galat, Kartu, Muat, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
 import { Perubahan } from './Pasar.jsx';
 
-function Kpi({ ikon, warna, label, children }) {
+function Kpi({ label, children }) {
   return (
-    <Kartu className="flex items-start gap-3">
-      <IkonKotak ikon={ikon} warna={warna} />
-      <div className="min-w-0">
-        <p className="text-sm text-redup">{label}</p>
-        <div className="mt-1">{children}</div>
-      </div>
+    <Kartu>
+      <p className="text-sm text-redup">{label}</p>
+      <div className="mt-1.5">{children}</div>
     </Kartu>
   );
 }
 
-function Catatan() {
-  const { data, loading, error, muat } = useApi('/dashboard/catatan');
+// Satu kalimat dari AI tentang hal terpenting hari ini. Dipakai di banner, atau baris tipis kalau semua aman.
+function TeksCatatan({ catatan, cadangan }) {
+  if (catatan.loading && !catatan.data) return <span className="text-redup">{cadangan}</span>;
+  if (!catatan.data) return <span>{cadangan}</span>;
   return (
-    <section className="rounded-[20px] border border-biru/15 bg-gradient-to-br from-biru-muda via-white to-kuning-muda/60 p-4 shadow-kartu sm:p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">Catatan hari ini</h2>
-        {data && <span className="text-xs text-redup">{data.sumber === 'ai' ? 'Dirangkum AI dari angka hitungan' : 'Ringkasan otomatis'}</span>}
-      </div>
-      {loading && !data ? (
-        <p role="status" className="mt-2 text-sm text-redup">
-          Merangkum kondisi usaha hari ini
-        </p>
-      ) : error ? (
-        <p className="mt-2 text-sm">
-          Catatan belum bisa dibuat.{' '}
-          <button className="min-h-11 font-semibold text-biru underline" onClick={muat}>
-            Coba lagi
-          </button>
-        </p>
-      ) : (
-        <p className="mt-2 max-w-3xl leading-relaxed">{data.teks}</p>
-      )}
-    </section>
+    <>
+      {catatan.data.teks}
+      {catatan.data.sumber === "ai" && <span className="ml-2 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-semibold text-biru">Catatan AI</span>}
+    </>
   );
 }
 
@@ -103,6 +86,7 @@ function Saran({ daftar, sesudah }) {
 export default function Dashboard() {
   const { user } = useAuth();
   const { data, loading, error, muat } = useApi('/dashboard');
+  const catatan = useApi('/dashboard/catatan');
   if (loading && !data) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
   const { usaha, kpi, produk, perlu_tindakan, bahan_naik, pasar_ringkas, belanja_terakhir } = data;
@@ -132,7 +116,9 @@ export default function Dashboard() {
             <p className="font-semibold">
               {diBawah} dari {kpi.jumlah_produk} menu di bawah target untung.
             </p>
-            <p className="text-sm text-kuning-tua">Target Anda {persen(usaha.target_margin)}. Lihat saran harga di samping atau rincian modalnya.</p>
+            <p className="text-sm text-kuning-tua">
+              <TeksCatatan catatan={catatan} cadangan={`Target Anda ${persen(usaha.target_margin)}. Lihat saran harga di samping.`} />
+            </p>
           </div>
           <Tombol varian="garis" to={`/produk/${perlu_tindakan[0]?.id ?? ''}`}>
             Lihat rincian
@@ -140,14 +126,18 @@ export default function Dashboard() {
         </div>
       )}
 
-      <Catatan />
+      {diBawah === 0 && (
+        <p className="mb-4 rounded-2xl border border-garis bg-white/80 px-4 py-3 text-sm shadow-kartu">
+          <TeksCatatan catatan={catatan} cadangan="Semua menu sesuai target untung." />
+        </p>
+      )}
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi ikon={ChartLineUp} warna="biru" label="Rata-rata untung">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Kpi label="Rata-rata untung">
           <p className="angka text-2xl font-bold">{persen(kpi.rata_margin)}</p>
           <p className="text-xs text-redup">Target {persen(usaha.target_margin)}</p>
         </Kpi>
-        <Kpi ikon={Trophy} warna="kuning" label="Menu paling untung">
+        <Kpi label="Menu paling untung">
           {terbaik ? (
             <>
               <Link to={`/produk/${terbaik.id}`} className="block truncate text-lg font-bold hover:text-biru">
@@ -159,7 +149,7 @@ export default function Dashboard() {
             <p className="text-sm text-redup">Belum ada hitungan lengkap</p>
           )}
         </Kpi>
-        <Kpi ikon={TrendUp} warna="rugi" label="Bahan naik tertinggi">
+        <Kpi label="Bahan naik tertinggi">
           {naik ? (
             <>
               <Link to={`/bahan/${naik.id}`} className="block truncate text-lg font-bold capitalize hover:text-biru">
@@ -171,7 +161,7 @@ export default function Dashboard() {
             <p className="text-sm text-redup">Tidak ada yang naik dari belanja sebelumnya</p>
           )}
         </Kpi>
-        <Kpi ikon={Receipt} warna="biru" label="Belanja bulan ini">
+        <Kpi label="Belanja bulan ini">
           <p className="angka text-2xl font-bold">{rupiah(kpi.belanja_bulan_ini)}</p>
           <p className="text-xs text-redup">{kpi.nota_bulan_ini} catatan</p>
         </Kpi>

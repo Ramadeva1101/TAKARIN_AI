@@ -111,16 +111,18 @@ export function infoHarian(usaha, data = hargaWilayah(usaha)) {
     .sort((a, b) => Math.abs(b.perubahan) - Math.abs(a.perubahan));
 }
 
+// Satu kalimat pendek: hal terpenting saja.
 function catatanTemplat(info, perlu) {
-  const kalimat = [];
-  if (perlu.length) {
-    const p = perlu[0];
-    kalimat.push(`${p.nama} untungnya ${persenTeks(p.margin)}, di bawah target. Harga aman ${rupiah(p.harga_aman)}.`);
+  if (perlu.length) return `Naikkan ${perlu[0].nama} ke ${rupiah(perlu[0].harga_aman)} agar untungnya kembali sesuai target.`;
+  if (info.length) {
+    const i = info[0];
+    return `${i.komoditas[0].toUpperCase()}${i.komoditas.slice(1)} ${i.arah} ${persenTeks(i.perubahan)}${i.menu.length ? `, pantau harga ${i.menu[0].nama}` : ''}.`;
   }
-  if (info.length) kalimat.push(info[0].teks + (info[0].menu.length ? ` Dipakai di ${info[0].menu.map((m) => m.nama).join(', ')}.` : ''));
-  if (!kalimat.length) kalimat.push('Semua menu sesuai target dan harga bahan di pasar stabil.');
-  return kalimat.join(' ');
+  return 'Semua menu sesuai target hari ini.';
 }
+
+// Catatan AI ditolak kalau kepanjangan atau lebih dari satu kalimat.
+const terlaluPanjang = (teks) => teks.split(/\s+/).length > 22 || (teks.match(/[.!?](\s|$)/g) || []).length > 1;
 
 // Catatan singkat untuk hari ini. AI hanya merangkai kalimat dari fakta; angka dicek ulang.
 export async function catatanHarian(usaha) {
@@ -130,8 +132,9 @@ export async function catatanHarian(usaha) {
   const fakta = {
     usaha: usaha.nama,
     target_untung_persen: Math.round(usaha.target_margin * 100),
-    menu_di_bawah_target: perlu.slice(0, 3).map((p) => ({ nama: p.nama, untung_persen: Number((p.margin * 100).toFixed(1)), modal: Math.round(p.hpp), harga_jual: p.harga_jual, harga_aman: p.harga_aman })),
-    kabar_harga: info.map((i) => ({ bahan: i.komoditas, arah: i.arah, perubahan_persen: Number((Math.abs(i.perubahan) * 100).toFixed(1)), periode: i.periode, harga: i.harga, satuan: i.satuan, wilayah: i.wilayah, dipakai_di: i.menu.map((m) => m.nama) })),
+    // Hanya satu fokus: menu di bawah target didahulukan, kabar harga dipakai kalau semua menu aman.
+    menu_di_bawah_target: perlu.slice(0, 1).map((p) => ({ nama: p.nama, untung_persen: Number((p.margin * 100).toFixed(1)), modal: Math.round(p.hpp), harga_jual: p.harga_jual, harga_aman: p.harga_aman })),
+    kabar_harga: (perlu.length ? [] : info.slice(0, 1)).map((i) => ({ bahan: i.komoditas, arah: i.arah, perubahan_persen: Number((Math.abs(i.perubahan) * 100).toFixed(1)), periode: i.periode, harga: i.harga, satuan: i.satuan, wilayah: i.wilayah, dipakai_di: i.menu.map((m) => m.nama) })),
   };
   const angka = [
     ...fakta.menu_di_bawah_target.flatMap((m) => [m.modal, m.harga_jual, m.harga_aman]),
@@ -141,7 +144,8 @@ export async function catatanHarian(usaha) {
 
   let teks = await tulisCatatan(fakta);
   let sumber = 'ai';
-  if (!teks || !validasiAngka(teks, angka, persen).valid) {
+  teks = teks?.trim().replace(/^["']|["']$/g, '');
+  if (!teks || terlaluPanjang(teks) || !validasiAngka(teks, angka, persen).valid) {
     teks = catatanTemplat(info, perlu);
     sumber = 'templat';
   }

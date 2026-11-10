@@ -134,16 +134,11 @@ function Area() {
   );
 }
 
-function KpiMini({ ikon: Ikon, warna, label, nilai }) {
+function KpiMini({ label, nilai }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-garis bg-white p-3 shadow-kartu">
-      <span className={`flex size-9 items-center justify-center rounded-xl ${warna}`}>
-        <Ikon size={20} weight="fill" />
-      </span>
-      <div className="min-w-0">
-        <p className="text-xs text-redup">{label}</p>
-        <p className="angka truncate font-bold">{nilai}</p>
-      </div>
+    <div className="rounded-2xl border border-garis bg-white p-3 shadow-kartu">
+      <p className="text-xs text-redup">{label}</p>
+      <p className="angka mt-0.5 truncate font-bold">{nilai}</p>
     </div>
   );
 }
@@ -187,9 +182,9 @@ function Pratinjau() {
               <Area />
             </div>
             <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-              <KpiMini ikon={ForkKnife} warna="bg-biru-muda text-biru" label="Menu dihitung" nilai="4 menu" />
-              <KpiMini ikon={ShoppingCart} warna="bg-kuning-muda text-[#c98a00]" label="Belanja bulan ini" nilai="Rp628.750" />
-              <KpiMini ikon={ChartLineUp} warna="bg-biru-muda text-biru" label="Rata-rata untung" nilai="48,4%" />
+              <KpiMini label="Menu dihitung" nilai="4 menu" />
+              <KpiMini label="Belanja bulan ini" nilai="Rp628.750" />
+              <KpiMini label="Rata-rata untung" nilai="48,4%" />
             </div>
           </div>
         </div>

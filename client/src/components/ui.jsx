@@ -93,20 +93,10 @@ export function Merek({ className = "", terang = false }) {
   return <img src="/logo-takarin.webp" alt="Takarin AI" height={tinggi} style={{ height: tinggi, width: "auto" }} className="inline-block shrink-0" />;
 }
 
-// Kotak ikon berwarna di kartu angka.
-export function IkonKotak({ ikon: Ikon, warna = 'biru' }) {
-  // Kotak berwarna muda dengan ikon duotone, seperti contoh desain. Tanpa gradasi atau bayangan tebal.
-  const cls = {
-    biru: "bg-biru-muda text-biru",
-    kuning: "bg-kuning-muda text-[#c98a00]",
-    rugi: "bg-rugi-muda text-rugi",
-    aman: "bg-aman-muda text-aman",
-  }[warna];
-  return (
-    <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${cls}`} aria-hidden>
-      <Ikon size={26} weight="duotone" />
-    </span>
-  );
+// Ikon penanda di daftar fitur: ikon polos berwarna, tanpa kotak latar.
+export function IkonKotak({ ikon: Ikon, warna = "biru" }) {
+  const cls = { biru: "text-biru", kuning: "text-[#c98a00]", rugi: "text-rugi", aman: "text-aman" }[warna];
+  return <Ikon size={28} weight="duotone" className={`mt-0.5 shrink-0 ${cls}`} aria-hidden />;
 }
 
 export function Kartu({ className = '', children, ...p }) {
