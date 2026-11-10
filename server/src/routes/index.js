@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { get, run } from '../lib/db.js';
 import { AppError } from '../lib/errors.js';
-import { modeAi } from '../ai/provider.js';
+import { modeAi, cekJenisUsaha } from '../ai/provider.js';
 import { wajibLogin, wajibUsaha, unggahFoto, unggahSuara, validasi, rahasiaJwt } from '../middleware/index.js';
 import * as S from './skema.js';
 import * as usaha from '../services/usaha.js';
@@ -50,6 +50,7 @@ router.get('/pasar/provinsi', async (_req, res) => res.json(await pasar.daftarPr
 router.get('/pasar/kota', async (req, res) => res.json(await pasar.daftarKotaPilihan(String(req.query.provinsi || ''))));
 
 // ---- Onboarding ----
+router.post('/usaha/cek-jenis', validasi(S.cekJenis), async (req, res) => res.json((await cekJenisUsaha(req.body.teks)).data));
 router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => res.json(await usaha.draftDariCerita(req.body.teks)));
 router.post('/usaha/setup', validasi(S.setup), (req, res) => {
   const hasil = usaha.simpanSetup(req.user.id, req.body);

@@ -339,6 +339,40 @@ export default function Dashboard() {
   const naik = bahan_naik[0];
   const diBawah = kpi.waspada + kpi.rugi;
 
+  // Akun baru tanpa menu: arahkan ke langkah pertama, bukan kartu angka kosong.
+  if (!produk.length)
+    return (
+      <>
+        <header className="mb-5">
+          <h1 className="text-2xl font-bold sm:text-[28px]">Halo, {user?.nama || 'Pebisnis'}</h1>
+          <p className="mt-1 text-sm text-redup">
+            {usaha.nama}
+            {usaha.kota ? `, ${usaha.kota}` : ''}
+          </p>
+        </header>
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          <div className="rounded-[24px] bg-biru p-6 text-white shadow-[0_20px_45px_rgb(29_89_187/0.25)] sm:p-8">
+            <h2 className="text-2xl font-bold">Tambahkan menu pertama</h2>
+            <p className="mt-2 max-w-lg text-white/85">Ceritakan menu dengan bahasa sehari-hari: nama, harga jual, dan bahan per porsi. AI menyusunnya menjadi resep, lalu modal per porsi langsung dihitung.</p>
+            <Tombol to="/produk/baru" varian="garis" className="mt-6 !border-transparent !bg-kuning !text-tinta hover:!bg-[#f2b000]">
+              <Plus size={16} weight="bold" aria-hidden /> Tambah menu
+            </Tombol>
+          </div>
+          <Kartu>
+            <h2 className="text-lg font-semibold">Setelah menu tersimpan</h2>
+            <ol className="mt-3 flex flex-col gap-3 text-sm">
+              {['Modal dan untung tiap porsi dihitung dari harga pasar daerah Anda.', 'Catat belanja dari foto nota, suara, atau ketik supaya modal memakai harga yang Anda bayar.', 'Menu yang untungnya di bawah target diberi saran harga.'].map((t, i) => (
+                <li key={t} className="flex gap-3">
+                  <span className="angka flex size-7 shrink-0 items-center justify-center rounded-full bg-biru-muda text-xs font-bold text-biru">{i + 1}</span>
+                  <span className="pt-1">{t}</span>
+                </li>
+              ))}
+            </ol>
+          </Kartu>
+        </section>
+      </>
+    );
+
   return (
     <>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">

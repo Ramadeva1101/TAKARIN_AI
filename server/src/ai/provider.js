@@ -147,3 +147,17 @@ export async function saranPromo(data) {
   if (modeAi() === 'fixture') return { data: skema.promoSaran.parse(fixture('promo')), model: 'fixture' };
   return chatJson(modelTeks(), [{ role: 'system', content: prompt.PROMO }, { role: 'user', content: JSON.stringify(data) }], skema.promoSaran);
 }
+
+// Kata kunci untuk mode fixture: perkiraan sederhana tanpa AI.
+const KUNCI_KULINER = /(makan|warung|kedai|kopi|teh|jus|minum|kue|roti|bakso|mie|mi |nasi|ayam|sate|seblak|angkringan|katering|catering|frozen|sambal|jamu|gorengan|martabak|donat|es |cafe|kafe|dapur|resto|bakery|snack|keripik|pempek|soto)/i;
+
+export async function cekJenisUsaha(teks) {
+  if (modeAi() === 'fixture') {
+    const valid = KUNCI_KULINER.test(` ${teks} `);
+    return {
+      data: { valid, kelompok: valid ? 'kuliner lain' : null, nama_jenis: valid ? teks.trim().toLowerCase().slice(0, 40) : null, alasan: valid ? 'Terlihat seperti usaha yang mengolah makanan atau minuman.' : 'Tidak terlihat seperti usaha yang mengolah makanan atau minuman.' },
+      model: 'fixture',
+    };
+  }
+  return chatJson(modelTeks(), [{ role: 'system', content: prompt.JENIS_USAHA }, { role: 'user', content: teks }], skema.jenisUsaha);
+}

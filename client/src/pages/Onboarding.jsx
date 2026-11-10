@@ -1,41 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash } from '@phosphor-icons/react';
+import { CheckCircle, Trash, WarningCircle } from '@phosphor-icons/react';
 import { api, pesanGalat } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import { Field, Kartu, Merek, Tombol, inputCls } from '../components/ui.jsx';
-import ResepEditor, { cekResep, rapikanResep, resepKosong } from '../components/ResepEditor.jsx';
-
-const JENIS = [
-  {
-    id: 'warung makan',
-    label: 'Warung makan',
-    ket: 'Nasi, lauk, mi, gorengan',
-    contoh:
-      'Saya jualan ayam geprek 15 ribu. Satu porsi pakai 1 potong ayam, tepung bumbu 50 gram, cabai rawit 20 gram, bawang putih 1 siung, minyak 1 sdm, nasi 100 gram, kertas nasi. Es teh 4 ribu: 1 teh celup, gula 2 sdm, es batu 150 gram, cup plastik.',
-  },
-  {
-    id: 'kedai minuman',
-    label: 'Kedai minuman',
-    ket: 'Es teh, kopi, jus',
-    contoh:
-      'Es kopi susu 12 ribu: kopi bubuk 15 gram, susu kental manis 2 sdm, susu cair 100 ml, es batu 150 gram, cup plastik dan sedotan. Es jeruk 6 ribu: jeruk peras 150 gram, gula 2 sdm, es batu, cup.',
-  },
-  {
-    id: 'kue dan jajanan',
-    label: 'Kue dan jajanan',
-    ket: 'Dibuat per adonan',
-    contoh:
-      'Bolu pandan dijual 3 ribu per potong. Satu loyang jadi 20 potong: tepung terigu 250 gram, telur 4 butir, gula pasir 200 gram, margarin 100 gram, santan 200 ml, pasta pandan 1 sdt. Plastik mika 1 per potong.',
-  },
-  {
-    id: 'katering',
-    label: 'Katering',
-    ket: 'Nasi kotak, pesanan',
-    contoh:
-      'Nasi kotak ayam bakar 25 ribu. Per kotak: nasi 150 gram, ayam 1 potong, tempe 1 potong, sambal 1 sdm, lalapan, kerupuk 1, kotak nasi 1. Bumbu ayam bakar per 10 potong: bawang merah 8 siung, bawang putih 5 siung, kecap 5 sdm.',
-  },
-];
+import { JENIS } from '../lib/jenis.js';
 
 const TARGET = [
   { nilai: 30, ket: 'Harga bersaing, untung tipis per porsi' },
@@ -43,7 +12,7 @@ const TARGET = [
   { nilai: 50, ket: 'Untuk menu andalan atau minuman' },
 ];
 
-const LANGKAH = ['Jenis usaha', 'Lokasi', 'Penjualan', 'Biaya rutin', 'Menu', 'Periksa'];
+const LANGKAH = ['Jenis usaha', 'Lokasi', 'Penjualan', 'Biaya rutin'];
 
 function Pilihan({ aktif, onClick, judul, ket }) {
   return (
@@ -68,10 +37,8 @@ export default function Onboarding() {
   const bersih = (s) => s.toLowerCase().replace(/^(kota administrasi|kota|kabupaten|kab\.?)\s+/, '').trim();
   const [usaha, setUsaha] = useState({ nama: '', jenis: '', kota: '', provinsi: '', target_margin: 40, porsi_per_hari: '' });
   const [rutin, setRutin] = useState({ gas: '', listrik: '', sewa: '' });
-  const [cerita, setCerita] = useState('');
-  const [produk, setProduk] = useState([resepKosong()]);
-  const [biayaAi, setBiayaAi] = useState([]);
-  const [pertanyaan, setPertanyaan] = useState([]);
+  // Jenis usaha di luar daftar: diisi sendiri lalu diperiksa AI.
+  const [lain, setLain] = useState({ aktif: false, teks: '', hasil: null, cek: false, galat: null });
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState(null);
 
@@ -94,13 +61,12 @@ export default function Onboarding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usaha.provinsi, wilayah.provinsi]);
 
-  const jenis = JENIS.find((j) => j.id === usaha.jenis);
   const u = (k) => (e) => setUsaha({ ...usaha, [k]: e.target.value });
   const adaKota = wilayah.kota.some((k) => bersih(k) === bersih(usaha.kota.trim()));
   const adaProv = wilayah.provinsi.some((k) => bersih(k) === bersih(usaha.provinsi.trim()));
 
   const bisaLanjut = [
-    usaha.nama.trim() && usaha.jenis,
+    usaha.nama.trim() && (lain.aktif ? lain.hasil?.valid && lain.hasil.teks === lain.teks.trim() : usaha.jenis),
     usaha.kota.trim() && usaha.provinsi.trim(),
     Number(usaha.porsi_per_hari) > 0 && Number(usaha.target_margin) >= 5,
     true,
@@ -115,27 +81,19 @@ export default function Onboarding() {
       .filter(([, n]) => Number(n) > 0)
       .map(([nama, nominal, periode]) => ({ nama, nominal: Number(nominal), periode }));
 
-  const susun = async () => {
-    setProses(true);
-    setGalat(null);
+  const periksaJenis = async () => {
+    const teks = lain.teks.trim();
+    setLain((l) => ({ ...l, cek: true, galat: null, hasil: null }));
     try {
-      const d = await api('/usaha/cerita', { method: 'POST', body: { teks: cerita } });
-      if (d.produk?.length) setProduk(d.produk.map((p) => ({ ...p, harga_jual: p.harga_jual ?? '', bahan: p.bahan.length ? p.bahan.map((b) => ({ ...b, qty: b.qty ?? '' })) : resepKosong().bahan })));
-      const sudah = biayaSurvei().map((b) => b.nama);
-      setBiayaAi((d.biaya || []).filter((b) => b.nominal && !sudah.some((s) => b.nama.toLowerCase().includes(s.split(' ')[0]))));
-      setPertanyaan(d.pertanyaan || []);
-      setLangkah(5);
+      const h = await api('/usaha/cek-jenis', { method: 'POST', body: { teks } });
+      setLain((l) => ({ ...l, cek: false, hasil: { ...h, teks } }));
+      if (h.valid) setUsaha((x) => ({ ...x, jenis: h.nama_jenis || teks.toLowerCase() }));
     } catch (err) {
-      setGalat(`${pesanGalat(err)}. Anda tetap bisa mengisi menu manual.`);
-    } finally {
-      setProses(false);
+      setLain((l) => ({ ...l, cek: false, galat: pesanGalat(err) }));
     }
   };
 
   const simpan = async () => {
-    const daftarProduk = produk.map(rapikanResep);
-    const masalah = daftarProduk.map(cekResep).find(Boolean);
-    if (masalah) return setGalat(masalah);
     setProses(true);
     setGalat(null);
     try {
@@ -143,12 +101,13 @@ export default function Onboarding() {
         method: 'POST',
         body: {
           usaha: { ...usaha, target_margin: Number(usaha.target_margin) / 100, porsi_per_hari: Number(usaha.porsi_per_hari) },
-          produk: daftarProduk,
-          biaya: [...biayaSurvei(), ...biayaAi.filter((b) => b.nama.trim() && Number(b.nominal) > 0).map((b) => ({ ...b, nominal: Number(b.nominal) }))],
+          produk: [],
+          biaya: biayaSurvei(),
         },
       });
       await segarkan();
-      nav('/', { replace: true });
+      // Menu dibuat setelah masuk, di halaman tambah menu.
+      nav('/produk/baru?awal=1', { replace: true });
     } catch (err) {
       setGalat(pesanGalat(err));
       setProses(false);
@@ -180,9 +139,59 @@ export default function Onboarding() {
           <Field className="mt-5" label="Nama usaha" value={usaha.nama} onChange={u('nama')} placeholder="Warung Bu Sari" />
           <div role="radiogroup" aria-label="Jenis usaha" className="mt-4 grid gap-2 sm:grid-cols-2">
             {JENIS.map((j) => (
-              <Pilihan key={j.id} aktif={usaha.jenis === j.id} onClick={() => setUsaha({ ...usaha, jenis: j.id })} judul={j.label} ket={j.ket} />
+              <Pilihan
+                key={j.id}
+                aktif={!lain.aktif && usaha.jenis === j.id}
+                onClick={() => {
+                  setLain((l) => ({ ...l, aktif: false }));
+                  setUsaha({ ...usaha, jenis: j.id });
+                }}
+                judul={j.label}
+                ket={j.ket}
+              />
             ))}
+            <Pilihan
+              aktif={lain.aktif}
+              onClick={() => {
+                setLain((l) => ({ ...l, aktif: true }));
+                setUsaha({ ...usaha, jenis: lain.hasil?.valid ? lain.hasil.nama_jenis || lain.teks.trim().toLowerCase() : '' });
+              }}
+              judul="Jenis lain"
+              ket="Angkringan, frozen food, sambal kemasan, dan lainnya"
+            />
           </div>
+          {lain.aktif && (
+            <Kartu className="mt-3">
+              <label htmlFor="jenis-lain" className="mb-1 block text-sm font-medium">
+                Tulis jenis usaha Anda
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  id="jenis-lain"
+                  value={lain.teks}
+                  onChange={(e) => setLain({ ...lain, teks: e.target.value, hasil: null })}
+                  onKeyDown={(e) => e.key === 'Enter' && lain.teks.trim().length >= 3 && periksaJenis()}
+                  placeholder="Contoh: dimsum beku rumahan"
+                  maxLength={60}
+                  className="min-h-11 min-w-0 flex-1 rounded-xl border border-garis bg-kartu px-3 text-base outline-none focus:border-biru"
+                />
+                <Tombol varian="polos" onClick={periksaJenis} disabled={lain.cek || lain.teks.trim().length < 3}>
+                  {lain.cek ? 'Memeriksa' : 'Periksa'}
+                </Tombol>
+              </div>
+              <p className="mt-1 text-xs text-redup">AI memeriksa apakah usaha ini mengolah bahan menjadi makanan atau minuman, karena modal per porsi hanya bisa dihitung untuk usaha seperti itu.</p>
+              {lain.hasil && (
+                <p role="status" className={`mt-3 flex gap-2 rounded-xl px-3 py-2 text-sm ${lain.hasil.valid ? 'bg-aman-muda text-aman' : 'bg-waspada-muda text-waspada'}`}>
+                  {lain.hasil.valid ? <CheckCircle size={20} weight="fill" className="shrink-0" aria-hidden /> : <WarningCircle size={20} weight="fill" className="shrink-0" aria-hidden />}
+                  <span>
+                    <b>{lain.hasil.valid ? `Bisa dihitung: ${lain.hasil.nama_jenis || lain.teks}` : 'Belum bisa dihitung'}</b>
+                    <span className="block">{lain.hasil.alasan}</span>
+                  </span>
+                </p>
+              )}
+              {lain.galat && <p className="mt-3 text-sm text-rugi">{lain.galat}. Coba lagi, atau pilih jenis terdekat di atas.</p>}
+            </Kartu>
+          )}
         </section>
       )}
 
@@ -245,80 +254,12 @@ export default function Onboarding() {
       {langkah === 3 && (
         <section>
           <h1 className="mt-1 text-2xl font-bold">Biaya rutin di luar bahan</h1>
-          <p className="mt-2 text-redup">Biaya ini ikut dibagi ke setiap porsi. Kosongkan yang tidak ada.</p>
+          <p className="mt-2 text-redup">Biaya ini ikut dibagi ke setiap porsi. Kosongkan yang tidak ada. Setelah ini Anda langsung bisa menambahkan menu.</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Field label="Gas per hari (Rp)" type="number" min="0" inputMode="numeric" value={rutin.gas} onChange={(e) => setRutin({ ...rutin, gas: e.target.value })} hint="Contoh: tabung 3 kg Rp22.000 habis 2 hari = 11000" />
             <Field label="Listrik per bulan (Rp)" type="number" min="0" inputMode="numeric" value={rutin.listrik} onChange={(e) => setRutin({ ...rutin, listrik: e.target.value })} />
             <Field label="Sewa tempat per bulan (Rp)" type="number" min="0" inputMode="numeric" value={rutin.sewa} onChange={(e) => setRutin({ ...rutin, sewa: e.target.value })} />
           </div>
-        </section>
-      )}
-
-      {langkah === 4 && (
-        <section>
-          <h1 className="mt-1 text-2xl font-bold">Ceritakan menu Anda</h1>
-          <p className="mt-2 text-redup">
-            Tulis seperti bercerita: nama menu, harga jual, bahan dan takaran per porsi. Takaran rumah tangga seperti sdm atau siung boleh. AI menyusunnya jadi resep, Anda periksa di langkah berikutnya.
-          </p>
-          <Kartu className="mt-5">
-            <Field label="Cerita menu" as="textarea" rows={7} value={cerita} onChange={(e) => setCerita(e.target.value)} placeholder={jenis?.contoh} />
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Tombol onClick={susun} disabled={proses || cerita.trim().length < 10}>
-                {proses ? 'Menyusun resep' : 'Susun resep'}
-              </Tombol>
-              {jenis && (
-                <Tombol varian="garis" onClick={() => setCerita(jenis.contoh)}>
-                  Pakai contoh {jenis.label.toLowerCase()}
-                </Tombol>
-              )}
-              <Tombol varian="hantu" onClick={() => setLangkah(5)}>
-                Isi manual
-              </Tombol>
-            </div>
-          </Kartu>
-        </section>
-      )}
-
-      {langkah === 5 && (
-        <section>
-          <h1 className="mt-1 text-2xl font-bold">Periksa resep</h1>
-          <p className="mt-2 text-redup">Ubah yang kurang tepat. Semua bisa diganti lagi nanti.</p>
-          {pertanyaan.length > 0 && (
-            <div className="mt-5 rounded-2xl bg-waspada-muda p-4 text-sm text-waspada">
-              <p className="font-semibold">Belum disebut di cerita:</p>
-              <ul className="mt-1 list-disc pl-5">
-                {pertanyaan.map((q) => (
-                  <li key={q}>{q}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {produk.map((p, i) => (
-            <Kartu key={i} className="mt-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold">Menu {i + 1}</h2>
-                {produk.length > 1 && (
-                  <Tombol varian="bahaya" onClick={() => setProduk(produk.filter((_, j) => j !== i))}>
-                    Hapus menu
-                  </Tombol>
-                )}
-              </div>
-              <ResepEditor judul={`m${i}`} value={p} onChange={(v) => setProduk(produk.map((x, j) => (j === i ? v : x)))} />
-            </Kartu>
-          ))}
-          <Tombol varian="garis" className="mt-3" onClick={() => setProduk([...produk, resepKosong()])}>
-            <Plus size={16} weight="bold" aria-hidden /> Tambah menu
-          </Tombol>
-          {biayaAi.length > 0 && (
-            <Kartu className="mt-4">
-              <h2 className="font-semibold">Biaya lain dari cerita</h2>
-              <div className="mt-3 flex flex-col gap-2">
-                {biayaAi.map((b, i) => (
-                  <BarisBiaya key={i} b={b} i={i} ubah={(v) => setBiayaAi(biayaAi.map((x, j) => (j === i ? v : x)))} hapus={() => setBiayaAi(biayaAi.filter((_, j) => j !== i))} />
-                ))}
-              </div>
-            </Kartu>
-          )}
         </section>
       )}
 
@@ -330,18 +271,18 @@ export default function Onboarding() {
 
       <div className="mt-8 flex flex-wrap gap-2">
         {langkah > 0 && (
-          <Tombol varian="garis" onClick={() => setLangkah(langkah === 5 ? 4 : langkah - 1)}>
+          <Tombol varian="garis" onClick={() => setLangkah(langkah - 1)}>
             Sebelumnya
           </Tombol>
         )}
-        {langkah < 4 && (
+        {langkah < LANGKAH.length - 1 && (
           <Tombol onClick={() => setLangkah(langkah + 1)} disabled={!bisaLanjut}>
             Lanjut
           </Tombol>
         )}
-        {langkah === 5 && (
+        {langkah === LANGKAH.length - 1 && (
           <Tombol onClick={simpan} disabled={proses}>
-            {proses ? 'Menyimpan' : 'Simpan dan hitung modal'}
+            {proses ? 'Menyimpan' : 'Simpan dan tambah menu'}
           </Tombol>
         )}
       </div>

@@ -44,7 +44,7 @@ export const biaya = z.object({ nama: z.string().trim().min(1).max(60), nominal:
 
 export const setup = z.object({
   usaha: profilUsaha,
-  produk: z.array(produk).min(1, 'Minimal satu produk'),
+  produk: z.array(produk).default([]),
   biaya: z.array(biaya).default([]),
   harga_bahan: z
     .array(z.object({ nama: z.string().trim().min(1), qty, satuan: z.string().trim().min(1), harga: z.coerce.number().positive(), tanggal: z.string().optional() }))
@@ -112,3 +112,5 @@ export const promoSimpan = promoHitung.extend({
   harga_paket: z.coerce.number().positive(),
   caption: z.string().trim().max(400).nullish(),
 });
+
+export const cekJenis = z.object({ teks: z.string().trim().min(3, 'Tulis jenis usaha minimal 3 huruf').max(60) });

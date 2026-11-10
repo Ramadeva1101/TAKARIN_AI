@@ -197,3 +197,28 @@ describe('alur utama end-to-end (AI fixture)', () => {
     expect((await api('GET', '/produk/9999')).status).toBe(404);
   });
 });
+
+describe('onboarding tanpa menu dan jenis usaha lain', () => {
+  it('jenis usaha lain diperiksa: kuliner diterima, non-kuliner ditolak', async () => {
+    token = (await api('POST', '/auth/daftar', { nama: 'Pak Made', email: 'made@contoh.id', password: 'rahasia123' })).data.token;
+    const ok = await api('POST', '/usaha/cek-jenis', { teks: 'angkringan' });
+    expect(ok.status).toBe(200);
+    expect(ok.data.valid).toBe(true);
+    const tolak = await api('POST', '/usaha/cek-jenis', { teks: 'toko baju' });
+    expect(tolak.data.valid).toBe(false);
+    expect((await api('POST', '/usaha/cek-jenis', { teks: 'a' })).status).toBe(400);
+  });
+
+  it('setup boleh tanpa menu, menu ditambah setelah masuk', async () => {
+    const r = await api('POST', '/usaha/setup', {
+      usaha: { nama: 'Angkringan Pak Made', jenis: 'angkringan', kota: 'Denpasar', provinsi: 'Bali', target_margin: 0.4, porsi_per_hari: 50 },
+      produk: [],
+      biaya: [],
+    });
+    expect(r.status).toBe(201);
+    expect(r.data.produk).toHaveLength(0);
+    const d = await api('GET', '/dashboard');
+    expect(d.status).toBe(200);
+    expect(d.data.produk).toHaveLength(0);
+  });
+});

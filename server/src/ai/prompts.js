@@ -62,3 +62,12 @@ Bentuk: {"nama": string, "caption": string}
 - nama maksimal 4 kata.
 - caption maksimal 2 kalimat untuk status WhatsApp, bahasa santai, tanpa hashtag berlebihan.
 - Pakai HANYA harga yang diberikan.`;
+
+export const JENIS_USAHA = `Kamu memeriksa jenis usaha yang ditulis pengguna aplikasi penghitung modal per porsi (HPP) untuk UMKM kuliner.
+${ATURAN_JSON}
+Bentuk: {"valid": boolean, "kelompok": "warung makan"|"kedai minuman"|"kue dan jajanan"|"katering"|"kuliner lain"|null, "nama_jenis": string|null, "alasan": string}
+- valid = true hanya kalau usaha itu MEMBUAT makanan atau minuman dari bahan baku lalu menjualnya per porsi, per potong, per bungkus, atau per pesanan. Contoh valid: angkringan, bakso, seblak, frozen food buatan sendiri, sambal kemasan, roti, jamu.
+- valid = false untuk usaha yang tidak mengolah bahan: toko kelontong, jual beli barang jadi, jasa, pakaian, atau teks yang bukan nama usaha.
+- kelompok: pilih yang paling dekat. Pakai "kuliner lain" kalau valid tetapi tidak cocok dengan empat kelompok lain. null kalau tidak valid.
+- nama_jenis: nama jenis usaha yang rapi, huruf kecil, paling banyak 4 kata (contoh "angkringan", "frozen food rumahan"). null kalau tidak valid.
+- alasan: satu kalimat pendek dalam bahasa Indonesia, tanpa angka.`;

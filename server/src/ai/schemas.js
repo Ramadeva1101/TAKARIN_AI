@@ -58,3 +58,10 @@ export const promoSaran = z.object({
   nama: z.string().min(1).max(60),
   caption: z.string().min(1).max(400),
 });
+
+export const jenisUsaha = z.object({
+  valid: z.boolean(),
+  kelompok: z.enum(['warung makan', 'kedai minuman', 'kue dan jajanan', 'katering', 'kuliner lain']).nullable().catch(null),
+  nama_jenis: teksOpsional,
+  alasan: z.string().max(200).catch(''),
+});
