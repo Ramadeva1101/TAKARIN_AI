@@ -1,19 +1,20 @@
 import { all, get, run, tx } from '../lib/db.js';
 import { acuanKeSatuanDasar } from '../domain/komoditas.js';
+import { bersihWilayah } from '../domain/wilayah.js';
 
 // Harga acuan terbaru: kota → provinsi → nasional.
 export function acuanTerbaru(komoditas, usaha) {
   if (!komoditas) return null;
   const urutan = [
-    ['kota', usaha.kota],
-    ['provinsi', usaha.provinsi],
-    ['nasional', 'Indonesia'],
+    ['kota', bersihWilayah(usaha.kota)],
+    ['provinsi', bersihWilayah(usaha.provinsi)],
+    ['nasional', 'indonesia'],
   ];
   for (const [level, wilayah] of urutan) {
     if (!wilayah) continue;
     const baris = get(
       `SELECT komoditas, wilayah, level, harga, satuan, tanggal, sumber FROM harga_pasar
-       WHERE komoditas = ? AND level = ? AND lower(wilayah) = lower(?) ORDER BY tanggal DESC LIMIT 1`,
+       WHERE komoditas = ? AND level = ? AND lower(wilayah) = ? ORDER BY tanggal DESC LIMIT 1`,
       komoditas,
       level,
       wilayah,
@@ -47,26 +48,45 @@ export function riwayatAcuan(komoditas, usaha, hari = 30) {
   );
 }
 
-// CSV: komoditas,wilayah,level,harga,satuan,tanggal,sumber
-export function imporCsv(teks) {
-  const baris = teks.trim().split(/\r?\n/).slice(1).filter(Boolean);
+/**
+ * Simpan baris harga: { komoditas, wilayah, level, harga, satuan, tanggal, sumber }.
+ * Data contoh pada wilayah+level yang sama dihapus supaya tidak bercampur dengan data asli.
+ */
+export function simpanHarga(baris) {
   return tx(() => {
-    let jumlah = 0;
+    const wilayahLevel = new Set();
     for (const b of baris) {
-      const [komoditas, wilayah, level, harga, satuan, tanggal, sumber] = b.split(',').map((s) => s.trim());
-      run('DELETE FROM harga_pasar WHERE komoditas = ? AND wilayah = ? AND tanggal = ?', komoditas, wilayah, tanggal);
+      run('DELETE FROM harga_pasar WHERE komoditas = ? AND wilayah = ? AND level = ? AND tanggal = ?', b.komoditas, b.wilayah, b.level, b.tanggal);
       run(
         'INSERT INTO harga_pasar (komoditas, wilayah, level, harga, satuan, tanggal, sumber) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        komoditas,
-        wilayah,
-        level,
-        Number(harga),
-        satuan,
-        tanggal,
-        sumber,
+        b.komoditas,
+        b.wilayah,
+        b.level,
+        b.harga,
+        b.satuan,
+        b.tanggal,
+        b.sumber,
       );
-      jumlah += 1;
+      if (b.sumber !== 'data contoh') wilayahLevel.add(`${b.wilayah}|${b.level}`);
     }
-    return jumlah;
+    for (const kunci of wilayahLevel) {
+      const [wilayah, level] = kunci.split('|');
+      run("DELETE FROM harga_pasar WHERE sumber = 'data contoh' AND wilayah = ? AND level = ?", wilayah, level);
+    }
+    return baris.length;
   });
+}
+
+// CSV: komoditas,wilayah,level,harga,satuan,tanggal,sumber
+export function imporCsv(teks) {
+  const baris = teks
+    .trim()
+    .split(/\r?\n/)
+    .slice(1)
+    .filter(Boolean)
+    .map((b) => {
+      const [komoditas, wilayah, level, harga, satuan, tanggal, sumber] = b.split(',').map((s) => s.trim());
+      return { komoditas, wilayah, level, harga: Number(harga), satuan, tanggal, sumber };
+    });
+  return simpanHarga(baris);
 }

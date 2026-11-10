@@ -25,6 +25,8 @@ export function cocokkanKomoditas(namaBahan) {
 export function acuanKeSatuanDasar(hargaAcuan, satuanAcuan, satuanDasar) {
   if (satuanAcuan === 'kg' && satuanDasar === 'g') return hargaAcuan / 1000;
   if (satuanAcuan === 'liter' && satuanDasar === 'ml') return hargaAcuan / 1000;
+  // Minyak goreng dilaporkan per kg; 1 liter minyak goreng sekitar 0,92 kg.
+  if (satuanAcuan === 'kg' && satuanDasar === 'ml') return (hargaAcuan * 0.92) / 1000;
   if (satuanAcuan === 'kg' && satuanDasar === 'butir') return hargaAcuan / 16;
   if (satuanAcuan === satuanDasar) return hargaAcuan;
   return null;

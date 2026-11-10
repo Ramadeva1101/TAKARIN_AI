@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
-import { persen, rupiah, tanggal } from '../lib/api.js';
-import { Galat, Judul, Kartu, Kosong, Muat } from '../components/ui.jsx';
+import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
+import { Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
 
 const LEVEL = { kota: 'kota', provinsi: 'rata-rata provinsi', nasional: 'rata-rata nasional' };
@@ -37,7 +38,7 @@ function KartuKomoditas({ d }) {
         </p>
       </div>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        <Perubahan nilai={d.perubahan_harian} ket="dari kemarin" />
+        <Perubahan nilai={d.perubahan_harian} ket={d.tanggal_sebelumnya ? `dari ${tanggal(d.tanggal_sebelumnya)}` : 'dari data sebelumnya'} />
         <Perubahan nilai={d.perubahan_mingguan} ket="seminggu" />
       </div>
       <div className="mt-2">
@@ -67,6 +68,30 @@ function KartuKomoditas({ d }) {
 
 export default function Pasar() {
   const { data, loading, error, muat } = useApi('/pasar');
+  const [proses, setProses] = useState(false);
+  const [galatPerbarui, setGalatPerbarui] = useState(null);
+  const berjalan = data?.sinkron?.berjalan;
+
+  // Server sedang menarik data: cek lagi sebentar lagi.
+  useEffect(() => {
+    if (!berjalan) return;
+    const t = setTimeout(muat, 5000);
+    return () => clearTimeout(t);
+  }, [berjalan, data, muat]);
+
+  const perbarui = async () => {
+    setProses(true);
+    setGalatPerbarui(null);
+    try {
+      await api('/pasar/perbarui', { method: 'POST' });
+      await muat();
+    } catch (err) {
+      setGalatPerbarui(pesanGalat(err));
+    } finally {
+      setProses(false);
+    }
+  };
+
   if (loading && !data) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
 
@@ -78,7 +103,32 @@ export default function Pasar() {
 
   return (
     <>
-      <Judul judul="Harga pasar" sub={`${tempat || 'Wilayah belum diisi'} · diperbarui ${tanggal(terbaru)}`} />
+      <Judul
+        judul="Harga pasar"
+        sub={`${tempat || 'Wilayah belum diisi'} · data per ${terbaru ? tanggal(terbaru) : 'belum ada'}`}
+        aksi={
+          data.sinkron.aktif && (
+            <Tombol varian="garis" onClick={perbarui} disabled={proses || berjalan}>
+              {proses || berjalan ? 'Mengambil data' : 'Perbarui sekarang'}
+            </Tombol>
+          )
+        }
+      />
+      {(berjalan || galatPerbarui || data.sinkron.galat.length > 0) && (
+        <div role="status" className={`mb-4 rounded-xl px-3 py-2 text-sm ${berjalan ? 'bg-teal-muda text-teal-tua' : 'bg-waspada-muda text-waspada'}`}>
+          {berjalan ? (
+            'Mengambil harga terbaru dari PIHPS Bank Indonesia. Bisa sampai setengah menit.'
+          ) : (
+            <>
+              {galatPerbarui && <p>{galatPerbarui}</p>}
+              {data.sinkron.galat.map((g) => (
+                <p key={g}>{g}</p>
+              ))}
+              <p>Data yang tampil adalah data tersimpan terakhir.</p>
+            </>
+          )}
+        </div>
+      )}
 
       {!data.harga.length ? (
         <Kartu>
@@ -139,7 +189,14 @@ export default function Pasar() {
           )}
 
           <p className="mt-6 max-w-2xl text-xs text-redup">
-            Sumber: {sumber}. Harga diambil bertingkat: kota dulu, lalu provinsi, lalu nasional kalau data kota belum ada. Harga yang lebih dari 7 hari tidak dipakai untuk menilai harga belanja.
+            Sumber: {sumber}
+            {sumber.includes('PIHPS') && (
+              <>
+                {' '}
+                (<a className="underline" href="https://www.bi.go.id/hargapangan" target="_blank" rel="noreferrer">bi.go.id/hargapangan</a>), harga pasar tradisional.
+              </>
+            )}{' '}
+            Harga diambil bertingkat: kota dulu, lalu provinsi, lalu nasional kalau data kota belum ada. Harga yang lebih dari 7 hari tidak dipakai untuk menilai harga belanja.
           </p>
         </>
       )}

@@ -3,16 +3,36 @@ import { acuanTerbaru, riwayatAcuan } from './hargaPasar.js';
 import { hitungSemua } from './hpp.js';
 import { tulisCatatan } from '../ai/provider.js';
 import { validasiAngka } from '../domain/validasiAngka.js';
+import { bersihWilayah } from '../domain/wilayah.js';
+import { daftarProvinsi, daftarKota, hargaLiveAktif } from './pihps.js';
 
 const rupiah = (n) => `Rp${Math.round(n).toLocaleString('id-ID')}`;
 const persenTeks = (x) => `${(Math.abs(x) * 100).toFixed(1).replace('.', ',')}%`;
 
-// Wilayah yang punya data harga acuan, untuk pilihan saat setup.
-export function wilayahTersedia() {
-  return {
-    kota: all("SELECT DISTINCT wilayah FROM harga_pasar WHERE level = 'kota' ORDER BY wilayah").map((r) => r.wilayah),
-    provinsi: all("SELECT DISTINCT wilayah FROM harga_pasar WHERE level = 'provinsi' ORDER BY wilayah").map((r) => r.wilayah),
-  };
+// Pilihan wilayah saat setup. Dari PIHPS bila bisa dijangkau, kalau tidak dari data yang sudah tersimpan.
+export async function daftarProvinsiPilihan() {
+  if (hargaLiveAktif()) {
+    try {
+      return (await daftarProvinsi()).map((p) => p.name).sort((a, b) => a.localeCompare(b, 'id'));
+    } catch {
+      /* jatuh ke data tersimpan */
+    }
+  }
+  return all("SELECT DISTINCT wilayah FROM harga_pasar WHERE level = 'provinsi' ORDER BY wilayah").map((r) => r.wilayah);
+}
+
+export async function daftarKotaPilihan(provinsi) {
+  if (hargaLiveAktif() && provinsi) {
+    try {
+      const semua = await daftarProvinsi();
+      const target = bersihWilayah(provinsi);
+      const prov = semua.find((p) => bersihWilayah(p.name) === target);
+      if (prov) return (await daftarKota(prov.id)).map((k) => k.name.trim()).sort((a, b) => a.localeCompare(b, 'id'));
+    } catch {
+      /* jatuh ke data tersimpan */
+    }
+  }
+  return all("SELECT DISTINCT wilayah FROM harga_pasar WHERE level = 'kota' ORDER BY wilayah").map((r) => r.wilayah);
 }
 
 function bahanPerKomoditas(usaha) {
@@ -55,6 +75,7 @@ export function hargaWilayah(usaha) {
         sumber: akhir.sumber,
         kedaluwarsa: akhir.kedaluwarsa,
         harga_sebelumnya: sebelum?.harga ?? null,
+        tanggal_sebelumnya: sebelum?.tanggal ?? null,
         perubahan_harian: sebelum ? (akhir.harga - sebelum.harga) / sebelum.harga : null,
         perubahan_mingguan: minggu ? (akhir.harga - minggu.harga) / minggu.harga : null,
         riwayat: riwayat.slice(-14),
@@ -73,7 +94,7 @@ export function infoHarian(usaha, data = hargaWilayah(usaha)) {
     .map((d) => {
       const pakaiMinggu = d.perubahan_harian == null || Math.abs(d.perubahan_harian) < 0.01;
       const ubah = pakaiMinggu ? d.perubahan_mingguan : d.perubahan_harian;
-      const kapan = pakaiMinggu ? 'dalam seminggu' : 'dari hari sebelumnya';
+      const kapan = pakaiMinggu ? 'dalam seminggu' : 'dari data sebelumnya';
       return {
         komoditas: d.komoditas,
         arah: ubah > 0 ? 'naik' : 'turun',

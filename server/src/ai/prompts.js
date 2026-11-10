@@ -40,7 +40,7 @@ Bentuk:
 - porsi_per_batch: kalau dimasak sekaligus ("1 panci jadi 30 porsi") isi 30, kalau per porsi isi 1.
 - Kemasan per porsi (kertas nasi, cup) masukkan sebagai bahan produk itu.
 - Gas, listrik, air, sewa masuk "biaya". Contoh "gas 3 kilo 22 ribu habis 2 hari" → {"nama":"gas","nominal":11000,"periode":"hari"}.
-- pertanyaan: maksimal 3 pertanyaan singkat untuk data penting yang belum disebut (contoh harga jual).
+- pertanyaan: maksimal 3 pertanyaan singkat tentang resep yang belum jelas (contoh harga jual menu, takaran bahan yang kosong). JANGAN menanyakan porsi terjual per hari, biaya gas/listrik/sewa, atau harga beli bahan, karena itu sudah dikumpulkan di tempat lain. Kalau tidak ada yang perlu ditanyakan, isi [].
 ${ATURAN_ANGKA}`;
 
 export const PENJELASAN = `Kamu menjelaskan hasil hitungan modal (HPP) ke pemilik warung dengan bahasa sehari-hari.

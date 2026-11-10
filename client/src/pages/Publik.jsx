@@ -191,7 +191,7 @@ const FAQ = [
   ['Apa itu modal per porsi (HPP)?', 'Biaya untuk membuat satu porsi menu: bahan sesuai takaran, kemasan, dan bagian dari biaya gas, listrik, atau sewa.'],
   ['Takaran saya pakai sendok dan siung, bisa?', 'Bisa. sdm, sdt, gelas, siung, butir, potong, dan ekor diubah ke gram atau ml dengan perkiraan umum. Untuk satuan khusus seperti ikat atau bungkus, isi beratnya sekali di halaman bahan baku.'],
   ['Kalau hasil baca nota salah?', 'Setiap hasil baca masuk ke halaman periksa dulu. Baris yang ragu ditandai kuning, dan harga yang jauh dari harga pasar diberi peringatan. Data baru dipakai setelah Anda simpan.'],
-  ['Harga pasar diambil dari mana?', 'Dari data harga komoditas harian per kota atau provinsi yang diimpor ke server. Tanggal dan sumbernya selalu ditampilkan. Kalau kota Anda belum ada, dipakai harga provinsi lalu nasional.'],
+  ['Harga pasar diambil dari mana?', 'Dari PIHPS Nasional milik Bank Indonesia (bi.go.id/hargapangan), harga pasar tradisional per kota dan provinsi. Server mengambilnya secara berkala, dan tanggal serta sumbernya selalu ditampilkan. Kalau kota Anda tidak ada di PIHPS, dipakai harga provinsi, lalu nasional.'],
   ['Kenapa harga bahan saya beda dengan harga pasar?', 'Harga yang dipakai untuk menghitung modal adalah harga belanja Anda sendiri (rata-rata tiga belanja terakhir). Harga pasar hanya pembanding.'],
   ['Apakah promo paket bisa membuat rugi?', 'Paket dengan harga di bawah modal tidak bisa disimpan. Setiap pilihan harga menunjukkan untung per paket dan berapa banyak lagi paket harus terjual supaya labanya sama.'],
 ];
@@ -232,7 +232,7 @@ export function Tentang() {
       <h2>Etika data</h2>
       <ul>
         <li>Data resep dan belanja hanya terlihat oleh akun Anda. Dapur Untung tidak memakainya untuk melatih model.</li>
-        <li>Harga pasar berasal dari data komoditas publik yang diimpor, bukan dari mengambil data toko atau aplikasi lain tanpa izin.</li>
+        <li>Harga pasar berasal dari data publik PIHPS Bank Indonesia, diambil secukupnya (satu wilayah paling sering sekali dalam beberapa jam) dan selalu disebut sumbernya. Aplikasi tidak mengambil data toko, marketplace, atau aplikasi pesan antar tanpa izin.</li>
         <li>Semua hasil AI bisa diperiksa dan diubah sebelum dipakai.</li>
       </ul>
     </Halaman>

@@ -13,6 +13,7 @@ import * as bahan from '../services/bahan.js';
 import * as dashboard from '../services/dashboard.js';
 import * as promo from '../services/promo.js';
 import * as pasar from '../services/pasar.js';
+import * as pihps from '../services/pihps.js';
 import { simpanKonversi } from '../services/bahan.js';
 
 export const router = Router();
@@ -45,21 +46,42 @@ router.get('/auth/saya', (req, res) => {
   res.json({ user, usaha: usaha.usahaMilik(req.user.id) });
 });
 
-router.get('/pasar/wilayah', (_req, res) => res.json(pasar.wilayahTersedia()));
+router.get('/pasar/provinsi', async (_req, res) => res.json(await pasar.daftarProvinsiPilihan()));
+router.get('/pasar/kota', async (req, res) => res.json(await pasar.daftarKotaPilihan(String(req.query.provinsi || ''))));
 
 // ---- Onboarding ----
 router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => res.json(await usaha.draftDariCerita(req.body.teks)));
-router.post('/usaha/setup', validasi(S.setup), (req, res) => res.status(201).json(usaha.simpanSetup(req.user.id, req.body)));
+router.post('/usaha/setup', validasi(S.setup), (req, res) => {
+  const hasil = usaha.simpanSetup(req.user.id, req.body);
+  pihps.pastikanSegar(usaha.usahaMilik(req.user.id));
+  res.status(201).json(hasil);
+});
 
 router.use(wajibUsaha);
 
 router.get('/usaha', (req, res) => res.json({ ...req.usaha, biaya: usaha.daftarBiaya(req.usaha.id) }));
-router.put('/usaha', validasi(S.profilUsaha), (req, res) => res.json(usaha.ubahProfil(req.usaha, req.body)));
+router.put('/usaha', validasi(S.profilUsaha), (req, res) => {
+  const hasil = usaha.ubahProfil(req.usaha, req.body);
+  pihps.pastikanSegar(usaha.usahaMilik(req.user.id));
+  res.json(hasil);
+});
 router.put('/usaha/biaya', validasi(S.biaya.array()), (req, res) => res.json(usaha.gantiBiaya(req.usaha.id, req.body)));
 
-router.get('/dashboard', (req, res) => res.json(dashboard.ringkasan(req.usaha)));
+router.get('/dashboard', (req, res) => {
+  pihps.pastikanSegar(req.usaha);
+  res.json(dashboard.ringkasan(req.usaha));
+});
 router.get('/dashboard/catatan', async (req, res) => res.json(await pasar.catatanHarian(req.usaha)));
-router.get('/pasar', (req, res) => res.json({ wilayah: { kota: req.usaha.kota, provinsi: req.usaha.provinsi }, harga: pasar.hargaWilayah(req.usaha) }));
+router.get('/pasar', (req, res) => {
+  pihps.pastikanSegar(req.usaha);
+  res.json({ wilayah: { kota: req.usaha.kota, provinsi: req.usaha.provinsi }, sinkron: pihps.statusSinkron(req.usaha), harga: pasar.hargaWilayah(req.usaha) });
+});
+// Tarik harga terbaru sekarang dan tunggu hasilnya.
+router.post('/pasar/perbarui', async (req, res) => {
+  if (!pihps.hargaLiveAktif()) throw new AppError(409, 'Pengambilan harga otomatis belum diaktifkan di server (HARGA_LIVE=on)');
+  const hasil = await pihps.perbarui(req.usaha, { paksa: true });
+  res.json({ hasil, sinkron: pihps.statusSinkron(req.usaha), harga: pasar.hargaWilayah(req.usaha) });
+});
 
 // ---- Produk ----
 router.get('/produk', (req, res) => res.json(produk.daftar(req.usaha)));

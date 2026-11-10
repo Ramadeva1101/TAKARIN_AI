@@ -13,7 +13,7 @@ const { imporCsv } = await import('../src/services/hargaPasar.js');
 
 const tgl = (mundurHari) => new Date(Date.now() - mundurHari * 86_400_000).toISOString().slice(0, 10);
 
-// Harga acuan contoh 14 hari terakhir. BUKAN data resmi: formatnya mengikuti Panel Harga Bapanas.
+// Cadangan bila PIHPS tidak bisa dijangkau: harga contoh 14 hari terakhir. BUKAN data resmi, diberi label "data contoh".
 // h = hari ke belakang (0 = hari ini). Pola dibuat bergerak supaya kabar harga harian bisa diuji.
 const DASAR_KOTA = [
   ['cabai rawit merah', 'kg', (h) => 60000 + (13 - h) * 900],
@@ -48,7 +48,14 @@ for (let h = 13; h >= 0; h -= 1) {
     baris.push([komoditas, wilayah, level, harga(h), satuan, tgl(h), 'data contoh'].join(','));
   }
 }
-console.log(`Harga acuan contoh: ${imporCsv(baris.join('\n'))} baris`);
+const { segarkanWilayah } = await import('../src/services/pihps.js');
+let adaHargaAsli = false;
+if (process.env.HARGA_LIVE === 'on') {
+  const h = await segarkanWilayah({ kota: 'Denpasar', provinsi: 'Bali' });
+  adaHargaAsli = h.kota > 0;
+  console.log('Harga PIHPS Bank Indonesia:', JSON.stringify(h));
+}
+if (!adaHargaAsli) console.log(`PIHPS tidak terjangkau, memakai harga contoh: ${imporCsv(baris.join('\n'))} baris`);
 
 const hash = await bcrypt.hash('demo12345', 10);
 const { lastInsertRowid: userId } = run('INSERT INTO users (email, password_hash, nama) VALUES (?, ?, ?)', 'demo@dapur.id', hash, 'Bu Sari');
@@ -112,22 +119,22 @@ simpanSetup(userId, {
 const usaha = get('SELECT * FROM usaha WHERE user_id = ?', userId);
 
 const BELANJA = [
-  { hari: 21, toko: 'Pasar Kreneng', cabai: 34000 },
-  { hari: 14, toko: 'Toko Sumber Rejeki', cabai: 35000 },
-  { hari: 7, toko: 'Pasar Kreneng', cabai: 36000 },
+  { hari: 21, toko: 'Pasar Kreneng', cabai: 29000 },
+  { hari: 14, toko: 'Toko Sumber Rejeki', cabai: 30500 },
+  { hari: 7, toko: 'Pasar Kreneng', cabai: 31500 },
 ];
 for (const b of BELANJA) {
   const item = [
     { teks_asli: 'cabe rawit 1/2 kg', nama_bahan: 'cabai rawit', qty: 0.5, satuan: 'kg', harga: b.cabai },
     { teks_asli: 'ayam 5 kg', nama_bahan: 'ayam', qty: 5, satuan: 'kg', harga: 180000 },
     { teks_asli: 'tepung bumbu 1 kg', nama_bahan: 'tepung bumbu', qty: 1, satuan: 'kg', harga: 12000 },
-    { teks_asli: 'bawang putih 1/4', nama_bahan: 'bawang putih', qty: 0.25, satuan: 'kg', harga: 10000 },
-    { teks_asli: 'bawang merah 1/2', nama_bahan: 'bawang merah', qty: 0.5, satuan: 'kg', harga: 19000 },
-    { teks_asli: 'minyak 2 liter', nama_bahan: 'minyak goreng', qty: 2, satuan: 'liter', harga: 36000 },
-    { teks_asli: 'beras 5 kg', nama_bahan: 'beras', qty: 5, satuan: 'kg', harga: 70000 },
-    { teks_asli: 'telur 1 kg', nama_bahan: 'telur', qty: 1, satuan: 'kg', harga: 29000 },
+    { teks_asli: 'bawang putih 1/4', nama_bahan: 'bawang putih', qty: 0.25, satuan: 'kg', harga: 8000 },
+    { teks_asli: 'bawang merah 1/2', nama_bahan: 'bawang merah', qty: 0.5, satuan: 'kg', harga: 14000 },
+    { teks_asli: 'minyak 2 liter', nama_bahan: 'minyak goreng', qty: 2, satuan: 'liter', harga: 46000 },
+    { teks_asli: 'beras 5 kg', nama_bahan: 'beras', qty: 5, satuan: 'kg', harga: 73000 },
+    { teks_asli: 'telur 1 kg', nama_bahan: 'telur', qty: 1, satuan: 'kg', harga: 27000 },
     { teks_asli: 'kecap 600 ml', nama_bahan: 'kecap manis', qty: 600, satuan: 'ml', harga: 18000 },
-    { teks_asli: 'gula 1 kg', nama_bahan: 'gula pasir', qty: 1, satuan: 'kg', harga: 17000 },
+    { teks_asli: 'gula 1 kg', nama_bahan: 'gula pasir', qty: 1, satuan: 'kg', harga: 18000 },
     { teks_asli: 'teh celup 25', nama_bahan: 'teh celup', qty: 25, satuan: 'pcs', harga: 6250 },
     { teks_asli: 'es batu 5 kg', nama_bahan: 'es batu', qty: 5, satuan: 'kg', harga: 10000 },
     { teks_asli: 'jeruk peras 2 kg', nama_bahan: 'jeruk peras', qty: 2, satuan: 'kg', harga: 30000 },

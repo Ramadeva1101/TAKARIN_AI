@@ -142,7 +142,7 @@ export default function Dashboard() {
                     <span className="angka text-sm">{`${rupiah(i.harga)}/${i.satuan}`}</span>
                   </div>
                   <div className="text-sm">
-                    <Perubahan nilai={i.perubahan} ket={i.periode === 'hari' ? 'dari kemarin' : 'seminggu'} />
+                    <Perubahan nilai={i.perubahan} ket={i.periode === 'hari' ? 'dari data sebelumnya' : 'seminggu'} />
                   </div>
                   {i.menu.length > 0 && <p className="text-xs text-redup">Dipakai di {i.menu.map((m) => m.nama).join(', ')}</p>}
                 </li>

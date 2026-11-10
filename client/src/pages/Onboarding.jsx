@@ -65,6 +65,7 @@ export default function Onboarding() {
   const nav = useNavigate();
   const [langkah, setLangkah] = useState(0);
   const [wilayah, setWilayah] = useState({ kota: [], provinsi: [] });
+  const bersih = (s) => s.toLowerCase().replace(/^(kota administrasi|kota|kabupaten|kab\.?)\s+/, '').trim();
   const [usaha, setUsaha] = useState({ nama: '', jenis: '', kota: '', provinsi: '', target_margin: 40, porsi_per_hari: '' });
   const [rutin, setRutin] = useState({ gas: '', listrik: '', sewa: '' });
   const [cerita, setCerita] = useState('');
@@ -75,13 +76,28 @@ export default function Onboarding() {
   const [galat, setGalat] = useState(null);
 
   useEffect(() => {
-    api('/pasar/wilayah').then(setWilayah).catch(() => {});
+    api('/pasar/provinsi')
+      .then((provinsi) => setWilayah((w) => ({ ...w, provinsi })))
+      .catch(() => {});
   }, []);
+
+  // Daftar kota mengikuti provinsi yang dipilih.
+  useEffect(() => {
+    if (!wilayah.provinsi.some((p) => bersih(p) === bersih(usaha.provinsi))) return setWilayah((w) => (w.kota.length ? { ...w, kota: [] } : w));
+    let batal = false;
+    api(`/pasar/kota?provinsi=${encodeURIComponent(usaha.provinsi)}`)
+      .then((kota) => !batal && setWilayah((w) => ({ ...w, kota })))
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usaha.provinsi, wilayah.provinsi]);
 
   const jenis = JENIS.find((j) => j.id === usaha.jenis);
   const u = (k) => (e) => setUsaha({ ...usaha, [k]: e.target.value });
-  const adaKota = wilayah.kota.some((k) => k.toLowerCase() === usaha.kota.trim().toLowerCase());
-  const adaProv = wilayah.provinsi.some((k) => k.toLowerCase() === usaha.provinsi.trim().toLowerCase());
+  const adaKota = wilayah.kota.some((k) => bersih(k) === bersih(usaha.kota.trim()));
+  const adaProv = wilayah.provinsi.some((k) => bersih(k) === bersih(usaha.provinsi.trim()));
 
   const bisaLanjut = [
     usaha.nama.trim() && usaha.jenis,
@@ -185,16 +201,16 @@ export default function Onboarding() {
             ))}
           </datalist>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Field label="Kota atau kabupaten" value={usaha.kota} onChange={u('kota')} list="daftar-kota" />
-            <Field label="Provinsi" value={usaha.provinsi} onChange={u('provinsi')} list="daftar-provinsi" />
+            <Field label="Provinsi" value={usaha.provinsi} onChange={u('provinsi')} list="daftar-provinsi" placeholder="Bali" />
+            <Field label="Kota atau kabupaten" value={usaha.kota} onChange={u('kota')} list="daftar-kota" placeholder="Denpasar" />
           </div>
-          {usaha.kota.trim() && (
+          {usaha.kota.trim() && usaha.provinsi.trim() && (
             <p className={`mt-4 rounded-xl px-3 py-2 text-sm ${adaKota ? 'bg-aman-muda text-aman' : 'bg-waspada-muda text-waspada'}`}>
               {adaKota
-                ? `Harga pasar tingkat kota tersedia untuk ${usaha.kota}.`
+                ? `Harga pasar tingkat kota tersedia untuk ${usaha.kota}, dari PIHPS Bank Indonesia.`
                 : adaProv
-                  ? `Belum ada data kota ${usaha.kota}. Dipakai harga tingkat provinsi ${usaha.provinsi}.`
-                  : 'Belum ada data harga daerah ini. Dipakai harga rata-rata nasional.'}
+                  ? `Data kota ${usaha.kota} tidak ada di PIHPS. Dipakai harga rata-rata provinsi ${usaha.provinsi}.`
+                  : 'Provinsi belum dikenali. Pilih dari daftar, atau harga rata-rata nasional yang dipakai.'}
             </p>
           )}
         </section>
