@@ -174,10 +174,10 @@ function Kebocoran() {
         {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
         {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
       </div>
-      <div className="mt-4 rounded-2xl bg-rugi-muda p-4 ring-1 ring-rugi/15" aria-live="polite">
-        <p className="text-sm text-redup">Untung yang hilang dalam 30 hari</p>
-        <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
-        <p className="angka mt-1 text-sm text-tinta">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
+      <div className="mt-4 rounded-2xl bg-biru p-4 text-white shadow-[0_14px_30px_rgb(29_89_187/0.25)]" aria-live="polite">
+        <p className="text-sm text-white/80">Untung yang hilang dalam 30 hari</p>
+        <p className="angka mt-1 text-3xl font-extrabold text-kuning">{rp(bulan)}</p>
+        <p className="angka mt-1 text-sm text-white/90">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
       </div>
       <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
     </div>
@@ -296,7 +296,7 @@ export function Beranda() {
               Harga jual ditentukan sekali di awal, lalu jarang dihitung ulang ketika harga bahan naik. Selisih beberapa ratus rupiah per porsi tidak terasa di kasir, tetapi terasa di akhir bulan.
             </p>
             <figure className="mt-6 flex items-center gap-4 border-l-4 border-kuning pl-4">
-              <p className="angka text-5xl font-extrabold tracking-tight text-kuning-tua">10,6%</p>
+              <p className="angka text-5xl font-extrabold tracking-tight text-biru">10,6%</p>
               <figcaption className="text-sm">
                 <span className="font-semibold">Kenaikan cabai rawit merah di Denpasar dalam seminggu.</span>
                 <span className="block text-redup">PIHPS Bank Indonesia, 10 November 2026</span>
