@@ -3,3 +3,6 @@ node_modules/
 *.db
 *.db-journal
 server/uploads/
+dist/
+*.db-shm
+*.db-wal

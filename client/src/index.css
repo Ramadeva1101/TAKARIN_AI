@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
+  --color-dasar: #f3f4ef;
+  --color-kartu: #ffffff;
+  --color-tinta: #1b1f1a;
+  --color-redup: #5a6158;
+  --color-garis: #dfe2d8;
+  --color-lime: #c6f06b;
+  --color-lime-tua: #3f5a10;
+  --color-teal: #17756b;
+  --color-teal-tua: #0f554e;
+  --color-teal-muda: #e2f1ee;
+  --color-aman: #1f7a3d;
+  --color-aman-muda: #e3f4e8;
+  --color-waspada: #8a5a00;
+  --color-waspada-muda: #fff3d6;
+  --color-rugi: #b42318;
+  --color-rugi-muda: #fde7e4;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--color-dasar); color: var(--color-tinta); font-family: var(--font-sans); }
+.angka { font-variant-numeric: tabular-nums; }
+
+a[href], button:not(:disabled), summary, select, label[for], input[type='checkbox'], input[type='radio'], [role='button'] { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible { outline: 3px solid var(--color-teal); outline-offset: 2px; border-radius: 6px; }
+
+/* Motif nota: tepi putus-putus seperti struk belanja */
+.tepi-nota { border-top: 2px dashed var(--color-garis); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
