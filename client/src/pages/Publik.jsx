@@ -46,7 +46,7 @@ export function PublikLayout() {
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <Link to="/" className="inline-flex min-h-11 items-center">
-            <Merek className="text-xl" />
+            <Merek className="text-lg sm:text-xl" />
           </Link>
           <nav aria-label="Menu situs" className="hidden items-center gap-2 md:flex">
             {MENU_SITUS.map(([to, label]) => (
@@ -60,11 +60,12 @@ export function PublikLayout() {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
-            <Tombol varian="masuk" to="/masuk">
-              Masuk <ArrowRight size={16} weight="bold" className="text-kuning" aria-hidden />
+          {/* Di HP tombol dibuat ringkas (tanpa panah, padding kecil) agar tidak berdesakan dengan logo. */}
+          <div className="flex shrink-0 items-center gap-2.5 sm:gap-2">
+            <Tombol varian="masuk" to="/masuk" className="!px-4 sm:!px-5">
+              Masuk <ArrowRight size={16} weight="bold" className="hidden text-kuning sm:block" aria-hidden />
             </Tombol>
-            <Tombol to="/daftar" className="hidden sm:inline-flex">
+            <Tombol to="/daftar" className="!px-4 sm:!px-5">
               Daftar
             </Tombol>
           </div>
@@ -249,7 +250,8 @@ export function Beranda() {
     <main>
       <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-8 lg:pb-24">
         <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[52px]">
-          Hitung HPP Usaha Anda
+          Hitung HPP <br className="sm:hidden" />
+          Usaha Anda
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
