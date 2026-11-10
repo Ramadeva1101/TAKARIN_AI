@@ -82,3 +82,15 @@ export function keSatuanDasar({ qty, satuan, satuanDasar, namaBahan, konversiKhu
 }
 
 export const SATUAN_DASAR = ['g', 'ml', 'butir', 'pcs'];
+
+const CAIRAN = /minyak|kecap|santan|air|saus|sirup|cuka|susu cair|madu/i;
+
+// Menebak satuan dasar bahan baru dari nama dan satuan yang dipakai.
+export function tebakSatuanDasar(namaBahan, satuan) {
+  const s = normalisasiSatuan(satuan);
+  if (/telur|telor/i.test(namaBahan || '')) return 'butir';
+  if (['pcs', 'bungkus', 'pak', 'botol', 'sachet', 'tabung'].includes(s)) return 'pcs';
+  if (s === 'butir') return 'butir';
+  if (VOLUME[s] || CAIRAN.test(namaBahan || '')) return 'ml';
+  return 'g';
+}

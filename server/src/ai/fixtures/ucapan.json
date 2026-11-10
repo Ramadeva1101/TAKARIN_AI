@@ -1,0 +1,11 @@
+{
+  "transkrip": "tadi belanja di pasar kreneng, cabe rawit setengah kilo tiga lima ribu, bawang putih seperempat goceng eh salah sepuluh ribu, terus gula dua kilo",
+  "hasil": {
+    "nama_toko": "Pasar Kreneng",
+    "item": [
+      { "teks_asli": "cabe rawit setengah kilo tiga lima ribu", "nama_bahan": "cabai rawit", "qty": 0.5, "satuan": "kg", "harga": 35000, "yakin": 0.9 },
+      { "teks_asli": "bawang putih seperempat goceng eh salah sepuluh ribu", "nama_bahan": "bawang putih", "qty": 0.25, "satuan": "kg", "harga": 10000, "yakin": 0.85 },
+      { "teks_asli": "gula dua kilo", "nama_bahan": "gula pasir", "qty": 2, "satuan": "kg", "harga": null, "yakin": 0.8 }
+    ]
+  }
+}

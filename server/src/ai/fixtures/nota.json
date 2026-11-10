@@ -1,0 +1,12 @@
+{
+  "nama_toko": "Toko Sumber Rejeki",
+  "tanggal": null,
+  "total_tertulis": 169500,
+  "item": [
+    { "teks_asli": "cbe rwt 1/2", "nama_bahan": "cabai rawit", "qty": 0.5, "satuan": "kg", "harga": 47500, "yakin": 0.94 },
+    { "teks_asli": "bwg mrh 1kg", "nama_bahan": "bawang merah", "qty": 1, "satuan": "kg", "harga": 40000, "yakin": 0.9 },
+    { "teks_asli": "telor 1 kg", "nama_bahan": "telur", "qty": 1, "satuan": "kg", "harga": 30000, "yakin": 0.92 },
+    { "teks_asli": "migor 2 ltr", "nama_bahan": "minyak goreng", "qty": 2, "satuan": "liter", "harga": 37000, "yakin": 0.88 },
+    { "teks_asli": "krts nsi 1 pak", "nama_bahan": "kertas nasi", "qty": 1, "satuan": "pak", "harga": 15000, "yakin": 0.55 }
+  ]
+}

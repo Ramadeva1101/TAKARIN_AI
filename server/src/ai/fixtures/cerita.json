@@ -1,0 +1,35 @@
+{
+  "porsi_per_hari": 80,
+  "produk": [
+    {
+      "nama": "Ayam Geprek",
+      "harga_jual": 15000,
+      "porsi_per_batch": 1,
+      "bahan": [
+        { "nama": "ayam", "qty": 1, "satuan": "potong" },
+        { "nama": "tepung bumbu", "qty": 50, "satuan": "g" },
+        { "nama": "cabai rawit", "qty": 20, "satuan": "g" },
+        { "nama": "bawang putih", "qty": 1, "satuan": "siung" },
+        { "nama": "minyak goreng", "qty": 1, "satuan": "sdm" },
+        { "nama": "beras", "qty": 100, "satuan": "g" },
+        { "nama": "kertas nasi", "qty": 1, "satuan": "pcs" }
+      ]
+    },
+    {
+      "nama": "Es Teh",
+      "harga_jual": null,
+      "porsi_per_batch": 1,
+      "bahan": [
+        { "nama": "teh celup", "qty": 1, "satuan": "pcs" },
+        { "nama": "gula pasir", "qty": 2, "satuan": "sdm" },
+        { "nama": "es batu", "qty": 150, "satuan": "g" },
+        { "nama": "cup plastik", "qty": 1, "satuan": "pcs" }
+      ]
+    }
+  ],
+  "biaya": [
+    { "nama": "gas", "nominal": 11000, "periode": "hari" },
+    { "nama": "listrik", "nominal": 300000, "periode": "bulan" }
+  ],
+  "pertanyaan": ["Es teh dijual berapa per gelas?"]
+}
