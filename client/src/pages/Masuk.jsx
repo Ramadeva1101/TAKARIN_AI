@@ -3,15 +3,6 @@ import { Link } from 'react-router-dom';
 import { Eye, EyeSlash, Receipt, TrendUp } from '@phosphor-icons/react';
 import { useAuth } from '../lib/auth.jsx';
 import { Field, Merek, Tombol } from '../components/ui.jsx';
-import { BatangUntung } from '../components/Chart.jsx';
-
-// Data contoh untuk ilustrasi panel kiri, ditandai sebagai contoh tampilan.
-const CONTOH = [
-  { id: 1, nama: 'Ayam Geprek', margin: 0.419, status: 'aman' },
-  { id: 2, nama: 'Es Jeruk', margin: 0.39, status: 'waspada' },
-  { id: 3, nama: 'Es Teh', margin: 0.584, status: 'aman' },
-  { id: 4, nama: 'Nasi Goreng', margin: 0.54, status: 'aman' },
-];
 
 function Panel() {
   return (
@@ -20,12 +11,14 @@ function Panel() {
       <div className="pointer-events-none absolute -bottom-40 -left-24 size-96 rounded-full bg-kuning/15" aria-hidden />
       <Merek terang className="relative text-lg" />
 
-      <div className="relative mx-auto mt-14 w-full max-w-lg flex-1" aria-hidden>
-        <div className="rounded-[20px] bg-white p-4 text-tinta shadow-[0_30px_60px_rgb(0_0_0/0.25)]">
-          <p className="text-sm font-semibold">Untung per menu</p>
-          <p className="text-xs text-redup">Es Jeruk di bawah target, saran harga Rp6.500</p>
-          <BatangUntung data={CONTOH} target={0.4} pilih={2} tinggi={230} />
-        </div>
+      <div className="relative mx-auto mt-14 w-full max-w-xl flex-1" aria-hidden>
+        <img
+          src="/tangkapan-ringkasan.webp"
+          width="1490"
+          height="716"
+          alt=""
+          className="block h-auto w-full rounded-[16px] border-4 border-white/90 shadow-[0_30px_60px_rgb(0_0_0/0.28)]"
+        />
         <div className="absolute -top-6 -left-8 flex w-56 items-center gap-3 rounded-2xl bg-white p-3 text-tinta shadow-[0_18px_40px_rgb(0_0_0/0.2)]">
           <Receipt size={26} weight="duotone" className="shrink-0 text-biru" />
           <div className="min-w-0">
@@ -45,7 +38,7 @@ function Panel() {
       <div className="relative mt-16">
         <p className="max-w-md text-[28px] leading-tight font-bold">Modal tiap porsi, dihitung dari nota belanja Anda.</p>
         <p className="mt-3 max-w-md text-white/80">Foto nota, ucapkan, atau ketik belanjaan. Untung setiap menu diperbarui dan dibandingkan dengan harga pasar di kota Anda.</p>
-        <p className="mt-4 text-xs text-white/60">Contoh tampilan aplikasi.</p>
+        <p className="mt-4 text-xs text-white/60">Tangkapan layar halaman Ringkasan dengan akun demo.</p>
       </div>
     </div>
   );
@@ -148,7 +141,7 @@ export default function Masuk({ mode }) {
           )}
         </div>
         <footer className="mx-auto flex w-full max-w-sm flex-wrap items-center justify-between gap-2 text-xs text-redup">
-          <span>Takarin AI · LOGICODIX 2026</span>
+          <span>© 2026 Takarin AI</span>
           <span className="flex gap-1">
             <Link to="/privasi" className="inline-flex min-h-11 items-center px-1 hover:text-tinta">
               Privasi

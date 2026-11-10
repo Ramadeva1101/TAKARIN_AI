@@ -7,48 +7,57 @@ function KotakTooltip({ children }) {
   return <div className="rounded-xl border border-garis bg-kartu px-3 py-2 text-sm shadow-[0_10px_30px_rgb(13_27_62/0.12)]">{children}</div>;
 }
 
-// Batang untung per menu. Klik batang untuk memilih menu; garis kuning = target.
+// Batang untung per menu. Gaya datar: warna solid, tanpa animasi; batang terpilih biru dengan label di atasnya.
+function LabelTerpilih({ x, y, width, value, index, pilihIndex }) {
+  if (index !== pilihIndex) return null;
+  const teks = persen(value);
+  const w = teks.length * 7 + 14;
+  return (
+    <g>
+      <rect x={x + width / 2 - w / 2} y={y - 30} width={w} height={22} rx={6} fill="#0d1b3e" />
+      <text x={x + width / 2} y={y - 15} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={600}>
+        {teks}
+      </text>
+    </g>
+  );
+}
+
 export function BatangUntung({ data, target, pilih, ubah, tinggi = 240 }) {
   const maks = Math.ceil(Math.max(target * 1.25, ...data.map((d) => d.margin)) * 10) / 10;
+  const pilihIndex = data.findIndex((d) => d.id === pilih);
   return (
     <div style={{ height: tinggi }} role="img" aria-label={`Grafik untung per menu. ${data.map((d) => `${d.nama} ${persen(d.margin)}`).join(', ')}. Target ${persen(target, 0)}.`}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 16, right: 8, left: -12, bottom: 0 }} barCategoryGap="28%">
-          <defs>
-            <linearGradient id="batang-aktif" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#3d86ea" />
-              <stop offset="1" stopColor="#1d59bb" />
-            </linearGradient>
-            <linearGradient id="batang-biasa" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#c7dbf7" />
-              <stop offset="1" stopColor="#e8f0fb" />
-            </linearGradient>
-            <linearGradient id="batang-kurang" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#fed765" />
-              <stop offset="1" stopColor="#fef3b3" />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} stroke="#e2e9f4" strokeDasharray="4 6" />
-          <XAxis dataKey="nama" tick={SUMBU} tickLine={false} axisLine={false} interval={0} tickMargin={10} />
+        <BarChart data={data} margin={{ top: 34, right: 8, left: -12, bottom: 0 }} barCategoryGap="34%">
+          <CartesianGrid vertical={false} stroke="#e8edf5" />
+          <XAxis dataKey="nama" tick={SUMBU} tickLine={false} axisLine={{ stroke: '#e2e9f4' }} interval={0} tickMargin={10} />
           <YAxis domain={[0, maks]} tickFormatter={(v) => `${Math.round(v * 100)}%`} tick={SUMBU} tickLine={false} axisLine={false} width={48} />
           <Tooltip
-            cursor={{ fill: 'rgb(29 89 187 / 0.06)', radius: 12 }}
+            cursor={false}
             content={({ active, payload }) =>
               active && payload?.length ? (
-                <KotakTooltip>
+                <div className="rounded-lg bg-tinta px-3 py-2 text-xs text-white shadow-lg">
                   <p className="font-semibold">{payload[0].payload.nama}</p>
-                  <p className="angka text-redup">
-                    Untung <b className="text-tinta">{persen(payload[0].payload.margin)}</b>
+                  <p className="angka text-white/75">
+                    Untung {persen(payload[0].payload.margin)}
                     {payload[0].payload.hpp != null && ` · modal ${rupiah(payload[0].payload.hpp)}`}
                   </p>
-                </KotakTooltip>
+                </div>
               ) : null
             }
           />
-          <ReferenceLine y={target} stroke="#febd19" strokeWidth={2} strokeDasharray="6 5" ifOverflow="extendDomain" label={{ value: `Target ${persen(target, 0)}`, position: 'insideTopRight', fill: '#8a5a00', fontSize: 11, fontWeight: 700 }} />
-          <Bar dataKey="margin" radius={[12, 12, 4, 4]} maxBarSize={56} onClick={(d) => ubah?.(d.payload?.id ?? d.id)} className="cursor-pointer" animationDuration={700}>
+          <ReferenceLine y={target} stroke="#e0a800" strokeWidth={1.5} strokeDasharray="5 4" label={{ value: `Target ${persen(target, 0)}`, position: 'insideBottomRight', fill: '#8a5a00', fontSize: 11, fontWeight: 600 }} />
+          <Bar
+            dataKey="margin"
+            radius={[8, 8, 8, 8]}
+            maxBarSize={34}
+            onClick={(d) => ubah?.(d.payload?.id ?? d.id)}
+            className={ubah ? 'cursor-pointer' : ''}
+            isAnimationActive={false}
+            label={(p) => <LabelTerpilih {...p} pilihIndex={pilihIndex} />}
+          >
             {data.map((d) => (
-              <Cell key={d.id} fill={d.id === pilih ? 'url(#batang-aktif)' : d.status === 'aman' ? 'url(#batang-biasa)' : 'url(#batang-kurang)'} />
+              <Cell key={d.id} fill={d.id === pilih ? '#1d59bb' : d.status === 'aman' ? '#dfe7f3' : '#fbe3a0'} />
             ))}
           </Bar>
         </BarChart>
@@ -93,7 +102,7 @@ export function AreaHarga({ data, satuan, label, tinggi = 220 }) {
               ) : null
             }
           />
-          <Area type="monotone" dataKey="harga" stroke={warna} strokeWidth={2.5} fill={`url(#${id})`} activeDot={{ r: 6, fill: '#febd19', stroke: '#fff', strokeWidth: 3 }} dot={false} animationDuration={700} />
+          <Area type="monotone" dataKey="harga" stroke={warna} strokeWidth={2.5} fill={`url(#${id})`} activeDot={{ r: 6, fill: '#febd19', stroke: '#fff', strokeWidth: 3 }} dot={false} isAnimationActive={false} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -130,11 +139,11 @@ export function BatangKomposisi({ data, menu }) {
           />
           <Bar
             dataKey="biaya"
-            radius={[4, 10, 10, 4]}
-            maxBarSize={22}
-            fill="url(#batang-mendatar)"
-            background={{ fill: '#f0f4fa', radius: 10 }}
-            animationDuration={600}
+            radius={[6, 6, 6, 6]}
+            maxBarSize={14}
+            fill="#1d59bb"
+            background={{ fill: '#eef2f8', radius: 6 }}
+            isAnimationActive={false}
             label={{ position: 'right', formatter: (v) => rupiah(v), fontSize: 12, fill: '#0d1b3e', fontWeight: 600 }}
           />
         </BarChart>

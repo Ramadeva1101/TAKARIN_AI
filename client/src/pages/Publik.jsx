@@ -76,7 +76,7 @@ export function PublikLayout() {
       <footer className="border-t border-garis bg-kartu">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-sm text-redup sm:px-6">
           <p className="flex items-center gap-2">
-            <Merek /> · proyek LOGICODIX 2026
+            <Merek />
           </p>
           <nav aria-label="Tautan situs" className="flex flex-wrap gap-1">
             <Link to="/tentang" className="inline-flex min-h-11 items-center px-2 hover:text-tinta">
@@ -111,83 +111,20 @@ function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
   );
 }
 
-// Grafik area kecil untuk pratinjau (data demo modal ayam geprek 8 belanja terakhir).
-function Area() {
-  const nilai = [8350, 8420, 8380, 8510, 8470, 8590, 8640, 8708];
-  const min = 8300;
-  const maks = 8750;
-  const titik = nilai.map((v, i) => [(i / (nilai.length - 1)) * 200, 60 - ((v - min) / (maks - min)) * 50]);
-  const garis = titik.map((p) => p.join(',')).join(' ');
-  return (
-    <svg viewBox="0 0 200 64" className="h-16 w-full" preserveAspectRatio="none" aria-hidden>
-      <defs>
-        <linearGradient id="isi-area" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#76b9ff" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#76b9ff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={`0,64 ${garis} 200,64`} fill="url(#isi-area)" />
-      <polyline points={garis} fill="none" stroke="#3d86ea" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function KpiMini({ label, nilai }) {
-  return (
-    <div className="rounded-2xl border border-garis bg-white p-3 shadow-kartu">
-      <p className="text-xs text-redup">{label}</p>
-      <p className="angka mt-0.5 truncate font-bold">{nilai}</p>
-    </div>
-  );
-}
-
-// Pratinjau tampilan aplikasi. Angkanya dari akun demo, ditandai di bawahnya.
+// Pratinjau: tangkapan layar asli halaman Ringkasan dengan akun demo.
 function Pratinjau() {
   return (
-    <figure className="mx-auto max-w-[720px]">
-      <div className="rounded-[26px] border border-white bg-white/60 p-2 shadow-[0_30px_70px_rgb(29_89_187/0.15)] backdrop-blur">
-        <div className="flex overflow-hidden rounded-[20px] border border-garis bg-white text-left">
-          <div className="hidden w-40 shrink-0 flex-col gap-1 bg-gradient-to-b from-navy to-[#2a3f66] p-3 text-[13px] text-white/75 sm:flex" aria-hidden>
-            <Merek terang className="mb-3 text-sm" />
-            {[
-              [House, 'Ringkasan', true],
-              [ForkKnife, 'Produk'],
-              [Storefront, 'Harga pasar'],
-              [Basket, 'Bahan baku'],
-            ].map(([Ikon, l, a]) => (
-              <span key={l} className={`flex items-center gap-2 rounded-xl px-2.5 py-1.5 ${a ? 'bg-biru-muda font-semibold text-biru' : ''}`}>
-                <Ikon size={15} weight={a ? 'fill' : 'regular'} /> {l}
-              </span>
-            ))}
-          </div>
-          <div className="min-w-0 flex-1 p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-bold">Halo, Bu Sari!</p>
-                <p className="text-xs text-redup">Ringkasan modal Warung Bu Sari hari ini.</p>
-              </div>
-              <span className="hidden items-center gap-1.5 rounded-xl border border-garis px-2.5 py-1 text-xs font-medium sm:inline-flex">
-                <CalendarBlank size={14} /> Hari ini <CaretDown size={12} />
-              </span>
-            </div>
-            <div className="mt-3 grid grid-cols-[auto_1fr] items-end gap-4 rounded-2xl bg-gradient-to-br from-biru-muda to-white p-3.5">
-              <div>
-                <p className="text-xs font-medium">Modal per porsi, Ayam Geprek</p>
-                <p className="angka mt-1 flex flex-wrap items-baseline gap-2 text-2xl font-extrabold">
-                  Rp8.708 <Chip status="aman">Untung 41,9%</Chip>
-                </p>
-              </div>
-              <Area />
-            </div>
-            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-              <KpiMini label="Menu dihitung" nilai="4 menu" />
-              <KpiMini label="Belanja bulan ini" nilai="Rp628.750" />
-              <KpiMini label="Rata-rata untung" nilai="48,4%" />
-            </div>
-          </div>
-        </div>
+    <figure className="mx-auto max-w-[760px]">
+      <div className="rounded-[22px] border border-white bg-white/70 p-1.5 shadow-[0_30px_70px_rgb(29_89_187/0.18)] backdrop-blur">
+        <img
+          src="/tangkapan-ringkasan.webp"
+          width="1490"
+          height="716"
+          alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,4%, grafik untung per menu dengan garis target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
+          className="block h-auto w-full rounded-[16px] border border-garis"
+          fetchPriority="high"
+        />
       </div>
-      <figcaption className="mt-2 text-center text-xs text-redup">Contoh tampilan dengan data akun demo.</figcaption>
     </figure>
   );
 }
@@ -237,10 +174,10 @@ function Kebocoran() {
         {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
         {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
       </div>
-      <div className="mt-4 rounded-2xl bg-navy p-4 text-white" aria-live="polite">
-        <p className="text-sm text-white/75">Untung yang hilang dalam 30 hari</p>
-        <p className="angka mt-1 text-3xl font-extrabold text-kuning">{rp(bulan)}</p>
-        <p className="angka mt-1 text-sm text-white/80">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
+      <div className="mt-4 rounded-2xl bg-rugi-muda p-4 ring-1 ring-rugi/15" aria-live="polite">
+        <p className="text-sm text-redup">Untung yang hilang dalam 30 hari</p>
+        <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
+        <p className="angka mt-1 text-sm text-tinta">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
       </div>
       <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
     </div>
@@ -309,16 +246,16 @@ const PRINSIP = [
 export function Beranda() {
   return (
     <main>
-      <section className="relative mx-auto max-w-6xl px-4 pt-10 pb-16 text-center sm:px-6 lg:pt-12 lg:pb-20">
+      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-16 text-center sm:px-6 lg:pt-8 lg:pb-20">
         <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[56px]">
           Hitung HPP Usahamu
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base text-redup sm:text-lg">
+        <p className="mx-auto mt-4 max-w-3xl text-base text-redup sm:text-lg">
           Untuk warung, kedai, kue, dan katering. Takarin AI membaca nota belanja, menghitung modal setiap porsi, dan menunjukkan harga jual yang masih memenuhi target untung.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
             Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
@@ -327,9 +264,9 @@ export function Beranda() {
           </Tombol>
         </div>
 
-        <div className="relative mt-8">
-          <KartuMelayang posisi="left-0 top-12 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
-          <KartuMelayang posisi="right-0 top-20 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Data PIHPS Bank Indonesia" />
+        <div className="relative mt-7">
+          <KartuMelayang posisi="-left-2 top-1/2 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
+          <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Data PIHPS Bank Indonesia" />
           <Pratinjau />
         </div>
 
@@ -352,8 +289,7 @@ export function Beranda() {
       <section className="mx-auto max-w-6xl px-4 pt-8 pb-24 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
-            <span className="inline-block rounded-full bg-rugi-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-rugi">MASALAH</span>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               Untung tergerus <span className="teks-emas">tanpa terasa</span>
             </h2>
             <p className="mt-3 max-w-lg text-redup">
@@ -383,8 +319,7 @@ export function Beranda() {
       <section id="cara-kerja" className="scroll-mt-20 border-y border-garis bg-kartu">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
           <div className="text-center">
-            <span className="inline-block rounded-full bg-biru-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-biru">CARA KERJA</span>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               Hitung HPP dalam <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span>
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-redup">Setelah menu tersimpan, pekerjaan rutin Anda hanya mencatat belanja. Sisanya dihitung otomatis.</p>
@@ -408,8 +343,7 @@ export function Beranda() {
 
       <section id="fitur" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 lg:py-24">
         <div className="text-center">
-          <span className="inline-block rounded-full bg-kuning-muda px-4 py-1.5 text-sm font-semibold tracking-wide text-kuning-tua">FITUR</span>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Semua Hitungan <span className="teks-biru">dalam</span> <span className="teks-emas">Satu Tempat</span>
           </h2>
         </div>
@@ -428,8 +362,7 @@ export function Beranda() {
 
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
-          <span className="inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold tracking-wide text-biru shadow-kartu">PRINSIP</span>
-          <h2 className="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">AI membaca, kode yang menghitung</h2>
+          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">AI membaca, kode yang menghitung</h2>
           <p className="mt-3 max-w-2xl text-redup">AI dipakai di bagian yang memang sulit bagi manusia: membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita. Angka yang menentukan harga tidak diserahkan kepada AI.</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {PRINSIP.map(([Ikon, judul, teks]) => (
