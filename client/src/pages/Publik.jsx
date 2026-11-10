@@ -215,13 +215,13 @@ const LANGKAH = [
   {
     no: '03',
     judul: 'Lihat modal dan harga minimal',
-    teks: 'Modal per porsi dihitung ulang setiap kali belanja disimpan. Menu yang untungnya di bawah target langsung ditandai.',
+    teks: 'Sebelum ada belanja, modal dihitung dari harga pasar daerah. Setiap belanja disimpan, modal dihitung ulang memakai harga yang Anda bayar. Menu yang untungnya di bawah target langsung ditandai.',
     isi: (
       <div className="rounded-xl border border-garis bg-dasar p-3">
         <p className="text-xs text-redup">Modal per porsi</p>
-        <p className="angka text-xl font-bold">Rp8.708</p>
+        <p className="angka text-xl font-bold">Rp8.721</p>
         <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
-          <span className="angka">Harga minimal Rp15.000</span>
+          <span className="angka">Harga jual Rp15.000</span>
           <span className="angka font-semibold text-aman">Untung 41,9%</span>
         </div>
       </div>
@@ -239,7 +239,7 @@ const FITUR = [
 const PRINSIP = [
   [ShieldCheck, 'Angka dihitung oleh kode', 'Modal, untung, dan harga minimal memakai rumus tetap. Teks AI yang memuat angka di luar hasil hitungan dibuang dan diganti penjelasan baku.'],
   [UserCheck, 'Pemilik usaha tetap memutuskan', 'Setiap hasil AI masuk ke halaman periksa terlebih dahulu. Tidak ada data yang dipakai sebelum disetujui.'],
-  [Leaf, 'Hemat sumber daya', 'Foto dikompres di ponsel, AI dipanggil hanya saat membaca atau menulis, dan harga pasar diambil paling sering sekali dalam enam jam.'],
+  [Leaf, 'Hemat sumber daya', 'Foto dikompres di ponsel, AI hanya dipanggil saat membaca atau menulis, catatan harian dipakai ulang selama datanya sama, dan harga pasar diambil otomatis paling sering sekali dalam enam jam per wilayah.'],
   [Database, 'Data publik yang jelas sumbernya', 'Harga pasar berasal dari PIHPS Bank Indonesia dengan tanggal yang selalu ditampilkan. Tidak ada pengambilan data dari toko atau marketplace.'],
 ];
 
@@ -253,7 +253,7 @@ export function Beranda() {
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-4 max-w-3xl text-base text-redup sm:text-lg">
-          Untuk warung, kedai, kue, dan katering. Takarin AI membaca nota belanja, menghitung modal setiap porsi, dan menunjukkan harga jual yang masih memenuhi target untung.
+          Untuk warung, kedai, kue, katering, dan usaha kuliner lain. Ceritakan resep sekali, lalu catat belanja dari foto nota, ucapan, atau ketikan. Takarin AI menghitung modal setiap porsi dan menunjukkan harga jual yang masih memenuhi target untung.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">

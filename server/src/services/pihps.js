@@ -141,6 +141,7 @@ export async function segarkanWilayah({ kota, provinsi }) {
 
 // ---- Penjadwalan: tiap wilayah paling sering sekali per beberapa jam, tanpa menahan permintaan pengguna ----
 const status = new Map();
+const JEDA_MANUAL_MS = 10 * 60_000;
 const kunciWilayah = (u) => `${bersihWilayah(u.provinsi)}|${bersihWilayah(u.kota)}`;
 
 export function statusSinkron(usaha) {
@@ -164,6 +165,8 @@ export function perbarui(usaha, { paksa = false } = {}) {
   // Gagal sebagian: coba lagi setelah 10 menit saja, supaya situs sumber tidak dibanjiri.
   const jeda = s?.hasil?.galat?.length ? 600_000 : JEDA_ULANG_MS;
   if (!paksa && s?.selesai && Date.now() - s.selesai < jeda) return null;
+  // Pembaruan manual juga dibatasi supaya situs sumber tidak dibanjiri.
+  if (paksa && s?.selesai && Date.now() - s.selesai < JEDA_MANUAL_MS) return null;
   const baru = { proses: null, selesai: s?.selesai ?? null, hasil: s?.hasil ?? { galat: [] } };
   baru.proses = segarkanWilayah({ kota: usaha.kota, provinsi: usaha.provinsi })
     .then((hasil) => {

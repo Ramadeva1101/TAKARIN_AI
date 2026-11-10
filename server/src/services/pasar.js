@@ -1,7 +1,7 @@
 import { all } from '../lib/db.js';
 import { acuanTerbaru, riwayatAcuan } from './hargaPasar.js';
 import { hitungSemua } from './hpp.js';
-import { tulisCatatan } from '../ai/provider.js';
+import { tulisCatatan, modeAi } from '../ai/provider.js';
 import { validasiAngka } from '../domain/validasiAngka.js';
 import { bersihWilayah } from '../domain/wilayah.js';
 import { daftarProvinsi, daftarKota, hargaLiveAktif } from './pihps.js';
@@ -124,6 +124,9 @@ function catatanTemplat(info, perlu) {
 // Catatan AI ditolak kalau kepanjangan atau lebih dari satu kalimat.
 const terlaluPanjang = (teks) => teks.split(/\s+/).length > 22 || (teks.match(/[.!?](\s|$)/g) || []).length > 1;
 
+// Catatan yang sudah ditulis disimpan per usaha; dipakai ulang selama tanggal dan faktanya sama.
+const simpananCatatan = new Map();
+
 // Catatan singkat untuk hari ini. AI hanya merangkai kalimat dari fakta; angka dicek ulang.
 export async function catatanHarian(usaha) {
   const produk = hitungSemua(usaha);
@@ -145,6 +148,10 @@ export async function catatanHarian(usaha) {
   ];
   const persen = [fakta.target_untung_persen, ...fakta.menu_di_bawah_target.map((m) => m.untung_persen), ...fakta.kabar_harga.map((k) => k.perubahan_persen)];
 
+  const kunciFakta = `${tanggal}|${JSON.stringify(fakta)}`;
+  const lama = simpananCatatan.get(usaha.id);
+  if (lama?.kunci === kunciFakta) return lama.hasil;
+
   let teks = await tulisCatatan(fakta);
   let sumber = 'ai';
   teks = teks?.trim().replace(/^["']|["']$/g, '');
@@ -152,5 +159,8 @@ export async function catatanHarian(usaha) {
     teks = catatanTemplat(info, perlu);
     sumber = 'templat';
   }
-  return { teks, sumber, tanggal };
+  const hasil = { teks, sumber, tanggal };
+  // Hasil templat karena AI gagal tidak disimpan, supaya dicoba lagi lain kali.
+  if (sumber === 'ai' || modeAi() === 'fixture') simpananCatatan.set(usaha.id, { kunci: kunciFakta, hasil });
+  return hasil;
 }
