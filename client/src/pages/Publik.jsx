@@ -101,7 +101,7 @@ export function PublikLayout() {
 // Kartu miring di kiri dan kanan pratinjau (desktop saja). Isinya fitur yang memang ada.
 function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
   return (
-    <div className={`absolute z-10 hidden w-64 items-center gap-3 rounded-2xl border border-[#d3deee] bg-white p-4 text-left shadow-[0_1px_2px_rgb(13_27_62/0.08),0_24px_48px_-12px_rgb(13_27_62/0.35)] xl:flex ${posisi}`} aria-hidden>
+    <div className={`absolute z-10 hidden w-[17.5rem] items-center gap-3 rounded-2xl border border-[#d3deee] bg-white p-4 text-left shadow-[0_1px_2px_rgb(13_27_62/0.08),0_24px_48px_-12px_rgb(13_27_62/0.35)] xl:flex ${posisi}`} aria-hidden>
       <IkonKotak ikon={ikon} warna={warna} />
       <div>
         <p className="font-bold">{judul}</p>
@@ -112,9 +112,10 @@ function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
 }
 
 // Pratinjau: tangkapan layar asli halaman Ringkasan dengan akun demo.
+// Tangkapan layar berhenti di tengah halaman; bagian bawahnya dipudarkan agar terbaca sebagai halaman yang berlanjut.
 function Pratinjau() {
   return (
-    <figure className="mx-auto max-w-[680px]">
+    <figure className="mx-auto max-w-[680px] [mask-image:linear-gradient(to_bottom,black_72%,transparent)]">
       <div className="rounded-[22px] border border-white bg-white/70 p-1.5 shadow-[0_30px_70px_rgb(29_89_187/0.18)] backdrop-blur">
         <img
           src="/tangkapan-ringkasan.webp"
@@ -130,10 +131,10 @@ function Pratinjau() {
 }
 
 const FAKTA = [
-  [Scales, 'Takaran sdm, siung, potong'],
-  [MapPin, 'Harga kota, provinsi, nasional'],
-  [Storefront, '13 komoditas pangan PIHPS'],
-  [Microphone, 'Foto, suara, atau ketik'],
+  [Scales, 'Takaran sendok, siung, dan potong'],
+  [MapPin, 'Harga pasar kota hingga nasional'],
+  [Storefront, '13 komoditas pangan dari PIHPS'],
+  [Microphone, 'Input foto nota, suara, atau teks'],
 ];
 
 const MASALAH = [
@@ -248,7 +249,7 @@ export function Beranda() {
     <main>
       <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-8 lg:pb-24">
         <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[52px]">
-          Hitung HPP Usahamu
+          Hitung HPP Usaha Anda
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
@@ -265,15 +266,15 @@ export function Beranda() {
         </div>
 
         <div className="relative mt-7">
-          <KartuMelayang posisi="-left-2 top-1/2 -rotate-6" ikon={Camera} warna="biru" judul="Nota jadi data" teks="Foto, suara, atau ketik" />
-          <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar kotamu" teks="Data PIHPS Bank Indonesia" />
+          <KartuMelayang posisi="-left-2 top-1/2 -rotate-6" ikon={Camera} warna="biru" judul="Nota terbaca otomatis" teks="Dari foto, suara, atau teks" />
+          <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar daerah Anda" teks="Data PIHPS Bank Indonesia" />
           <Pratinjau />
         </div>
 
         <div className="mt-20">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
-            <p className="text-base font-semibold">Dirancang mengikuti cara warung bekerja</p>
+            <p className="text-base font-semibold">Dirancang sesuai cara kerja usaha kuliner</p>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-kuning/70" />
           </div>
           <ul className="mt-4 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
