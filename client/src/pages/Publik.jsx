@@ -132,7 +132,7 @@ function Pratinjau() {
 const FAKTA = [
   [Scales, 'Takaran sdm, siung, potong'],
   [MapPin, 'Harga kota, provinsi, nasional'],
-  [Storefront, '11 komoditas pangan PIHPS'],
+  [Storefront, '13 komoditas pangan PIHPS'],
   [Microphone, 'Foto, suara, atau ketik'],
 ];
 
@@ -253,7 +253,7 @@ export function Beranda() {
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-4 max-w-3xl text-base text-redup sm:text-lg">
-          Untuk warung, kedai, kue, katering, dan usaha kuliner lain. Ceritakan resep sekali, lalu catat belanja dari foto nota, ucapan, atau ketikan. Takarin AI menghitung modal setiap porsi dan menunjukkan harga jual yang masih memenuhi target untung.
+          Ceritakan resep sekali, lalu catat belanja dari foto nota, suara, atau ketikan. Takarin AI menghitung modal per porsi dan harga jual sesuai target untung.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">

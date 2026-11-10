@@ -1,12 +1,14 @@
 // Mencocokkan nama bahan sehari-hari ke nama komoditas di data harga pangan pemerintah.
 // Urutan penting: pola yang lebih spesifik di atas.
 const POLA = [
-  [/cab[ae]i?\s*(rawit|setan|rwt)/i, 'cabai rawit merah'],
+  [/cab[ae]i?\s*(rawit|setan|rwt)\s*(hijau|ijo)|cengek\s*(hijau|ijo)/i, 'cabai rawit hijau'],
+  [/cab[ae]i?\s*(rawit|setan|rwt)|cengek/i, 'cabai rawit merah'],
   [/cab[ae]i?\s*(keriting|krtg)/i, 'cabai merah keriting'],
   [/cab[ae]i?\s*(besar|merah)/i, 'cabai merah besar'],
   [/bawang\s*merah|bwg\s*mrh|bawang\s*mrh/i, 'bawang merah'],
   [/bawang\s*putih|bwg\s*pth|bawang\s*pth/i, 'bawang putih'],
   [/telur|telor/i, 'telur ayam ras'],
+  [/(minyak\s*(goreng\s*)?|migor\s*)curah/i, 'minyak goreng curah'],
   [/minyak\s*(goreng)?|migor/i, 'minyak goreng'],
   [/gula\s*(pasir)?/i, 'gula pasir'],
   [/beras/i, 'beras medium'],

@@ -15,6 +15,7 @@ const HARI_RIWAYAT = 30;
 // Nama komoditas PIHPS → nama komoditas di aplikasi (lihat domain/komoditas.js).
 const PETA = {
   'Cabai Rawit Merah': 'cabai rawit merah',
+  'Cabai Rawit Hijau': 'cabai rawit hijau',
   'Cabai Merah Keriting': 'cabai merah keriting',
   'Cabai Merah Besar': 'cabai merah besar',
   'Bawang Merah Ukuran Sedang': 'bawang merah',
@@ -25,8 +26,9 @@ const PETA = {
   'Gula Pasir Lokal': 'gula pasir',
   'Beras Kualitas Medium I': 'beras medium',
   'Minyak Goreng Kemasan Bermerk 1': 'minyak goreng',
+  'Minyak Goreng Curah': 'minyak goreng curah',
 };
-const ID_KOMODITAS = ['com_16', 'com_14', 'com_13', 'com_11', 'com_12', 'com_10', 'com_7', 'com_8', 'com_21', 'com_3', 'com_18'];
+const ID_KOMODITAS = ['com_16', 'com_15', 'com_17', 'com_14', 'com_13', 'com_11', 'com_12', 'com_10', 'com_7', 'com_8', 'com_21', 'com_3', 'com_18'];
 
 export const hargaLiveAktif = () => process.env.HARGA_LIVE === 'on';
 
