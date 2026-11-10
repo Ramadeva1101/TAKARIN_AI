@@ -26,7 +26,7 @@ function kelontong() {
   if (!process.env.KELONTONG_API_KEY) throw new AiError('KELONTONG_API_KEY belum diisi di server/.env');
   klienTeks ??= new OpenAI({
     apiKey: process.env.KELONTONG_API_KEY,
-    baseURL: process.env.KELONTONG_BASE_URL || 'https://api.kelontongai.my.id/v1',
+    baseURL: process.env.KELONTONG_BASE_URL || 'https://api.kelontongai.id/v1',
     timeout: 60_000,
     maxRetries: 0,
   });
