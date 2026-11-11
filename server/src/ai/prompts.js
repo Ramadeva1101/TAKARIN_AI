@@ -1,4 +1,4 @@
-const ATURAN_JSON = 'Balas HANYA dengan satu objek JSON valid, tanpa penjelasan dan tanpa markdown.';
+export const ATURAN_JSON = 'Balas HANYA dengan satu objek JSON valid, tanpa penjelasan dan tanpa markdown.';
 
 const ATURAN_ANGKA = `Aturan angka:
 - Tulis angka rupiah sebagai bilangan bulat tanpa titik (47500).

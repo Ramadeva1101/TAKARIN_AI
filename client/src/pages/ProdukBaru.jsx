@@ -137,12 +137,12 @@ export default function ProdukBaru() {
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold">Menu {i + 1}</h2>
                 {daftar.length > 1 && (
-                  <Tombol varian="bahaya" onClick={() => setDaftar(daftar.filter((_, j) => j !== i))}>
+                  <Tombol varian="bahaya" onClick={() => setDaftar((d) => d.filter((_, j) => j !== i))}>
                     Hapus menu
                   </Tombol>
                 )}
               </div>
-              <ResepEditor judul={`m${i}`} value={p} onChange={(v) => setDaftar(daftar.map((x, j) => (j === i ? v : x)))} />
+              <ResepEditor judul={`m${i}`} value={p} onChange={(v) => setDaftar((d) => d.map((x, j) => (j === i ? v : x)))} />
             </Kartu>
           ))}
           <div className="mt-3 flex flex-wrap gap-2">
