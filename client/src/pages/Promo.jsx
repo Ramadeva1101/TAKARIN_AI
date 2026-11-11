@@ -3,7 +3,7 @@ import { Check, Copy, Minus, PencilSimple, Plus, Sparkle, Trash, WhatsappLogo } 
 import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
-import { Field, Galat, Judul, Kartu, Kosong, Muat, Tombol } from '../components/ui.jsx';
+import { Field, Galat, Judul, Kartu, Kosong, Muat, Pemutar, Tombol } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
 import { hargaAsing } from '../lib/harga.js';
 
@@ -97,13 +97,16 @@ function KartuTersimpan({ p, baru, muat, ubah }) {
       setInfo('Tidak bisa menyalin otomatis. Tekan lama teks caption untuk menyalin.');
     }
   };
+  const [menghapus, setMenghapus] = useState(false);
   const hapus = async () => {
     if (!window.confirm(`Hapus paket ${p.nama}?`)) return;
+    setMenghapus(true);
     try {
       await api(`/promo/${p.id}`, { method: 'DELETE' });
-      muat();
+      await muat();
     } catch (e) {
       setInfo(pesanGalat(e));
+      setMenghapus(false);
     }
   };
   const margin = p.hpp_paket != null ? (p.harga_paket - p.hpp_paket) / p.harga_paket : null;
@@ -117,8 +120,8 @@ function KartuTersimpan({ p, baru, muat, ubah }) {
           <p className="truncate font-semibold">{p.nama}</p>
           {p.items && <p className="truncate text-xs text-redup">{teksIsi(p.items)}</p>}
         </div>
-        <button type="button" aria-label={`Hapus paket ${p.nama}`} onClick={hapus} className="flex size-11 shrink-0 items-center justify-center rounded-full text-redup hover:bg-dasar hover:text-rugi sm:size-9">
-          <Trash size={18} aria-hidden />
+        <button type="button" aria-label={`Hapus paket ${p.nama}`} onClick={hapus} disabled={menghapus} aria-busy={menghapus || undefined} className="flex size-11 shrink-0 items-center justify-center rounded-full text-redup hover:bg-dasar hover:text-rugi sm:size-9">
+          {menghapus ? <Pemutar size={18} /> : <Trash size={18} aria-hidden />}
         </button>
       </div>
       <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
@@ -411,8 +414,8 @@ export default function Promo() {
 
             {hasil && (
               <Langkah no="3" judul="Nama dan caption" sub="Isi sendiri, atau minta usulan dari AI lalu ubah seperlunya.">
-                <Tombol varian="lembut" onClick={saran} disabled={proses === 'saran' || !(hargaN > 0)}>
-                  <Sparkle size={16} aria-hidden /> {proses === 'saran' ? 'Menyusun usulan' : 'Usulkan nama dan caption'}
+                <Tombol memuat={proses === 'saran'} varian="lembut" onClick={saran} disabled={proses === 'saran' || !(hargaN > 0)}>
+                  {proses !== 'saran' && <Sparkle size={16} aria-hidden />} {proses === 'saran' ? 'Menyusun usulan' : 'Usulkan nama dan caption'}
                 </Tombol>
                 <Field className="mt-4" label="Nama paket" value={nama} onChange={(e) => setNama(e.target.value)} />
                 <Field
@@ -433,7 +436,7 @@ export default function Promo() {
             <Pratinjau isi={isi} hasil={hasil} nama={nama} caption={caption} hargaN={hargaN} margin={margin} />
             {hasil && (
               <>
-                <Tombol className="w-full !min-h-12" onClick={simpan} disabled={proses === 'simpan' || !siap}>
+                <Tombol memuat={proses === 'simpan'} className="w-full !min-h-12" onClick={simpan} disabled={proses === 'simpan' || !siap}>
                   {proses === 'simpan' ? 'Menyimpan' : editP ? 'Simpan perubahan' : 'Simpan paket'}
                 </Tombol>
                 {!nama.trim() && !rugi && <p className="text-center text-xs text-redup">Isi nama paket di langkah 3 untuk menyimpan.</p>}

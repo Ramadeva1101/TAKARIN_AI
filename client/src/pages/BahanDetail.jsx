@@ -34,6 +34,7 @@ export default function BahanDetail() {
   const semuaBahan = useApi('/bahan');
   const [gabungKe, setGabungKe] = useState('');
   const [galatGabung, setGalatGabung] = useState(null);
+  const [proses, setProses] = useState(null);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -46,23 +47,29 @@ export default function BahanDetail() {
 
   const simpan = async (e) => {
     e.preventDefault();
+    setProses('simpan');
     try {
       await api(`/bahan/${id}`, { method: 'PUT', body: { ...form, komoditas: form.komoditas || null, susut_persen: Number(form.susut_persen) } });
       setPesan({ ok: true, teks: 'Tersimpan. Modal menu ikut dihitung ulang.' });
       muat();
     } catch (err) {
       setPesan({ ok: false, teks: pesanGalat(err) });
+    } finally {
+      setProses(null);
     }
   };
 
   const tambahKonversi = async (e) => {
     e.preventDefault();
+    setProses('konversi');
     try {
       await api(`/bahan/${id}/konversi`, { method: 'POST', body: { satuan: konv.satuan, faktor: Number(konv.faktor) } });
       setKonv({ satuan: '', faktor: '' });
-      muat();
+      await muat();
     } catch (err) {
       setPesan({ ok: false, teks: pesanGalat(err) });
+    } finally {
+      setProses(null);
     }
   };
 
@@ -73,11 +80,14 @@ export default function BahanDetail() {
     if (!ke) return;
     if (!window.confirm(`Gabungkan "${b.nama}" ke "${ke.nama}"? Riwayat belanja dan resep pindah ke ${ke.nama}, lalu "${b.nama}" dihapus.`)) return;
     setGalatGabung(null);
+    setProses('gabung');
     try {
       await api(`/bahan/${b.id}/gabung`, { method: 'POST', body: { ke_id: ke.id } });
+      setProses(null);
       nav(`/bahan/${ke.id}`, { replace: true });
     } catch (err) {
       setGalatGabung(pesanGalat(err));
+      setProses(null);
     }
   };
 
@@ -157,7 +167,7 @@ export default function BahanDetail() {
                 {pesan.teks}
               </p>
             )}
-            <Tombol type="submit" className="mt-4">
+            <Tombol type="submit" className="mt-4" memuat={proses === 'simpan'}>
               Simpan
             </Tombol>
           </form>
@@ -176,7 +186,7 @@ export default function BahanDetail() {
           <form onSubmit={tambahKonversi} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
             <Field label="Satuan" value={konv.satuan} onChange={(e) => setKonv({ ...konv, satuan: e.target.value })} placeholder="ikat" />
             <Field label={`Isi (${sd})`} type="number" min="0" step="any" value={konv.faktor} onChange={(e) => setKonv({ ...konv, faktor: e.target.value })} />
-            <Tombol type="submit" varian="garis" disabled={!konv.satuan || !(Number(konv.faktor) > 0)}>
+            <Tombol type="submit" varian="garis" memuat={proses === 'konversi'} disabled={!konv.satuan || !(Number(konv.faktor) > 0)}>
               Tambah
             </Tombol>
           </form>
@@ -212,7 +222,7 @@ export default function BahanDetail() {
                   </select>
                 )}
               </Field>
-              <Tombol varian="garis" onClick={gabung} disabled={!gabungKe}>
+              <Tombol varian="garis" onClick={gabung} memuat={proses === 'gabung'} disabled={!gabungKe}>
                 Gabungkan
               </Tombol>
             </div>

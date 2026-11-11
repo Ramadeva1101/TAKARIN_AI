@@ -169,7 +169,7 @@ export default function Onboarding() {
                   maxLength={60}
                   className="min-h-11 min-w-0 flex-1 rounded-xl border border-garis bg-kartu px-3 text-base outline-none focus:border-biru"
                 />
-                <Tombol varian="polos" onClick={periksaJenis} disabled={lain.cek || lain.teks.trim().length < 3}>
+                <Tombol memuat={lain.cek} varian="polos" onClick={periksaJenis} disabled={lain.cek || lain.teks.trim().length < 3}>
                   {lain.cek ? 'Memeriksa' : 'Periksa'}
                 </Tombol>
               </div>
@@ -285,7 +285,7 @@ export default function Onboarding() {
           </Tombol>
         )}
         {langkah === LANGKAH.length - 1 && (
-          <Tombol onClick={simpan} disabled={proses}>
+          <Tombol memuat={proses} onClick={simpan} disabled={proses}>
             {proses ? 'Menyimpan' : 'Simpan dan tambah menu'}
           </Tombol>
         )}

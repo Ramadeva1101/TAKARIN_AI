@@ -71,7 +71,7 @@ function Dampak({ hasil }) {
   );
 }
 
-function Tersimpan({ n, hapus, galat }) {
+function Tersimpan({ n, hapus, galat, menghapus }) {
   return (
     <Kartu>
       <ul className="divide-y divide-garis">
@@ -90,7 +90,7 @@ function Tersimpan({ n, hapus, galat }) {
       </ul>
       <div className="tepi-nota mt-2 flex flex-wrap items-center justify-between gap-3 pt-4">
         <p className="text-sm text-redup">Salah catat? Hapus belanja ini, lalu catat ulang. Modal menu dihitung ulang tanpa belanja ini.</p>
-        <Tombol varian="bahaya" className="border border-rugi/30" onClick={hapus}>
+        <Tombol varian="bahaya" className="border border-rugi/30" onClick={hapus} memuat={menghapus}>
           Hapus belanja
         </Tombol>
       </div>
@@ -110,6 +110,7 @@ export default function BelanjaCek() {
   const [hasil, setHasil] = useState(null);
   const [galat, setGalat] = useState(null);
   const [proses, setProses] = useState(false);
+  const [menghapus, setMenghapus] = useState(false);
 
   useEffect(() => {
     if (!n) return;
@@ -126,11 +127,13 @@ export default function BelanjaCek() {
   const hapus = async () => {
     if (!window.confirm(n.status === 'disimpan' ? 'Hapus belanja ini? Harga dari belanja ini tidak dipakai lagi untuk menghitung modal.' : 'Buang catatan belanja ini?')) return;
     setGalat(null);
+    setMenghapus(true);
     try {
       await api(`/pembelian/${id}`, { method: 'DELETE' });
       nav('/belanja', { replace: true });
     } catch (err) {
       setGalat(pesanGalat(err));
+      setMenghapus(false);
     }
   };
 
@@ -138,7 +141,7 @@ export default function BelanjaCek() {
     return (
       <>
         <Judul judul={n.nama_toko || 'Belanja'} sub={`${tanggal(n.tanggal)} · dari ${sumber}`} kembali="/belanja" />
-        <Tersimpan n={n} hapus={hapus} galat={galat} />
+        <Tersimpan n={n} hapus={hapus} galat={galat} menghapus={menghapus} />
       </>
     );
   }
@@ -306,10 +309,10 @@ export default function BelanjaCek() {
           </p>
         )}
         <div className="mt-4 flex flex-wrap gap-2">
-          <Tombol onClick={simpan} disabled={proses}>
+          <Tombol memuat={proses} onClick={simpan} disabled={proses}>
             {proses ? 'Menyimpan' : 'Simpan dan hitung ulang modal'}
           </Tombol>
-          <Tombol varian="bahaya" onClick={hapus}>
+          <Tombol varian="bahaya" onClick={hapus} memuat={menghapus}>
             Buang
           </Tombol>
         </div>

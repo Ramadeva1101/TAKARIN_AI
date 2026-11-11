@@ -4,7 +4,7 @@ import { Plus, ShoppingCart, Camera, Microphone, TextT, PencilSimple } from '@ph
 import { useApi } from '../lib/hooks.js';
 import { useAuth } from '../lib/auth.jsx';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
-import { Galat, Kartu, Muat, Tombol } from '../components/ui.jsx';
+import { Galat, Kartu, Muat, Pemutar, Tombol } from '../components/ui.jsx';
 import { Segmen } from '../components/Grafik.jsx';
 import { Mini } from '../components/Chart.jsx';
 import { Perubahan } from './Pasar.jsx';
@@ -220,8 +220,10 @@ function StatusMenu({ kpi, perlu, catatan, sesudah }) {
                   type="button"
                   onClick={() => terapkan(p)}
                   disabled={proses === p.id}
-                  className="angka min-h-11 rounded-full bg-kuning px-4 text-sm font-semibold text-tinta hover:bg-[#f2b000] disabled:opacity-60"
+                  aria-busy={proses === p.id || undefined}
+                  className="angka inline-flex min-h-11 items-center gap-1.5 rounded-full bg-kuning px-4 text-sm font-semibold text-tinta hover:bg-[#f2b000] disabled:opacity-60"
                 >
+                  {proses === p.id && <Pemutar size={14} />}
                   {proses === p.id ? 'Menyimpan' : `Pakai ${rupiah(p.opsi_utama.harga_jual)}`}
                 </button>
               )}

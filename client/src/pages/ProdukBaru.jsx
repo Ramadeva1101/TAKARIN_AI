@@ -64,7 +64,7 @@ export default function ProdukBaru() {
   };
 
   const tombolSimpan = (
-    <Tombol type="submit" className="mt-4" disabled={proses}>
+    <Tombol memuat={proses} type="submit" className="mt-4" disabled={proses}>
       {proses ? 'Menyimpan' : daftar && cara === 'cerita' && daftar.length > 1 ? `Simpan ${daftar.length} menu` : 'Simpan menu'}
     </Tombol>
   );
@@ -109,7 +109,7 @@ export default function ProdukBaru() {
             hint="Sebutkan nama menu, harga jual, lalu bahan dan takaran per porsi. Takaran sdm, siung, atau potong boleh."
           />
           <div className="mt-4 flex flex-wrap gap-2">
-            <Tombol onClick={susun} disabled={proses || cerita.trim().length < 10}>
+            <Tombol memuat={proses} onClick={susun} disabled={proses || cerita.trim().length < 10}>
               {proses ? 'Menyusun resep' : 'Susun resep'}
             </Tombol>
             <Tombol varian="garis" onClick={() => setCerita(contoh)}>

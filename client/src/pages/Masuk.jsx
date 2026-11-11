@@ -119,7 +119,7 @@ export default function Masuk({ mode }) {
                 {galat}
               </p>
             )}
-            <Tombol type="submit" varian="polos" className="mt-1 !min-h-12 w-full text-base" disabled={kirim}>
+            <Tombol memuat={kirim} type="submit" varian="polos" className="mt-1 !min-h-12 w-full text-base" disabled={kirim}>
               {kirim ? 'Memproses' : daftar ? 'Buat akun' : 'Masuk'}
             </Tombol>
           </form>

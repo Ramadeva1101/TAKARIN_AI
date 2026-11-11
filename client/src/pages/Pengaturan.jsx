@@ -22,6 +22,7 @@ export default function Pengaturan() {
   const [biaya, setBiaya] = useState([]);
   const [p1, setP1] = useState(null);
   const [p2, setP2] = useState(null);
+  const [menyimpan, setMenyimpan] = useState(null);
   const [wilayah, setWilayah] = useState({ provinsi: [], kota: [] });
 
   useEffect(() => {
@@ -60,23 +61,29 @@ export default function Pengaturan() {
 
   const simpanProfil = async (e) => {
     e.preventDefault();
+    setMenyimpan('profil');
     try {
       await api('/usaha', { method: 'PUT', body: { ...profil, target_margin: Number(profil.target_margin) / 100, porsi_per_hari: Number(profil.porsi_per_hari), hari_buka: Number(profil.hari_buka) } });
       await segarkan();
       setP1({ ok: true, teks: 'Profil tersimpan. Status menu dihitung ulang.' });
     } catch (err) {
       setP1({ ok: false, teks: pesanGalat(err) });
+    } finally {
+      setMenyimpan(null);
     }
   };
 
   const simpanBiaya = async (e) => {
     e.preventDefault();
+    setMenyimpan('biaya');
     try {
       await api('/usaha/biaya', { method: 'PUT', body: biayaValid(biaya) });
       setP2({ ok: true, teks: 'Biaya tersimpan.' });
       muat();
     } catch (err) {
       setP2({ ok: false, teks: pesanGalat(err) });
+    } finally {
+      setMenyimpan(null);
     }
   };
 
@@ -117,7 +124,7 @@ export default function Pengaturan() {
               <Field label="Hari buka sebulan" type="number" min="1" max="31" value={profil.hari_buka} onChange={u('hari_buka')} hint="Biaya bulanan dibagi ke hari buka." />
             </div>
             <Pesan p={p1} />
-            <Tombol type="submit" className="mt-4">
+            <Tombol type="submit" className="mt-4" memuat={menyimpan === 'profil'}>
               Simpan profil
             </Tombol>
           </form>
@@ -131,7 +138,7 @@ export default function Pengaturan() {
               <BiayaRutin value={biaya} onChange={setBiaya} />
               <Pesan p={p2} />
               <div>
-                <Tombol type="submit" className="mt-4">
+                <Tombol type="submit" className="mt-4" memuat={menyimpan === 'biaya'}>
                   Simpan biaya
                 </Tombol>
               </div>

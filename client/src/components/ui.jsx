@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { Link } from 'react-router-dom';
-import { WarningCircle } from '@phosphor-icons/react';
+import { CircleNotch, WarningCircle } from '@phosphor-icons/react';
 
 const VARIAN = {
   utama: 'tombol-merek text-white',
@@ -12,12 +12,26 @@ const VARIAN = {
   bahaya: 'text-rugi hover:bg-rugi-muda',
 };
 const dasarTombol =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:shadow-none';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:shadow-none aria-busy:cursor-wait aria-busy:opacity-85';
 
-export function Tombol({ varian = 'utama', className = '', to, ...p }) {
+// Lingkaran berputar untuk tombol yang sedang menunggu server. Ukuran ikut teks tombol.
+export function Pemutar({ size = 16, className = '' }) {
+  return <CircleNotch size={size} weight="bold" className={`shrink-0 animate-spin ${className}`} aria-hidden />;
+}
+
+/**
+ * Tombol standar. memuat = true: tampil lingkaran berputar di depan teks, tombol terkunci,
+ * dan pembaca layar diberi tahu sedang memproses (aria-busy).
+ */
+export function Tombol({ varian = 'utama', className = '', to, memuat = false, disabled, children, ...p }) {
   const cls = `${dasarTombol} ${VARIAN[varian]} ${className}`;
-  if (to) return <Link to={to} className={cls} {...p} />;
-  return <button type="button" className={cls} {...p} />;
+  if (to) return <Link to={to} className={cls} {...p}>{children}</Link>;
+  return (
+    <button type="button" className={cls} disabled={disabled || memuat} aria-busy={memuat || undefined} {...p}>
+      {memuat && <Pemutar />}
+      {children}
+    </button>
+  );
 }
 
 export function Field({ label, hint, error, as = 'input', className = '', children, ...p }) {

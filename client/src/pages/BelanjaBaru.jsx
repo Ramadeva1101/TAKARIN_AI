@@ -36,7 +36,7 @@ function Foto({ kirim, proses }) {
           }}
         />
       </label>
-      <Tombol
+      <Tombol memuat={proses}
         className="mt-4"
         disabled={!file || proses}
         onClick={async () => {
@@ -65,7 +65,7 @@ function Suara({ kirim, proses }) {
       {teks && (
         <Field className="mt-4" label="Yang terdengar (bisa diperbaiki)" as="textarea" rows={3} value={teks} onChange={(e) => setTeks(e.target.value)} />
       )}
-      <Tombol className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks, sumber: 'suara' } })}>
+      <Tombol memuat={proses} className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks, sumber: 'suara' } })}>
         {proses ? 'Membaca' : 'Proses ucapan'}
       </Tombol>
     </>
@@ -85,7 +85,7 @@ function Teks({ kirim, proses }) {
         placeholder={'cabe rawit 1/2 kg 35rb\nbawang putih 1/4 10rb\ngula 2 kilo'}
         hint="Satu bahan per baris. Singkatan seperti rb, goceng, ceban dipahami."
       />
-      <Tombol className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks } })}>
+      <Tombol memuat={proses} className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks } })}>
         {proses ? 'Membaca' : 'Baca tulisan'}
       </Tombol>
     </>

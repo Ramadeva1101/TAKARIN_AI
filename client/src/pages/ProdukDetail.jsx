@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
-import { Chip, Galat, Judul, Kartu, Muat, Tombol } from '../components/ui.jsx';
+import { Chip, Galat, Judul, Kartu, Muat, Pemutar, Tombol } from '../components/ui.jsx';
 import ResepEditor, { cekResep, rapikanResep } from '../components/ResepEditor.jsx';
 
 const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar', acuan: 'harga pasar' };
@@ -190,15 +190,15 @@ function BarisHarga({ k, satuanDasar, sesudah }) {
               ))}
             </select>
             <input aria-label={`Harga ${k.nama} (Rp)`} type="number" min="0" inputMode="numeric" placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => ubahF({ harga: e.target.value })} />
-            <Tombol varian="polos" className="col-span-3" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={() => simpan()}>
+            <Tombol memuat={proses} varian="polos" className="col-span-3" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={() => simpan()}>
               {proses ? 'Menyimpan' : 'Simpan'}
             </Tombol>
           </div>
           {tanya && (
             <div role="alert" className="mt-2 rounded-xl bg-kuning-muda px-3 py-2 text-sm">
               <p>{tanya}</p>
-              <button type="button" onClick={() => simpan(true)} disabled={proses} className="mt-1.5 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-3 text-sm font-semibold sm:min-h-9">
-                Ya, harga ini benar
+              <button type="button" onClick={() => simpan(true)} disabled={proses} aria-busy={proses || undefined} className="mt-1.5 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-garis bg-kartu px-3 text-sm font-semibold sm:min-h-9">
+                {proses && <Pemutar size={14} />} Ya, harga ini benar
               </button>
             </div>
           )}
@@ -229,7 +229,8 @@ function LengkapiHarga({ p, sesudah }) {
   );
 }
 
-function Rekomendasi({ id, onTerapkan }) {
+function Rekomendasi({ id, onTerapkan, proses }) {
+  const [dipilih, setDipilih] = useState(null);
   const { data, loading, error, muat } = useApi(`/produk/${id}/rekomendasi`);
   if (loading && !data) return <Muat teks="Menyusun penjelasan" />;
   if (error) return <Galat error={error} ulang={muat} />;
@@ -246,7 +247,16 @@ function Rekomendasi({ id, onTerapkan }) {
                 Modal {rupiah(o.hpp)}, jual {rupiah(o.harga_jual)}, untung {persen(o.margin)}
               </p>
               {o.jenis === 'naik_harga' && (
-                <Tombol varian="garis" className="mt-2" onClick={() => onTerapkan(o.harga_jual)}>
+                <Tombol
+                  varian="garis"
+                  className="mt-2"
+                  memuat={proses && dipilih === o.harga_jual}
+                  disabled={proses}
+                  onClick={() => {
+                    setDipilih(o.harga_jual);
+                    onTerapkan(o.harga_jual);
+                  }}
+                >
                   Pakai harga {rupiah(o.harga_jual)}
                 </Tombol>
               )}
@@ -266,6 +276,7 @@ export default function ProdukDetail() {
   const [galat, setGalat] = useState(null);
   const [versi, setVersi] = useState(0);
   const [proses, setProses] = useState(false);
+  const [menghapus, setMenghapus] = useState(false);
 
   if (loading && !p) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
@@ -300,11 +311,13 @@ export default function ProdukDetail() {
 
   const hapus = async () => {
     if (!window.confirm(`Hapus menu ${p.nama}? Resepnya ikut terhapus.`)) return;
+    setMenghapus(true);
     try {
       await api(`/produk/${id}`, { method: 'DELETE' });
       nav('/produk', { replace: true });
     } catch (err) {
       setGalat(pesanGalat(err));
+      setMenghapus(false);
     }
   };
 
@@ -319,7 +332,7 @@ export default function ProdukDetail() {
               <Tombol varian="garis" onClick={() => setEdit({ nama: p.nama, harga_jual: p.harga_jual, porsi_per_batch: p.porsi_per_batch, bahan: p.resep.map((r) => ({ bahan_id: r.bahan_id, nama: r.nama, qty: r.qty, satuan: r.satuan })) })}>
                 Ubah resep
               </Tombol>
-              <Tombol varian="bahaya" onClick={hapus}>
+              <Tombol varian="bahaya" onClick={hapus} memuat={menghapus}>
                 Hapus
               </Tombol>
             </>
@@ -341,7 +354,7 @@ export default function ProdukDetail() {
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Tombol onClick={simpanResep} disabled={proses}>
+            <Tombol memuat={proses} onClick={simpanResep} disabled={proses}>
               {proses ? 'Menyimpan' : 'Simpan resep'}
             </Tombol>
             <Tombol varian="garis" onClick={tutupEdit}>
@@ -383,7 +396,7 @@ export default function ProdukDetail() {
             </Kartu>
             <div className="flex flex-col gap-4 lg:col-span-2">
               {p.lengkap ? (
-                <Rekomendasi key={versi} id={id} onTerapkan={(harga) => simpan({ harga_jual: harga })} />
+                <Rekomendasi key={versi} id={id} proses={proses} onTerapkan={(harga) => simpan({ harga_jual: harga })} />
               ) : (
                 <LengkapiHarga
                   p={p}

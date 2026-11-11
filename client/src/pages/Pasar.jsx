@@ -171,7 +171,7 @@ export default function Pasar() {
         sub={`${tempat || 'Wilayah belum diisi'} · data per ${terbaru ? tanggal(terbaru) : 'belum ada'}`}
         aksi={
           data.sinkron.aktif && (
-            <Tombol varian="garis" onClick={perbarui} disabled={proses || berjalan}>
+            <Tombol memuat={proses || berjalan} varian="garis" onClick={perbarui} disabled={proses || berjalan}>
               {proses || berjalan ? 'Mengambil data' : 'Perbarui sekarang'}
             </Tombol>
           )

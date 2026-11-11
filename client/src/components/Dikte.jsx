@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Microphone, Stop } from '@phosphor-icons/react';
+import { Pemutar } from './ui.jsx';
 import { api, pesanGalat } from '../lib/api.js';
 
 const Pengenal = typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
@@ -100,7 +101,7 @@ export default function Dikte({ onTeks, label = 'Ucapkan', contoh }) {
           </button>
         ) : (
           <button type="button" onClick={mulai} disabled={proses} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-biru/40 bg-biru-muda px-5 text-sm font-semibold text-biru-tua hover:bg-[#dce8ff] disabled:opacity-60">
-            <Microphone size={18} weight="fill" aria-hidden /> {proses ? 'Mengubah suara jadi teks' : label}
+            {proses ? <Pemutar size={18} /> : <Microphone size={18} weight="fill" aria-hidden />} {proses ? 'Mengubah suara jadi teks' : label}
           </button>
         )}
         {aktif && (
