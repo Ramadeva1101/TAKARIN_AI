@@ -40,7 +40,22 @@ export function PublikLayout() {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
     else window.scrollTo(0, 0);
   }, [pathname, hash]);
-  const aktif = (to) => (to.includes('#') ? `/${hash}` === to : pathname === to && !hash);
+  // Garis menu mengikuti section yang sedang terlihat di beranda.
+  const [bagian, setBagian] = useState('');
+  useEffect(() => {
+    if (pathname !== '/') return setBagian('');
+    const cek = () => {
+      const ada = ['cara-kerja', 'fitur'].filter((id) => {
+        const el = document.getElementById(id);
+        return el && el.getBoundingClientRect().top <= 140;
+      });
+      setBagian(ada.at(-1) || '');
+    };
+    cek();
+    window.addEventListener('scroll', cek, { passive: true });
+    return () => window.removeEventListener('scroll', cek);
+  }, [pathname]);
+  const aktif = (to) => (to.includes('#') ? to === `/#${bagian}` : pathname === to && !bagian);
   return (
     <div className="latar-merek flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md">
@@ -188,48 +203,77 @@ function Kebocoran() {
 
 const LANGKAH = [
   {
-    no: '01',
     judul: 'Ceritakan menu',
-    teks: 'Tulis menu, harga jual, dan takaran dengan bahasa sehari-hari. AI menyusunnya menjadi resep yang bisa Anda periksa.',
-    isi: (
-      <div className="rounded-xl border border-garis bg-dasar p-3 text-sm text-redup">"Ayam geprek 15 ribu, ayam 1 potong, cabai rawit 20 gram, minyak 1 sdm, nasi 100 gram..."</div>
-    ),
+    teks: 'Tulis atau ucapkan menu, harga jual, dan takaran dengan bahasa sehari-hari. AI menyusunnya menjadi resep yang bisa Anda periksa.',
+    gambar: '/langkah-menu.webp',
+    alt: 'Halaman Tambah menu: resep ayam geprek hasil susunan AI, setiap bahan terhubung ke harga dari catatan belanja.',
   },
   {
-    no: '02',
     judul: 'Catat belanja',
-    teks: 'Foto nota, ucapkan, atau ketik. Baris yang meragukan dan harga yang jauh dari pasar ditandai sebelum disimpan.',
-    isi: (
-      <ul className="tepi-nota rounded-xl border border-garis bg-dasar p-3 font-mono text-xs">
-        {[
-          ['cbe rwt 1/2', '31.500'],
-          ['ayam 5 kg', '180.000'],
-          ['minyak 2 ltr', '46.000'],
-        ].map(([a, b]) => (
-          <li key={a} className="flex justify-between py-0.5">
-            <span>{a}</span>
-            <span>{b}</span>
-          </li>
-        ))}
-      </ul>
-    ),
+    teks: 'Foto nota, ucapkan, atau ketik. Baris yang meragukan ditandai kuning dan dibandingkan dengan harga belanja terakhir sebelum disimpan.',
+    gambar: '/langkah-belanja.webp',
+    alt: 'Halaman Periksa belanja: hasil baca ucapan menjadi baris bawang, daun bawang, dan daging ayam, dengan baris yang perlu dicek berwarna kuning.',
   },
   {
-    no: '03',
     judul: 'Lihat modal dan harga minimal',
-    teks: 'Sebelum ada belanja, modal dihitung dari harga pasar daerah. Setiap belanja disimpan, modal dihitung ulang memakai harga yang Anda bayar. Menu yang untungnya di bawah target langsung ditandai.',
-    isi: (
-      <div className="rounded-xl border border-garis bg-dasar p-3">
-        <p className="text-xs text-redup">Modal per porsi</p>
-        <p className="angka text-xl font-bold">Rp8.721</p>
-        <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
-          <span className="angka">Harga jual Rp15.000</span>
-          <span className="angka font-semibold text-aman">Untung 41,9%</span>
-        </div>
-      </div>
-    ),
+    teks: 'Modal per porsi dihitung dari harga belanja Anda, atau harga pasar daerah kalau belum pernah beli. Menu di bawah target langsung ditandai.',
+    gambar: '/langkah-modal.webp',
+    alt: 'Halaman menu Ayam Geprek: modal per porsi Rp7.721, harga jual Rp15.000, untung 48,5%, dan rincian biaya tiap bahan.',
   },
 ];
+
+// Tiga langkah dengan tangkapan layar asli aplikasi (akun demo). Pilih langkah untuk melihat halamannya.
+function CaraKerja() {
+  const [pilih, setPilih] = useState(0);
+  const l = LANGKAH[pilih];
+  const pindah = (e) => {
+    const arah = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (!arah) return;
+    e.preventDefault();
+    const baru = (pilih + arah + LANGKAH.length) % LANGKAH.length;
+    setPilih(baru);
+    document.getElementById(`langkah-${baru}`)?.focus();
+  };
+  return (
+    <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.5fr)] lg:items-start">
+      <div role="tablist" aria-label="Langkah" aria-orientation="vertical" className="flex flex-col gap-2" onKeyDown={pindah}>
+        {LANGKAH.map((x, i) => {
+          const on = i === pilih;
+          return (
+            <button
+              key={x.judul}
+              id={`langkah-${i}`}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              aria-controls="panel-langkah"
+              tabIndex={on ? 0 : -1}
+              onClick={() => setPilih(i)}
+              className={`flex gap-3 rounded-2xl border p-4 text-left transition-colors ${on ? 'border-biru/40 bg-biru-muda' : 'border-garis bg-kartu hover:border-biru/30'}`}
+            >
+              <span className={`angka flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${on ? 'bg-biru text-white' : 'bg-dasar text-biru'}`}>{i + 1}</span>
+              <span>
+                <span className="block font-semibold">{x.judul}</span>
+                <span className={`mt-1 text-sm text-redup ${on ? 'block' : 'hidden lg:block'}`}>{x.teks}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <figure id="panel-langkah" role="tabpanel" aria-labelledby={`langkah-${pilih}`}>
+        <div className="overflow-hidden rounded-[20px] border border-garis bg-dasar">
+          <div className="flex items-center gap-1.5 border-b border-garis bg-kartu px-4 py-2.5" aria-hidden>
+            <span className="size-2.5 rounded-full bg-garis" />
+            <span className="size-2.5 rounded-full bg-garis" />
+            <span className="size-2.5 rounded-full bg-garis" />
+          </div>
+          <img key={l.gambar} src={l.gambar} width="1930" height="1222" alt={l.alt} loading="lazy" className="block aspect-[1930/1222] h-auto w-full object-cover object-top" />
+        </div>
+        <figcaption className="mt-2 text-xs text-redup">Tangkapan layar aplikasi dengan akun demo.</figcaption>
+      </figure>
+    </div>
+  );
+}
 
 const FITUR = [
   { ikon: Camera, warna: 'biru', judul: 'Baca nota, suara, dan tulisan', teks: 'Singkatan nota seperti "cbe rwt" dan bahasa lisan seperti goceng, ceban, atau "eh salah" diubah menjadi baris belanja.' },
@@ -327,20 +371,7 @@ export function Beranda() {
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-redup">Setelah menu tersimpan, pekerjaan rutin Anda hanya mencatat belanja. Sisanya dihitung otomatis.</p>
           </div>
-          <ol className="mt-10 grid gap-4 md:grid-cols-3">
-            {LANGKAH.map((l) => (
-              <li key={l.no} className="flex flex-col gap-4 rounded-[20px] border border-garis bg-kartu p-5 shadow-kartu">
-                <div className="flex items-start gap-3">
-                  <span className="angka flex size-11 shrink-0 items-center justify-center rounded-xl bg-biru-muda text-base font-extrabold text-biru">{l.no}</span>
-                  <div>
-                    <h3 className="font-semibold">{l.judul}</h3>
-                    <p className="mt-1 text-sm text-redup">{l.teks}</p>
-                  </div>
-                </div>
-                <div className="mt-auto">{l.isi}</div>
-              </li>
-            ))}
-          </ol>
+          <CaraKerja />
         </div>
       </section>
 

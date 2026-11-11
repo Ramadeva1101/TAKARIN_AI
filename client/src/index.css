@@ -47,19 +47,12 @@ h1, h2, h3, .font-judul { font-family: var(--font-judul); letter-spacing: -0.02e
   color: transparent;
 }
 
-/* Tombol utama: biru, berakhir kuning di ujung kanan (tempat ikon panah), teks tetap di area biru. */
-.tombol-merek {
-  background: linear-gradient(90deg, #1d59bb 0%, #2b6fd6 62%, #febd19 118%);
-  box-shadow: 0 8px 20px rgb(29 89 187 / 0.28), 0 2px 0 rgb(254 189 25 / 0.35) inset;
-  text-shadow: 0 1px 1px rgb(13 27 62 / 0.25);
-}
-.tombol-merek:hover { background: linear-gradient(90deg, #164a9e 0%, #2463c8 62%, #febd19 118%); }
+/* Tombol utama: biru polos. */
+.tombol-merek { background: var(--color-biru); }
+.tombol-merek:hover { background: var(--color-biru-tua); }
 
-/* Bingkai pil dua warna (tombol Masuk). */
-.bingkai-merek {
-  border: 1.5px solid transparent;
-  background: linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #76b9ff, #febd19) border-box;
-}
+.bingkai-merek { border: 1px solid var(--color-garis); background: var(--color-kartu); }
+.bingkai-merek:hover { border-color: rgb(29 89 187 / 0.4); }
 
 /* Latar halaman publik: cahaya biru di kiri, hangat kuning di kanan. */
 .latar-merek {
@@ -83,7 +76,4 @@ button:disabled { cursor: not-allowed; }
 }
 
 /* Area aplikasi (setelah masuk): tanpa gradasi dan bayangan. */
-.ruang-kerja .tombol-merek { background: var(--color-biru); box-shadow: none; text-shadow: none; }
-.ruang-kerja .tombol-merek:hover { background: var(--color-biru-tua); }
-.ruang-kerja .bingkai-merek { border: 1px solid var(--color-garis); background: var(--color-kartu); }
 .ruang-kerja .shadow-kartu { box-shadow: none; }

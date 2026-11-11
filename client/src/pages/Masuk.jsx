@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeSlash, Receipt, TrendUp } from '@phosphor-icons/react';
+import { ArrowLeft, Eye, EyeSlash, Receipt, TrendUp } from '@phosphor-icons/react';
 import { useAuth } from '../lib/auth.jsx';
 import { Field, Merek, Tombol } from '../components/ui.jsx';
 
@@ -76,9 +76,14 @@ export default function Masuk({ mode }) {
     <div className="grid min-h-dvh bg-kartu lg:grid-cols-[1.05fr_1fr] lg:p-4">
       <Panel />
       <div className="flex flex-col px-5 py-8 sm:px-10">
-        <Link to="/" className="inline-flex min-h-11 items-center self-start lg:hidden">
-          <Merek className="text-xl" />
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link to="/" className="inline-flex min-h-11 items-center lg:hidden">
+            <Merek className="text-xl" />
+          </Link>
+          <Link to="/" className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-1 text-sm font-semibold text-redup hover:text-biru">
+            <ArrowLeft size={18} weight="bold" aria-hidden /> Kembali ke beranda
+          </Link>
+        </div>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8">
           <h1 className="text-[28px] font-bold">{daftar ? 'Buat akun usaha' : 'Selamat datang kembali'}</h1>
           <p className="mt-1 text-sm text-redup">{daftar ? 'Satu akun untuk satu usaha. Setelah daftar, ada 4 langkah singkat tentang usaha Anda.' : 'Masuk untuk melihat modal dan untung menu hari ini.'}</p>
