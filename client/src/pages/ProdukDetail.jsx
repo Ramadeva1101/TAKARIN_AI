@@ -121,7 +121,7 @@ function Simulasi({ p }) {
       <div className="tepi-nota mt-4 grid grid-cols-3 gap-2 pt-4 text-sm" aria-live="polite">
         <div>
           <p className="text-redup">Modal</p>
-          <p className="angka text-lg font-bold">{rupiah(hasil?.hpp ?? p.hpp)}</p>
+          <p className="angka text-lg font-bold">{p.lengkap ? rupiah(hasil?.hpp ?? p.hpp) : '–'}</p>
         </div>
         <div>
           <p className="text-redup">Untung</p>
@@ -151,14 +151,22 @@ function BarisHarga({ k, satuanDasar, sesudah }) {
   const [f, setF] = useState({ qty: 1, satuan: pilihan[0], harga: '' });
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState(null);
-  const simpan = async () => {
+  // Harga yang tidak wajar (misal salah satuan) ditolak server dengan 409 sampai pengguna yakin.
+  const [tanya, setTanya] = useState(null);
+  const ubahF = (perubahan) => {
+    setF({ ...f, ...perubahan });
+    setTanya(null);
+  };
+  const simpan = async (yakin = false) => {
     setProses(true);
     setGalat(null);
+    setTanya(null);
     try {
-      await api(`/bahan/${k.bahan_id}/harga`, { method: 'POST', body: { qty: Number(f.qty), satuan: f.satuan, harga: Number(f.harga) } });
+      await api(`/bahan/${k.bahan_id}/harga`, { method: 'POST', body: { qty: Number(f.qty), satuan: f.satuan, harga: Number(f.harga), yakin } });
       await sesudah();
     } catch (err) {
-      setGalat(pesanGalat(err));
+      if (err.status === 409) setTanya(pesanGalat(err));
+      else setGalat(pesanGalat(err));
       setProses(false);
     }
   };
@@ -174,18 +182,26 @@ function BarisHarga({ k, satuanDasar, sesudah }) {
         </p>
       ) : (
         <>
-          <div className="mt-2 grid grid-cols-[4.5rem_6rem_1fr] gap-2 sm:grid-cols-[4.5rem_6rem_1fr_auto]">
-            <input aria-label={`Jumlah ${k.nama}`} type="number" min="0" step="any" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.qty} onChange={(e) => setF({ ...f, qty: e.target.value })} />
-            <select aria-label={`Satuan ${k.nama}`} className="min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.satuan} onChange={(e) => setF({ ...f, satuan: e.target.value })}>
+          <div className="mt-2 grid grid-cols-[4.5rem_6rem_minmax(0,1fr)] gap-2">
+            <input aria-label={`Jumlah ${k.nama}`} type="number" min="0" step="any" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.qty} onChange={(e) => ubahF({ qty: e.target.value })} />
+            <select aria-label={`Satuan ${k.nama}`} className="min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.satuan} onChange={(e) => ubahF({ satuan: e.target.value })}>
               {pilihan.map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
-            <input aria-label={`Harga ${k.nama} (Rp)`} type="number" min="0" inputMode="numeric" placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => setF({ ...f, harga: e.target.value })} />
-            <Tombol varian="polos" className="col-span-3 sm:col-span-1" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={simpan}>
+            <input aria-label={`Harga ${k.nama} (Rp)`} type="number" min="0" inputMode="numeric" placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => ubahF({ harga: e.target.value })} />
+            <Tombol varian="polos" className="col-span-3" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={() => simpan()}>
               {proses ? 'Menyimpan' : 'Simpan'}
             </Tombol>
           </div>
+          {tanya && (
+            <div role="alert" className="mt-2 rounded-xl bg-kuning-muda px-3 py-2 text-sm">
+              <p>{tanya}</p>
+              <button type="button" onClick={() => simpan(true)} disabled={proses} className="mt-1.5 inline-flex min-h-11 items-center rounded-full border border-garis bg-kartu px-3 text-sm font-semibold sm:min-h-9">
+                Ya, harga ini benar
+              </button>
+            </div>
+          )}
           {galat && <p className="mt-1 text-sm text-rugi">{galat}</p>}
         </>
       )}

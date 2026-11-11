@@ -246,4 +246,20 @@ describe('harga perkiraan bahan', () => {
     expect(d.data.rincian[0].biaya).toBeCloseTo(900, 3);
     expect((await api('POST', `/bahan/${bahanId}/harga`, { qty: 0, satuan: 'kg', harga: 1 })).status).toBe(400);
   });
+
+  it('harga perkiraan yang tidak wajar minta konfirmasi dulu', async () => {
+    const p = await api('POST', '/produk', { nama: 'Cimol', harga_jual: 10000, porsi_per_batch: 1, bahan: [{ nama: 'tepung tapioka', qty: 50, satuan: 'gram' }] });
+    const bahanId = p.data.kurang[0].bahan_id;
+    // Salah satuan: Rp40 per kg, tanpa pembanding → di luar batas wajar.
+    const salah = await api('POST', `/bahan/${bahanId}/harga`, { qty: 1, satuan: 'kg', harga: 40 });
+    expect(salah.status).toBe(409);
+    expect(salah.data.pesan).toMatch(/Rp40\/kg/);
+    // Harga wajar tersimpan; setelah itu harga yang jauh dari belanja terakhir juga ditanya.
+    expect((await api('POST', `/bahan/${bahanId}/harga`, { qty: 1, satuan: 'kg', harga: 14000 })).status).toBe(201);
+    const jauh = await api('POST', `/bahan/${bahanId}/harga`, { qty: 1, satuan: 'kg', harga: 50000 });
+    expect(jauh.status).toBe(409);
+    expect(jauh.data.pesan).toMatch(/belanja terakhir \(Rp14\.000\/kg\)/);
+    // Pengguna yakin: tetap tersimpan.
+    expect((await api('POST', `/bahan/${bahanId}/harga`, { qty: 1, satuan: 'kg', harga: 50000, yakin: true })).status).toBe(201);
+  });
 });

@@ -3,7 +3,7 @@ import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
 import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar } from '../domain/satuan.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { bandingNama, rapikanNama } from '../domain/pencocokan.js';
-import { hargaRataRata, selisihPersen, statusAcuan } from '../domain/harga.js';
+import { hargaMencurigakan, hargaRataRata, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { acuanPerSatuanDasar, riwayatAcuan } from './hargaPasar.js';
 
 const kunci = (s) => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
@@ -204,11 +204,41 @@ export function ubahBahan(usaha, bahanId, data) {
 }
 
 // Harga perkiraan yang diisi sendiri (untuk bahan yang belum pernah dicatat belanjanya dan tidak ada di data pasar).
-export function isiHargaManual(usaha, bahanId, { qty, satuan, harga }) {
+// Batas wajar harga per satuan dasar kalau belum ada pembanding (belanja atau pasar).
+// Per gram/ml: Rp1.000 sampai Rp1.000.000 per kg/liter. Menangkap salah satuan seperti Rp40/kg.
+const BATAS_WAJAR = { g: [1, 1000], ml: [1, 1000], butir: [100, 20000], pcs: [10, 1_000_000] };
+
+function teksPerSatuan(hargaPerDasar, satuanDasar) {
+  const kali = satuanDasar === 'g' || satuanDasar === 'ml' ? 1000 : 1;
+  const sat = { g: 'kg', ml: 'liter' }[satuanDasar] ?? satuanDasar;
+  return `Rp${Math.round(hargaPerDasar * kali).toLocaleString('id-ID')}/${sat}`;
+}
+
+/**
+ * Harga perkiraan yang diketik pengguna. Harga yang jauh dari belanja terakhir atau harga pasar
+ * (kurang dari separuh atau lebih dari dua kali lipat), atau di luar batas wajar, ditolak dengan 409
+ * sampai pengguna mengonfirmasi (yakin = true). Mencegah salah satuan merusak modal semua menu.
+ */
+export function isiHargaManual(usaha, bahanId, { qty, satuan, harga, yakin = false }) {
   const bahan = get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', bahanId, usaha.id);
   if (!bahan) throw tidakDitemukan('Bahan');
   const konv = keSatuanDasar({ qty, satuan, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
   if (!konv.ok || !konv.nilai) throw new AppError(400, konv.pesan ?? 'Jumlah tidak valid');
+  const perDasar = harga / konv.nilai;
+  if (!yakin) {
+    const terakhir = get('SELECT harga_per_satuan FROM harga_bahan WHERE bahan_id = ? ORDER BY tanggal DESC, id DESC LIMIT 1', bahan.id);
+    const acuan = acuanPerSatuanDasar(bahan, usaha);
+    const pembanding = terakhir?.harga_per_satuan ?? acuan?.harga_per_satuan_dasar;
+    const isian = teksPerSatuan(perDasar, bahan.satuan_dasar);
+    if (pembanding && hargaMencurigakan(perDasar, pembanding)) {
+      const asal = terakhir ? 'belanja terakhir' : 'harga pasar';
+      throw new AppError(409, `Harga ${isian} jauh dari ${asal} (${teksPerSatuan(pembanding, bahan.satuan_dasar)}). Cek jumlah dan satuannya.`);
+    }
+    const [min, maks] = BATAS_WAJAR[bahan.satuan_dasar] ?? [0, Infinity];
+    if (!pembanding && (perDasar < min || perDasar > maks)) {
+      throw new AppError(409, `Harga ${isian} tidak biasa untuk ${bahan.nama}. Cek jumlah dan satuannya.`);
+    }
+  }
   run('INSERT INTO harga_bahan (bahan_id, harga_per_satuan, tanggal, sumber) VALUES (?, ?, ?, ?)', bahan.id, harga / konv.nilai, tanggalHariIni(), 'manual');
   return detailBahan(usaha, bahan.id);
 }
