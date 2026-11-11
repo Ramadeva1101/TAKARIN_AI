@@ -118,7 +118,7 @@ export default function BahanDetail() {
               </p>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-redup">Belum ada harga pasar. Isi komoditas di samping supaya bisa dibandingkan.</p>
+            <p className="mt-4 text-sm text-redup">Belum ada harga pasar. Isi kolom "Nama di harga pasar" supaya bisa dibandingkan.</p>
           )}
         </Kartu>
 
@@ -159,7 +159,7 @@ export default function BahanDetail() {
                   </select>
                 )}
               </Field>
-              <Field label="Komoditas pasar" value={form.komoditas} onChange={(e) => setForm({ ...form, komoditas: e.target.value })} hint="Contoh: cabai rawit merah, daging ayam ras" />
+              <Field label="Nama di harga pasar" value={form.komoditas} onChange={(e) => setForm({ ...form, komoditas: e.target.value })} hint="Contoh: cabai rawit merah, daging ayam ras" />
               <Field label="Susut (%)" type="number" min="0" max="90" value={form.susut_persen} onChange={(e) => setForm({ ...form, susut_persen: e.target.value })} hint="Bagian terbuang: kulit, tulang, batang" />
             </div>
             {pesan && (

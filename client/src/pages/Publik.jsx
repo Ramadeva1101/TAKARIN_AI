@@ -147,20 +147,20 @@ function Pratinjau() {
 }
 
 const FAKTA = [
-  [Scales, 'Takaran sendok, siung, dan potong'],
-  [MapPin, 'Harga pasar kota hingga nasional'],
-  [Storefront, '13 komoditas pangan dari PIHPS'],
-  [Microphone, 'Input foto nota, suara, atau teks'],
+  [Scales, 'Takaran pakai sendok, siung, atau potong'],
+  [MapPin, 'Harga pasar di kota Anda'],
+  [Storefront, 'Data harga dari Bank Indonesia'],
+  [Microphone, 'Catat dengan foto, suara, atau ketik'],
 ];
 
 const MASALAH = [
   {
-    judul: 'Takaran memakai sendok, bukan gram',
-    teks: 'Dua sendok gula atau tiga siung bawang sulit diubah menjadi rupiah tanpa alat bantu.',
+    judul: 'Takaran pakai sendok, bukan gram',
+    teks: 'Susah tahu berapa rupiah dua sendok gula atau tiga siung bawang.',
   },
   {
     judul: 'Nota disimpan, tidak dihitung',
-    teks: 'Nota belanja jarang dipakai untuk memeriksa apakah setiap porsi masih untung.',
+    teks: 'Nota belanja menumpuk, padahal isinya bisa menunjukkan menu mana yang masih untung.',
   },
 ];
 
@@ -196,7 +196,7 @@ function Kebocoran() {
         <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
         <p className="angka mt-1 text-sm">Setara {setara} porsi gratis setiap bulan.</p>
       </div>
-      <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
+      <p className="mt-3 text-xs text-redup">Takarin AI menghitung ini otomatis untuk setiap menu Anda, setiap kali Anda mencatat belanja.</p>
     </div>
   );
 }
@@ -204,19 +204,19 @@ function Kebocoran() {
 const LANGKAH = [
   {
     judul: 'Ceritakan menu',
-    teks: 'Tulis atau ucapkan menu, harga jual, dan takaran dengan bahasa sehari-hari. AI menyusunnya menjadi resep yang bisa Anda periksa.',
+    teks: 'Ketik atau ucapkan menu Anda seperti bercerita: harga jualnya, bahannya, dan takarannya. Takarin AI mengubahnya menjadi resep yang bisa Anda periksa.',
     gambar: '/langkah-menu.webp',
     alt: 'Halaman Tambah menu: resep ayam geprek hasil susunan AI, setiap bahan terhubung ke harga dari catatan belanja.',
   },
   {
     judul: 'Catat belanja',
-    teks: 'Foto nota, ucapkan, atau ketik. Baris yang meragukan ditandai kuning dan dibandingkan dengan harga belanja terakhir sebelum disimpan.',
+    teks: 'Foto nota, ucapkan, atau ketik belanjaan. Yang meragukan diberi warna kuning supaya Anda cek dulu sebelum disimpan.',
     gambar: '/langkah-belanja.webp',
     alt: 'Halaman Periksa belanja: hasil baca ucapan menjadi baris bawang, daun bawang, dan daging ayam, dengan baris yang perlu dicek berwarna kuning.',
   },
   {
-    judul: 'Lihat modal dan harga minimal',
-    teks: 'Modal per porsi dihitung dari harga belanja Anda, atau harga pasar daerah kalau belum pernah beli. Menu di bawah target langsung ditandai.',
+    judul: 'Lihat modal dan untung',
+    teks: 'Modal tiap porsi dihitung dari harga yang Anda bayar. Kalau bahannya belum pernah Anda beli, dipakai harga pasar di kota Anda. Menu yang untungnya kurang langsung ditandai.',
     gambar: '/langkah-modal.webp',
     alt: 'Halaman menu Ayam Geprek: modal per porsi Rp7.721, harga jual Rp15.000, untung 48,5%, dan rincian biaya tiap bahan.',
   },
@@ -276,17 +276,17 @@ function CaraKerja() {
 }
 
 const FITUR = [
-  { ikon: Camera, warna: 'biru', judul: 'Baca nota, suara, dan tulisan', teks: 'Singkatan nota seperti "cbe rwt" dan bahasa lisan seperti goceng, ceban, atau "eh salah" diubah menjadi baris belanja.' },
-  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar daerah', teks: 'Harga pasar tradisional tingkat kota, provinsi, dan nasional dari PIHPS Bank Indonesia sebagai pembanding harga belanja.' },
-  { ikon: Calculator, warna: 'aman', judul: 'Saran harga dan simulasi', teks: 'Geser harga jual atau harga bahan dan lihat untungnya berubah. Saran harga bisa diterapkan langsung dari ringkasan.' },
-  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Tiga pilihan harga paket beserta tambahan penjualan yang dibutuhkan agar total untung tidak turun. Paket rugi tidak bisa disimpan.' },
+  { ikon: Camera, warna: 'biru', judul: 'Nota tulisan tangan tetap terbaca', teks: 'Singkatan seperti "cbe rwt" tetap dikenali. Bicara biasa juga bisa, misalnya "ayam goceng, eh salah, ceban".' },
+  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar di kota Anda', teks: 'Lihat harga cabai, bawang, ayam, dan bahan lain di pasar kota Anda, supaya tahu belanjaan Anda kemahalan atau tidak.' },
+  { ikon: Calculator, warna: 'aman', judul: 'Saran harga jual', teks: 'Geser harga jual dan lihat untungnya langsung berubah. Kalau ada menu yang kurang untung, Takarin AI menyarankan harga baru yang bisa dipakai dengan satu ketukan.' },
+  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Gabungkan beberapa menu jadi satu paket. Takarin AI memberi pilihan harga yang tidak rugi dan membuatkan teks promo untuk status WhatsApp.' },
 ];
 
 const PRINSIP = [
-  [ShieldCheck, 'Angka dihitung oleh kode', 'Modal, untung, dan harga minimal memakai rumus tetap. Teks AI yang memuat angka di luar hasil hitungan dibuang dan diganti penjelasan baku.'],
-  [UserCheck, 'Pemilik usaha tetap memutuskan', 'Setiap hasil AI masuk ke halaman periksa terlebih dahulu. Tidak ada data yang dipakai sebelum disetujui.'],
-  [Leaf, 'Hemat sumber daya', 'Foto dikompres di ponsel, AI hanya dipanggil saat membaca atau menulis, catatan harian dipakai ulang selama datanya sama, dan harga pasar diambil otomatis paling sering sekali dalam enam jam per wilayah.'],
-  [Database, 'Data publik yang jelas sumbernya', 'Harga pasar berasal dari PIHPS Bank Indonesia dengan tanggal yang selalu ditampilkan. Tidak ada pengambilan data dari toko atau marketplace.'],
+  [ShieldCheck, 'Angka modal tidak ditebak', 'Modal dan untung selalu dihitung dengan cara yang sama. AI hanya membantu membaca nota dan ucapan Anda.'],
+  [UserCheck, 'Anda yang memutuskan', 'Hasil baca nota atau ucapan ditunjukkan dulu. Anda bisa membetulkannya sebelum disimpan.'],
+  [Leaf, 'Hemat kuota', 'Foto nota diperkecil di HP sebelum dikirim, jadi tidak boros kuota internet.'],
+  [Database, 'Harga pasar dari sumber resmi', 'Harga pasar diambil dari Bank Indonesia, lengkap dengan tanggalnya.'],
 ];
 
 export function Beranda() {
@@ -294,17 +294,17 @@ export function Beranda() {
     <main>
       <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 text-center sm:px-6 lg:pt-6 lg:pb-24">
         <h1 className="mx-auto max-w-4xl text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[48px]">
-          Hitung HPP <br className="sm:hidden" />
-          Usaha Anda
+          Hitung Modal <br className="sm:hidden" />
+          Tiap Porsi
           <br />
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-3 max-w-3xl text-base text-redup sm:text-lg">
-          Ceritakan resep sekali, lalu catat belanja dari foto nota, suara, atau ketikan. Takarin AI menghitung modal per porsi dan harga jual sesuai target untung.
+          Foto nota belanja, ucapkan, atau ketik. Takarin AI menghitung modal setiap menu dan memberi tahu harga jual yang tetap untung.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
-            Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
+            Coba gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
           <Tombol varian="garis" to="/#cara-kerja" className="!min-h-12 px-6 text-base">
             <PlayCircle size={22} weight="fill" className="text-navy" aria-hidden /> Lihat cara kerja
@@ -313,14 +313,14 @@ export function Beranda() {
 
         <div className="relative mt-6">
           <KartuMelayang posisi="-left-2 top-1/2 -rotate-6" ikon={Camera} warna="biru" judul="Nota terbaca otomatis" teks="Dari foto, suara, atau teks" />
-          <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar daerah Anda" teks="Data PIHPS Bank Indonesia" />
+          <KartuMelayang posisi="-right-2 top-1/3 rotate-6" ikon={ChartBar} warna="kuning" judul="Harga pasar di kota Anda" teks="Data dari Bank Indonesia" />
           <Pratinjau />
         </div>
 
         <div className="mt-10 lg:mt-6">
           <div className="flex items-center gap-4">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-biru-terang/60" />
-            <p className="text-base font-semibold">Dirancang sesuai cara kerja usaha kuliner</p>
+            <p className="text-base font-semibold">Dibuat untuk cara kerja warung</p>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-kuning/70" />
           </div>
           <ul className="mt-4 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
@@ -346,7 +346,7 @@ export function Beranda() {
               <p className="angka text-5xl font-extrabold tracking-tight text-biru">10,6%</p>
               <figcaption className="text-sm">
                 <span className="font-semibold">Kenaikan cabai rawit merah di Denpasar dalam seminggu.</span>
-                <span className="block text-redup">PIHPS Bank Indonesia, 10 November 2026</span>
+                <span className="block text-redup">Data Bank Indonesia, 10 November 2026</span>
               </figcaption>
             </figure>
             <ol className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
@@ -367,9 +367,9 @@ export function Beranda() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Hitung HPP dalam <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span>
+              Cukup <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span>
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-redup">Setelah menu tersimpan, pekerjaan rutin Anda hanya mencatat belanja. Sisanya dihitung otomatis.</p>
+            <p className="mx-auto mt-2 max-w-2xl text-redup">Isi menu sekali. Setelah itu Anda cukup mencatat belanja, sisanya dihitung otomatis.</p>
           </div>
           <CaraKerja />
         </div>
@@ -396,8 +396,8 @@ export function Beranda() {
 
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
-          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">AI membaca, kode yang menghitung</h2>
-          <p className="mt-3 max-w-2xl text-redup">AI dipakai di bagian yang memang sulit bagi manusia: membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita. Angka yang menentukan harga tidak diserahkan kepada AI.</p>
+          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Hitungannya bisa dipercaya</h2>
+          <p className="mt-3 max-w-2xl text-redup">AI membantu membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita Anda. Angka modal dan untung tetap dihitung dengan cara yang pasti.</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {PRINSIP.map(([Ikon, judul, teks]) => (
               <li key={judul} className="flex gap-4 rounded-[20px] border border-white bg-white/80 p-5 shadow-kartu">
@@ -415,7 +415,7 @@ export function Beranda() {
       <section id="faq" className="mx-auto grid max-w-6xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.6fr)] lg:py-24">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Pertanyaan umum</h2>
-          <p className="mt-3 text-redup">Cara menghitung modal, takaran, dan asal harga pasar.</p>
+          <p className="mt-3 text-redup">Hal yang paling sering ditanyakan pemilik usaha.</p>
         </div>
         <div className="flex flex-col gap-2">
           {FAQ.map(([q, a]) => (
@@ -433,10 +433,10 @@ export function Beranda() {
       <section className="border-t border-garis">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 className="text-3xl font-extrabold tracking-tight">Mulai dari menu yang paling sering terjual</h2>
-        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, isi 4 langkah singkat tentang usaha Anda, lalu ceritakan atau ucapkan satu menu. Modal per porsinya langsung terlihat.</p>
+        <p className="mx-auto mt-2 max-w-xl text-redup">Daftar gratis, jawab beberapa pertanyaan singkat tentang usaha Anda, lalu ceritakan satu menu. Modal per porsinya langsung kelihatan.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
-            Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
+            Coba gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
           <Tombol varian="garis" to="/masuk" className="!min-h-12 px-7 text-base">
             Coba akun demo
@@ -458,12 +458,14 @@ function Halaman({ judul, children }) {
 }
 
 const FAQ = [
-  ['Apa itu modal per porsi (HPP)?', 'Biaya untuk membuat satu porsi menu: bahan sesuai takaran, kemasan, dan bagian dari biaya rutin seperti bahan bakar, listrik, atau sewa.'],
-  ['Takaran saya pakai sendok dan siung, bisa?', 'Bisa. sdm, sdt, gelas, siung, butir, potong, dan ekor diubah ke gram atau ml dengan perkiraan umum. Untuk satuan khusus seperti ikat atau bungkus, isi beratnya sekali di halaman bahan baku.'],
-  ['Kalau hasil baca nota salah?', 'Setiap hasil baca masuk ke halaman periksa dulu. Baris yang ragu ditandai kuning, dan harga yang jauh dari harga pasar diberi peringatan. Data baru dipakai setelah Anda simpan.'],
-  ['Harga pasar diambil dari mana?', 'Dari PIHPS Nasional milik Bank Indonesia (bi.go.id/hargapangan), harga pasar tradisional per kota dan provinsi. Server mengambilnya secara berkala, dan tanggal serta sumbernya selalu ditampilkan. Kalau kota Anda tidak ada di PIHPS, dipakai harga provinsi, lalu nasional.'],
-  ['Kenapa harga bahan saya beda dengan harga pasar?', 'Harga yang dipakai untuk menghitung modal adalah harga belanja Anda sendiri (rata-rata tiga belanja terakhir). Harga pasar hanya pembanding.'],
-  ['Apakah promo paket bisa membuat rugi?', 'Paket dengan harga di bawah modal tidak bisa disimpan. Setiap pilihan harga menunjukkan untung per paket dan berapa banyak lagi paket harus terjual supaya total untungnya sama.'],
+  ['Apa itu modal per porsi (HPP)?', 'Biaya untuk membuat satu porsi menu: bahan-bahannya, bungkusnya, ditambah sebagian kecil biaya rutin seperti gas, listrik, atau sewa tempat.'],
+  ['Takaran saya pakai sendok dan siung, bisa?', 'Bisa. Sendok, gelas, siung, butir, potong, dan ekor diubah otomatis ke gram dengan perkiraan umum. Untuk satuan seperti ikat atau bungkus, isi beratnya sekali saja di halaman Bahan baku.'],
+  ['Kalau hasil baca nota salah?', 'Hasil baca selalu ditunjukkan dulu sebelum disimpan. Baris yang meragukan berwarna kuning, dan harga yang jauh dari biasanya diberi peringatan. Anda bisa membetulkannya langsung.'],
+  ['Harga pasar diambil dari mana?', 'Dari situs harga pangan Bank Indonesia (PIHPS), yaitu harga di pasar tradisional. Kalau kota Anda tidak ada, dipakai harga provinsi atau harga nasional. Tanggal datanya selalu ditampilkan.'],
+  ['Kenapa harga bahan saya beda dengan harga pasar?', 'Modal dihitung dari harga yang Anda bayar sendiri, yaitu rata-rata tiga belanja terakhir. Harga pasar hanya untuk pembanding.'],
+  ['Apakah promo paket bisa membuat rugi?', 'Tidak. Paket yang harganya di bawah modal tidak bisa disimpan. Takarin AI juga menunjukkan berapa paket yang perlu terjual supaya untung Anda tidak turun.'],
+  ['Bisa dipakai di HP?', 'Bisa. Takarin AI dibuka lewat browser di HP atau laptop, tanpa perlu memasang aplikasi.'],
+  ['Apakah data usaha saya aman?', 'Resep dan catatan belanja hanya bisa dilihat dari akun Anda, dan tidak dipakai untuk melatih AI.'],
 ];
 
 export function Bantuan() {
@@ -484,26 +486,25 @@ export function Bantuan() {
 export function Tentang() {
   return (
     <Halaman judul="Tentang Takarin AI">
-      <p>Banyak warung menentukan harga jual dengan perkiraan, lalu tidak sadar untungnya menipis ketika harga bahan naik. Takarin AI dibuat untuk menjawab satu pertanyaan: berapa modal satu porsi hari ini, dan apakah harga jual masih aman.</p>
-      <h2>Cara kerja AI</h2>
+      <p>Banyak warung menentukan harga jual dengan kira-kira, lalu tidak sadar untungnya menipis ketika harga bahan naik. Takarin AI dibuat untuk menjawab satu pertanyaan: berapa modal satu porsi hari ini, dan apakah harga jual masih untung.</p>
+      <h2>Yang dibantu AI</h2>
       <ul>
-        <li>Membaca foto nota dan tulisan tangan menjadi baris belanja.</li>
-        <li>Mengubah ucapan belanja menjadi data, termasuk bahasa sehari-hari seperti goceng dan ceban.</li>
-        <li>Menyusun resep dan takaran dari cerita pemilik usaha.</li>
-        <li>Merangkai penjelasan, catatan harian, serta nama dan caption promo.</li>
+        <li>Membaca foto nota, termasuk tulisan tangan dan singkatan.</li>
+        <li>Memahami ucapan belanja, termasuk bahasa sehari-hari seperti goceng dan ceban.</li>
+        <li>Menyusun resep dan takaran dari cerita Anda.</li>
+        <li>Menulis catatan harian, serta nama dan teks promo.</li>
       </ul>
-      <p>Perhitungan modal, untung, harga minimal, dan promo memakai rumus tetap di server, bukan AI. Teks AI yang memuat angka di luar hasil hitungan dibuang.</p>
-      <h2>Hemat sumber daya</h2>
+      <p>Modal, untung, harga minimal, dan harga promo tidak ditebak AI. Semuanya dihitung dengan cara yang sama setiap kali.</p>
+      <h2>Hemat kuota</h2>
       <ul>
-        <li>Foto nota dikompres di ponsel sebelum diunggah, sehingga hemat kuota dan daya server.</li>
-        <li>AI hanya dipanggil saat membaca nota, suara, cerita, dan menulis teks. Hitungan dan grafik tidak memakai AI.</li>
-        <li>Memakai model berukuran kecil, dengan model cadangan kalau layanan utama sedang penuh.</li>
+        <li>Foto nota diperkecil di HP sebelum dikirim.</li>
+        <li>AI hanya dipakai saat membaca nota, ucapan, dan cerita, atau saat menulis teks. Hitungan dan grafik tidak memakai AI.</li>
       </ul>
-      <h2>Etika data</h2>
+      <h2>Data Anda</h2>
       <ul>
-        <li>Data resep dan belanja hanya terlihat oleh akun Anda. Takarin AI tidak memakainya untuk melatih model.</li>
-        <li>Harga pasar berasal dari data publik PIHPS Bank Indonesia, diambil secukupnya (satu wilayah paling sering sekali dalam beberapa jam) dan selalu disebut sumbernya. Aplikasi tidak mengambil data toko, marketplace, atau aplikasi pesan antar tanpa izin.</li>
-        <li>Semua hasil AI bisa diperiksa dan diubah sebelum dipakai.</li>
+        <li>Resep dan catatan belanja hanya bisa dilihat dari akun Anda, dan tidak dipakai untuk melatih AI.</li>
+        <li>Harga pasar diambil dari situs harga pangan Bank Indonesia, secukupnya, dan sumbernya selalu ditulis. Takarin AI tidak mengambil data dari toko online atau aplikasi pesan antar.</li>
+        <li>Semua hasil AI bisa Anda periksa dan ubah sebelum dipakai.</li>
       </ul>
     </Halaman>
   );

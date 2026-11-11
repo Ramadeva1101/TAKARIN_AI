@@ -180,10 +180,10 @@ export default function Pasar() {
       {(berjalan || galatPerbarui || data.sinkron.galat.length > 0) && (
         <div role="status" className={`mb-4 rounded-xl px-3 py-2 text-sm ${berjalan ? 'bg-biru-muda text-biru-tua' : 'bg-waspada-muda text-waspada'}`}>
           {berjalan ? (
-            'Mengambil harga terbaru dari PIHPS Bank Indonesia. Bisa sampai setengah menit.'
+            'Mengambil harga terbaru dari Bank Indonesia. Bisa sampai setengah menit.'
           ) : (
             <>
-              <p className="font-semibold">Server PIHPS Bank Indonesia belum bisa dihubungi.</p>
+              <p className="font-semibold">Data harga Bank Indonesia belum bisa diambil.</p>
               <p>Harga di bawah adalah data tersimpan terakhir. Coba perbarui lagi beberapa saat lagi.</p>
               <details className="mt-1 text-xs opacity-80">
                 <summary className="inline-flex min-h-11 sm:min-h-9 items-center">Rincian teknis</summary>
@@ -206,17 +206,17 @@ export default function Pasar() {
           <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <button type="button" onClick={() => setUrut('naik')} className="rounded-[20px] border border-garis bg-kartu p-4 text-left transition-colors hover:border-biru/40">
               <p className="text-sm text-redup">Naik dalam seminggu</p>
-              <p className="angka mt-1 text-2xl font-extrabold text-rugi">{naikMinggu.length} <span className="text-sm font-semibold">komoditas</span></p>
+              <p className="angka mt-1 text-2xl font-extrabold text-rugi">{naikMinggu.length} <span className="text-sm font-semibold">bahan</span></p>
               <p className="truncate text-xs text-redup">{naikMinggu.length ? `Tertinggi: ${naikMinggu[0].komoditas} ${persen(naikMinggu[0].perubahan_mingguan)}` : 'Tidak ada'}</p>
             </button>
             <div className="rounded-[20px] border border-garis bg-kartu p-4">
               <p className="text-sm text-redup">Turun dalam seminggu</p>
-              <p className="angka mt-1 text-2xl font-extrabold text-aman">{turunMinggu} <span className="text-sm font-semibold">komoditas</span></p>
-              <p className="text-xs text-redup">Dari {data.harga.length} komoditas terpantau</p>
+              <p className="angka mt-1 text-2xl font-extrabold text-aman">{turunMinggu} <span className="text-sm font-semibold">bahan</span></p>
+              <p className="text-xs text-redup">Dari {data.harga.length} bahan yang dipantau</p>
             </div>
             <div className="rounded-[20px] border border-garis bg-kartu p-4">
               <p className="text-sm text-redup">Dipakai di resep Anda</p>
-              <p className="angka mt-1 text-2xl font-extrabold text-biru">{dipakai.length} <span className="text-sm font-semibold">komoditas</span></p>
+              <p className="angka mt-1 text-2xl font-extrabold text-biru">{dipakai.length} <span className="text-sm font-semibold">bahan</span></p>
               <p className="text-xs text-redup">Harga belanja dibandingkan otomatis</p>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function Pasar() {
                   ))}
                 </ul>
               ) : (
-                <Kosong judul="Belum ada bahan yang cocok" teks="Isi kolom komoditas pasar di halaman bahan baku supaya harganya terpantau di sini." />
+                <Kosong judul="Belum ada bahan yang cocok" teks="Isi kolom 'Nama di harga pasar' di halaman Bahan baku supaya harganya terpantau di sini." />
               )}
             </Kartu>
           </div>

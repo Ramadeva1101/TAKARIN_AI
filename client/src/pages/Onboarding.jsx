@@ -210,9 +210,9 @@ export default function Onboarding() {
           {usaha.kota.trim() && usaha.provinsi.trim() && (
             <p className={`mt-4 rounded-xl px-3 py-2 text-sm ${adaKota ? 'bg-aman-muda text-aman' : 'bg-waspada-muda text-waspada'}`}>
               {adaKota
-                ? `Harga pasar tingkat kota tersedia untuk ${usaha.kota}, dari PIHPS Bank Indonesia.`
+                ? `Harga pasar tingkat kota tersedia untuk ${usaha.kota}, dari data Bank Indonesia.`
                 : adaProv
-                  ? `Data kota ${usaha.kota} tidak ada di PIHPS. Dipakai harga rata-rata provinsi ${usaha.provinsi}.`
+                  ? `Kota ${usaha.kota} belum ada di data Bank Indonesia. Dipakai harga rata-rata provinsi ${usaha.provinsi}.`
                   : 'Provinsi belum dikenali. Pilih dari daftar, atau harga rata-rata nasional yang dipakai.'}
             </p>
           )}

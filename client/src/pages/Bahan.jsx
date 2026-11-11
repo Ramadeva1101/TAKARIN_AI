@@ -123,7 +123,7 @@ export default function Bahan() {
               <p className="truncate text-xs text-redup">{teratas ? `${persen(teratas.bagian_terbesar)} dari modal ${teratas.kontribusi[0].nama}` : 'Belum ada resep'}</p>
             </Link>
             {ubin('naik', 'text-tinta', 'Naik dari belanja sebelumnya', `${jmlNaik} bahan`, jmlNaik ? 'Ketuk untuk melihat' : 'Belum ada kenaikan dari belanja yang tercatat')}
-            {ubin('pasar', 'text-tinta', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding PIHPS Bank Indonesia')}
+            {ubin('pasar', 'text-tinta', 'Dibeli di atas harga pasar', `${jmlAtasPasar} bahan`, 'Dibanding harga pasar Bank Indonesia')}
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] lg:items-start">

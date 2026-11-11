@@ -116,7 +116,7 @@ export default function Pengaturan() {
               </datalist>
               {profil.kota.trim() && wilayah.provinsi.length > 0 && (
                 <p className={`rounded-xl px-3 py-2 text-xs sm:col-span-2 ${adaKota ? 'bg-aman-muda text-aman' : 'bg-waspada-muda text-waspada'}`}>
-                  {adaKota ? `Harga pasar tingkat kota tersedia untuk ${profil.kota}.` : adaProv ? `Kota ${profil.kota} tidak ada di PIHPS, dipakai rata-rata provinsi ${profil.provinsi}.` : 'Provinsi belum dikenali. Pilih dari daftar, atau harga rata-rata nasional yang dipakai.'}
+                  {adaKota ? `Harga pasar tingkat kota tersedia untuk ${profil.kota}.` : adaProv ? `Kota ${profil.kota} belum ada di data Bank Indonesia, dipakai rata-rata provinsi ${profil.provinsi}.` : 'Provinsi belum dikenali. Pilih dari daftar, atau harga rata-rata nasional yang dipakai.'}
                 </p>
               )}
               <Field label="Target untung (%)" type="number" min="5" max="90" value={profil.target_margin} onChange={u('target_margin')} />

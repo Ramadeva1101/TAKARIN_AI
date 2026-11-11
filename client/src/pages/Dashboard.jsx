@@ -282,7 +282,7 @@ function HargaPasar({ data }) {
       ) : (
         <p className="text-sm text-redup">Belum ada harga pasar untuk bahan Anda.</p>
       )}
-      {data.length > 0 && <p className="mt-2 text-xs text-redup">PIHPS Bank Indonesia, {data[0].wilayah}.</p>}
+      {data.length > 0 && <p className="mt-2 text-xs text-redup">Harga pasar Bank Indonesia, {data[0].wilayah}.</p>}
     </Kartu>
   );
 }
