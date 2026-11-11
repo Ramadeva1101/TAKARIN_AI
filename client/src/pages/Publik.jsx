@@ -31,7 +31,7 @@ const MENU_SITUS = [
   ['/', 'Beranda'],
   ['/#cara-kerja', 'Cara Kerja'],
   ['/#fitur', 'Fitur'],
-  ['/bantuan', 'FAQ'],
+  ['/#faq', 'FAQ'],
 ];
 
 export function PublikLayout() {
@@ -45,7 +45,7 @@ export function PublikLayout() {
   useEffect(() => {
     if (pathname !== '/') return setBagian('');
     const cek = () => {
-      const ada = ['cara-kerja', 'fitur'].filter((id) => {
+      const ada = ['cara-kerja', 'fitur', 'faq'].filter((id) => {
         const el = document.getElementById(id);
         return el && el.getBoundingClientRect().top <= 140;
       });
@@ -98,7 +98,7 @@ export function PublikLayout() {
             <Link to="/tentang" className="inline-flex min-h-11 items-center px-2 hover:text-tinta">
               Tentang
             </Link>
-            <Link to="/bantuan" className="inline-flex min-h-11 items-center px-2 hover:text-tinta md:hidden">
+            <Link to="/#faq" className="inline-flex min-h-11 items-center px-2 hover:text-tinta md:hidden">
               FAQ
             </Link>
             <Link to="/privasi" className="inline-flex min-h-11 items-center px-2 hover:text-tinta">
@@ -412,16 +412,36 @@ export function Beranda() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
+      <section id="faq" className="mx-auto grid max-w-6xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.6fr)] lg:py-24">
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Pertanyaan umum</h2>
+          <p className="mt-3 text-redup">Cara menghitung modal, takaran, dan asal harga pasar.</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          {FAQ.map(([q, a]) => (
+            <details key={q} className="group rounded-2xl border border-garis bg-kartu px-5">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+                {q}
+                <CaretDown size={18} weight="bold" className="shrink-0 text-redup transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <p className="pb-5 text-redup">{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-garis">
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 className="text-3xl font-extrabold tracking-tight">Mulai dari menu yang paling sering terjual</h2>
         <p className="mx-auto mt-2 max-w-xl text-redup">Daftar, isi 4 langkah singkat tentang usaha Anda, lalu ceritakan atau ucapkan satu menu. Modal per porsinya langsung terlihat.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
             Hitung HPP gratis <ArrowRight size={18} weight="bold" aria-hidden />
           </Tombol>
-          <Tombol varian="garis" to="/bantuan" className="!min-h-12 px-7 text-base">
-            Pertanyaan umum
+          <Tombol varian="garis" to="/masuk" className="!min-h-12 px-7 text-base">
+            Coba akun demo
           </Tombol>
+        </div>
         </div>
       </section>
     </main>
