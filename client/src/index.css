@@ -31,9 +31,9 @@ body { background: var(--color-dasar); color: var(--color-tinta); font-family: v
 .angka { font-variant-numeric: tabular-nums; }
 h1, h2, h3, .font-judul { font-family: var(--font-judul); letter-spacing: -0.02em; }
 
-/* Kata sorotan di judul beranda: warna polos. Kuning digelapkan agar terbaca di atas putih. */
+/* Kata sorotan di judul beranda: warna polos dari palet. */
 .teks-biru { color: #3d86ea; }
-.teks-emas { color: #c98a00; }
+.teks-emas { color: var(--color-kuning); }
 
 /* Tombol utama: biru polos. */
 .tombol-merek { background: var(--color-biru); }

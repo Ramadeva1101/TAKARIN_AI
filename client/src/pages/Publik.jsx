@@ -191,14 +191,10 @@ function Kebocoran() {
         {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
         {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
       </div>
-      <div className="tepi-nota mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 pt-4" aria-live="polite">
-        <div>
-          <p className="text-sm text-redup">Untung yang hilang dalam 30 hari</p>
-          <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
-        </div>
-        <p className="angka rounded-xl bg-kuning-muda px-3 py-2 text-sm">
-          Setara <b>{setara} porsi gratis</b> setiap bulan
-        </p>
+      <div className="tepi-nota mt-4 pt-4" aria-live="polite">
+        <p className="text-sm text-redup">Untung yang hilang dalam 30 hari</p>
+        <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
+        <p className="angka mt-1 text-sm">Setara {setara} porsi gratis setiap bulan.</p>
       </div>
       <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
     </div>
