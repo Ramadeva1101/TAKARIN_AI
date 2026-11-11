@@ -135,10 +135,10 @@ function Pratinjau() {
       <div className="rounded-[22px] border border-white bg-white/70 p-1.5 shadow-[0_30px_70px_rgb(29_89_187/0.18)] backdrop-blur">
         <img
           src="/tangkapan-ringkasan.webp"
-          width="1490"
-          height="716"
-          alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,4%, daftar untung per menu terhadap target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
-          className="block aspect-[1490/640] h-auto w-full rounded-[16px] border border-garis object-cover object-top"
+          width="1530"
+          height="740"
+          alt="Halaman Ringkasan Takarin AI: rata-rata untung 48,6%, daftar untung per menu terhadap target 40%, dan saran menaikkan harga Es Jeruk ke Rp6.500."
+          className="block aspect-[1530/660] h-auto w-full rounded-[16px] border border-garis object-cover object-top"
           fetchPriority="high"
         />
       </div>
@@ -183,7 +183,7 @@ function Kebocoran() {
     </label>
   );
   return (
-    <div className="rounded-[24px] border border-garis bg-kartu p-5 shadow-[0_24px_60px_rgb(29_89_187/0.12)] sm:p-6">
+    <div className="rounded-[24px] border border-garis bg-kartu p-5 sm:p-6">
       <p className="font-bold">Coba hitung untung yang hilang</p>
       <p className="text-sm text-redup">Modal per porsi naik, harga jual tetap.</p>
       <div className="mt-4 grid gap-1">
@@ -191,10 +191,14 @@ function Kebocoran() {
         {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
         {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
       </div>
-      <div className="mt-4 rounded-2xl bg-biru p-4 text-white shadow-[0_14px_30px_rgb(29_89_187/0.25)]" aria-live="polite">
-        <p className="text-sm text-white/80">Untung yang hilang dalam 30 hari</p>
-        <p className="angka mt-1 text-3xl font-extrabold text-kuning">{rp(bulan)}</p>
-        <p className="angka mt-1 text-sm text-white/90">Sama dengan memberikan {setara} porsi gratis setiap bulan.</p>
+      <div className="tepi-nota mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 pt-4" aria-live="polite">
+        <div>
+          <p className="text-sm text-redup">Untung yang hilang dalam 30 hari</p>
+          <p className="angka mt-1 text-3xl font-extrabold text-rugi">{rp(bulan)}</p>
+        </div>
+        <p className="angka rounded-xl bg-kuning-muda px-3 py-2 text-sm">
+          Setara <b>{setara} porsi gratis</b> setiap bulan
+        </p>
       </div>
       <p className="mt-3 text-xs text-redup">Takarin AI menghitung kenaikan modal ini dari nota belanja Anda, per menu, setiap kali belanja dicatat.</p>
     </div>

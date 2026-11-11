@@ -14,8 +14,8 @@ function Panel() {
       <div className="relative mx-auto mt-14 w-full max-w-xl flex-1" aria-hidden>
         <img
           src="/tangkapan-ringkasan.webp"
-          width="1490"
-          height="716"
+          width="1530"
+          height="740"
           alt=""
           className="block h-auto w-full rounded-[16px] border-4 border-white/90 shadow-[0_30px_60px_rgb(0_0_0/0.28)]"
         />

@@ -31,21 +31,9 @@ body { background: var(--color-dasar); color: var(--color-tinta); font-family: v
 .angka { font-variant-numeric: tabular-nums; }
 h1, h2, h3, .font-judul { font-family: var(--font-judul); letter-spacing: -0.02em; }
 
-/* Warna merek: biru ke kuning. Hanya untuk kata sorotan besar di beranda, bukan untuk teks biasa
-   (kuning di atas putih tidak cukup kontras untuk teks kecil). */
-.teks-merek {
-  background: linear-gradient(90deg, #1d59bb 0%, #4f97f5 40%, #e0a800 75%, #f0b000 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+/* Kata sorotan di judul beranda: warna polos. Kuning digelapkan agar terbaca di atas putih. */
 .teks-biru { color: #3d86ea; }
-.teks-emas {
-  background: linear-gradient(90deg, #c9a227, #f0ad00);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.teks-emas { color: #c98a00; }
 
 /* Tombol utama: biru polos. */
 .tombol-merek { background: var(--color-biru); }
