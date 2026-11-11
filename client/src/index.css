@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Plus Jakarta Sans: dirancang di Indonesia, jelas untuk angka rupiah, satu keluarga untuk judul dan teks. */
   --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
   --font-judul: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
   /* Palet Sicily: 1D59BB, 76B9FF, FEF3B3, FEBD19 */
@@ -18,7 +17,6 @@
   --color-kuning-tua: #8a5a00;
   --color-kuning-muda: #fef3b3;
   --color-navy: #13254a;
-  /* Hijau dan merah disesuaikan ke palet: hijau toska dekat biru, merah terakota dekat kuning. */
   --color-aman: #0e7c66;
   --color-aman-muda: #e3f4ef;
   --color-waspada: #8a5a00;
@@ -84,8 +82,7 @@ button:disabled { cursor: not-allowed; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 
-/* Area aplikasi (setelah masuk): datar dan tenang. Tanpa gradasi dan bayangan agar fokus ke angka.
-   Biru tetap untuk aksi utama, kuning hanya untuk penanda penting (target, saran harga). */
+/* Area aplikasi (setelah masuk): tanpa gradasi dan bayangan. */
 .ruang-kerja .tombol-merek { background: var(--color-biru); box-shadow: none; text-shadow: none; }
 .ruang-kerja .tombol-merek:hover { background: var(--color-biru-tua); }
 .ruang-kerja .bingkai-merek { border: 1px solid var(--color-garis); background: var(--color-kartu); }

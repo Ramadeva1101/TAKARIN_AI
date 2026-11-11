@@ -107,7 +107,6 @@ export function Merek({ className = "", terang = false }) {
   return <img src="/logo-takarin.webp" alt="Takarin AI" height={tinggi} style={{ height: tinggi, width: "auto" }} className="inline-block shrink-0" />;
 }
 
-// Ikon penanda di daftar fitur: ikon polos berwarna, tanpa kotak latar.
 export function IkonKotak({ ikon: Ikon, warna = "biru" }) {
   const cls = { biru: "text-biru", kuning: "text-[#c98a00]", rugi: "text-rugi", aman: "text-aman" }[warna];
   return <Ikon size={28} weight="duotone" className={`mt-0.5 shrink-0 ${cls}`} aria-hidden />;

@@ -29,9 +29,7 @@ function TeksCatatan({ catatan, cadangan }) {
   );
 }
 
-// Kartu angka di baris atas, mengikuti pola dasbor tenang: label dan perubahan di atas, angka besar,
-// keterangan di bawah. Tanpa ikon atau pil; warna hanya biru (baik) dan kuning (perlu perhatian).
-// Kartu untung memakai bilah yang sama dengan tabel di bawahnya: isi = untung, tanda tegak = target.
+// Kartu angka di baris atas. Kartu untung memakai bilah yang sama dengan tabel di bawahnya: isi = untung, tanda tegak = target.
 function Kpi({ label, nilai, ket, sudut, meter, to }) {
   const isi = (
     <>

@@ -99,7 +99,7 @@ export function PublikLayout() {
   );
 }
 
-// Kartu miring di kiri dan kanan pratinjau (desktop saja). Isinya fitur yang memang ada.
+// Kartu miring di kiri dan kanan pratinjau (desktop saja).
 function KartuMelayang({ posisi, ikon, warna, judul, teks }) {
   return (
     <div className={`absolute z-10 hidden w-[17.5rem] items-center gap-3 rounded-2xl border border-[#d3deee] bg-white p-4 text-left shadow-[0_1px_2px_rgb(13_27_62/0.08),0_24px_48px_-12px_rgb(13_27_62/0.35)] xl:flex ${posisi}`} aria-hidden>

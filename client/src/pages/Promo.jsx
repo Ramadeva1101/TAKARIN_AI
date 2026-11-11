@@ -12,7 +12,6 @@ const NAMA_OPSI = { aman: 'Sesuai target', seimbang: 'Diskon sedang', agresif: '
 const teksBagikan = (p) => `${p.nama}: ${rupiah(p.harga_paket)}${p.caption ? `\n${p.caption}` : ''}`;
 const teksIsi = (items) => items.map((i) => `${i.qty}× ${i.nama ?? `menu ${i.menu_id}`}`).join(', ');
 
-// Judul langkah: nomor bulat biru, lalu judul dan keterangan singkat.
 function Langkah({ no, judul, sub, children }) {
   return (
     <Kartu>

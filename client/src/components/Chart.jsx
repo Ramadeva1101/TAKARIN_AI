@@ -7,7 +7,7 @@ function KotakTooltip({ children }) {
   return <div className="rounded-xl border border-garis bg-kartu px-3 py-2 text-sm shadow-[0_10px_30px_rgb(13_27_62/0.12)]">{children}</div>;
 }
 
-// Batang untung per menu. Gaya datar: warna solid, tanpa animasi; batang terpilih biru dengan label di atasnya.
+// Batang untung per menu; batang terpilih diberi label nilai.
 function LabelTerpilih({ x, y, width, value, index, pilihIndex }) {
   if (index !== pilihIndex) return null;
   const teks = persen(value);
