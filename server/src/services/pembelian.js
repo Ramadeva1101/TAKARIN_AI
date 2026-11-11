@@ -23,6 +23,9 @@ function analisisItem(usaha, item) {
   const masalah = [];
 
   if (!bahan) masalah.push({ kode: 'bahan_baru', pesan: `"${item.nama_bahan}" belum ada di daftar bahan. Akan disimpan sebagai bahan baru.` });
+  else if (item.cara_cocok === 'mirip' || item.cara_cocok === 'komoditas') {
+    masalah.push({ kode: 'bahan_mirip', pesan: `Dicocokkan ke "${bahan.nama}" karena namanya mirip. Kalau berbeda, ganti nama bahannya.` });
+  }
 
   const konv = keSatuanDasar({
     qty: item.qty,
@@ -92,9 +95,9 @@ export function buatDraf(usaha, { sumber, nama_toko = null, tanggal = null, tota
       transkrip,
     );
     for (const i of item) {
-      const { bahan } = cocokkanBahan(usaha.id, i.teks_asli || i.nama_bahan, i.nama_bahan);
+      const { bahan, cara } = cocokkanBahan(usaha.id, i.teks_asli || i.nama_bahan, i.nama_bahan);
       run(
-        'INSERT INTO nota_item (nota_id, teks_asli, nama_bahan, bahan_id, qty, satuan, harga, yakin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO nota_item (nota_id, teks_asli, nama_bahan, bahan_id, qty, satuan, harga, yakin, cara_cocok) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         lastInsertRowid,
         i.teks_asli ?? '',
         i.nama_bahan,
@@ -103,6 +106,7 @@ export function buatDraf(usaha, { sumber, nama_toko = null, tanggal = null, tota
         i.satuan ?? null,
         i.harga ?? null,
         i.yakin ?? null,
+        cara,
       );
     }
     return lastInsertRowid;

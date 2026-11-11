@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Chip, Field, Galat, Judul, Kartu, Kosong, Muat, Tombol, hargaSatuan } from '../components/ui.jsx';
@@ -31,6 +31,10 @@ export default function BahanDetail() {
   const [form, setForm] = useState(null);
   const [konv, setKonv] = useState({ satuan: '', faktor: '' });
   const [pesan, setPesan] = useState(null);
+  const semuaBahan = useApi('/bahan');
+  const [gabungKe, setGabungKe] = useState('');
+  const [galatGabung, setGalatGabung] = useState(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     if (b) setForm({ nama: b.nama, satuan_dasar: b.satuan_dasar, komoditas: b.komoditas || '', susut_persen: b.susut_persen });
@@ -59,6 +63,21 @@ export default function BahanDetail() {
       muat();
     } catch (err) {
       setPesan({ ok: false, teks: pesanGalat(err) });
+    }
+  };
+
+  // Bahan ganda (misal "cabe" dan "cabai rawit"): pindahkan semua ke satu bahan.
+  const kandidatGabung = (semuaBahan.data || []).filter((x) => x.id !== b.id && x.satuan_dasar === b.satuan_dasar);
+  const gabung = async () => {
+    const ke = kandidatGabung.find((x) => String(x.id) === gabungKe);
+    if (!ke) return;
+    if (!window.confirm(`Gabungkan "${b.nama}" ke "${ke.nama}"? Riwayat belanja dan resep pindah ke ${ke.nama}, lalu "${b.nama}" dihapus.`)) return;
+    setGalatGabung(null);
+    try {
+      await api(`/bahan/${b.id}/gabung`, { method: 'POST', body: { ke_id: ke.id } });
+      nav(`/bahan/${ke.id}`, { replace: true });
+    } catch (err) {
+      setGalatGabung(pesanGalat(err));
     }
   };
 
@@ -175,6 +194,35 @@ export default function BahanDetail() {
             </p>
           )}
         </Kartu>
+
+        {kandidatGabung.length > 0 && (
+          <Kartu className="lg:col-span-2">
+            <h2 className="font-semibold">Bahan ini tercatat dua kali?</h2>
+            <p className="mb-3 text-sm text-redup">Misalnya "cabe" dan "cabai rawit". Gabungkan supaya resep dan belanja memakai satu harga yang sama.</p>
+            <div className="flex flex-wrap items-end gap-2">
+              <Field label="Gabungkan ke" className="min-w-56 flex-1 sm:max-w-sm">
+                {(fid) => (
+                  <select id={fid} className="min-h-11 w-full rounded-xl border border-garis bg-kartu px-3 capitalize" value={gabungKe} onChange={(e) => setGabungKe(e.target.value)}>
+                    <option value="">Pilih bahan</option>
+                    {kandidatGabung.map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {x.nama}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </Field>
+              <Tombol varian="garis" onClick={gabung} disabled={!gabungKe}>
+                Gabungkan
+              </Tombol>
+            </div>
+            {galatGabung && (
+              <p role="alert" className="mt-2 text-sm text-rugi">
+                {galatGabung}
+              </p>
+            )}
+          </Kartu>
+        )}
       </div>
     </>
   );

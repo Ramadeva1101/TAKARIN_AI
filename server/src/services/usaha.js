@@ -1,7 +1,7 @@
 import { all, get, run, tx } from '../lib/db.js';
 import { AppError, tanggalHariIni } from '../lib/errors.js';
 import { keSatuanDasar } from '../domain/satuan.js';
-import { cariAtauBuatBahan, konversiBahan } from './bahan.js';
+import { cariAtauBuatBahan, konversiBahan, simpanAlias } from './bahan.js';
 import { hitungSemua } from './hpp.js';
 import { bacaCerita } from '../ai/provider.js';
 
@@ -32,6 +32,7 @@ export function simpanResep(usahaId, menuId, bahanList) {
       ? get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', item.bahan_id, usahaId)
       : cariAtauBuatBahan(usahaId, item.nama, item.satuan);
     if (!bahan) throw new AppError(400, `Bahan ${item.nama} tidak ditemukan`);
+    if (item.bahan_id && item.nama && item.nama.trim().toLowerCase() !== bahan.nama) simpanAlias(usahaId, item.nama, bahan.id);
     run(
       'INSERT INTO resep_item (menu_id, bahan_id, qty, satuan) VALUES (?, ?, ?, ?)',
       menuId,
@@ -102,8 +103,8 @@ export function simpanSetup(userId, data) {
   });
 }
 
-export async function draftDariCerita(teks) {
-  const { data, model } = await bacaCerita(teks);
+export async function draftDariCerita(teks, namaBahanAda = []) {
+  const { data, model } = await bacaCerita(teks, namaBahanAda);
   return { ...data, model };
 }
 

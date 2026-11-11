@@ -40,8 +40,10 @@ export default function ProdukBaru() {
 
   const simpan = async (e) => {
     e.preventDefault();
-    const semua = (cara === 'cerita' && daftar ? daftar : [resep]).map(rapikanResep);
-    const masalah = semua.map(cekResep).find(Boolean);
+    if (cara === 'cerita' && !daftar) return;
+    const mentah = cara === 'cerita' && daftar ? daftar : [resep];
+    const semua = mentah.map(rapikanResep);
+    const masalah = semua.map((r, i) => cekResep(r, mentah[i])).find(Boolean);
     if (masalah) return setGalat(masalah);
     setProses(true);
     setGalat(null);

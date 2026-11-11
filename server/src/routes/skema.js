@@ -88,6 +88,9 @@ export const simpanBelanja = z.object({
 
 export const hargaManual = z.object({ qty: z.coerce.number().positive('Jumlah harus lebih dari 0'), satuan: z.string().trim().min(1, 'Satuan wajib diisi'), harga: z.coerce.number().positive('Harga harus lebih dari 0') });
 
+export const cocokkanNama = z.object({ nama: z.array(z.string().max(80)).max(60) });
+export const gabungBahan = z.object({ ke_id: z.coerce.number().int().positive() });
+
 export const ubahBahan = z.object({
   nama: z.string().trim().min(1).max(60).optional(),
   satuan_dasar: z.enum(['g', 'ml', 'butir', 'pcs']).optional(),

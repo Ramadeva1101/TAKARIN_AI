@@ -15,6 +15,7 @@ import * as promo from '../services/promo.js';
 import * as pasar from '../services/pasar.js';
 import * as pihps from '../services/pihps.js';
 import { simpanKonversi } from '../services/bahan.js';
+import { petaHarga } from '../services/hpp.js';
 
 export const router = Router();
 const id = (req) => Number(req.params.id);
@@ -58,7 +59,11 @@ router.post('/suara/teks', unggahSuara, async (req, res) => {
   res.json({ teks: teks.trim() });
 });
 router.post('/usaha/cek-jenis', validasi(S.cekJenis), async (req, res) => res.json((await cekJenisUsaha(req.body.teks)).data));
-router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => res.json(await usaha.draftDariCerita(req.body.teks)));
+router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => {
+  const milik = usaha.usahaMilik(req.user.id);
+  const namaAda = milik ? bahan.daftarNamaBahan(milik.id) : [];
+  res.json(await usaha.draftDariCerita(req.body.teks, namaAda));
+});
 router.post('/usaha/setup', validasi(S.setup), (req, res) => {
   const hasil = usaha.simpanSetup(req.user.id, req.body);
   pihps.pastikanSegar(usaha.usahaMilik(req.user.id));
@@ -128,6 +133,8 @@ router.delete('/pembelian/:id', (req, res) => {
 router.get('/bahan', (req, res) => res.json(dashboard.bahanDenganKontribusi(req.usaha)));
 router.get('/bahan/:id', (req, res) => res.json(bahan.detailBahan(req.usaha, id(req))));
 router.put('/bahan/:id', validasi(S.ubahBahan), (req, res) => res.json(bahan.ubahBahan(req.usaha, id(req), req.body)));
+router.post('/bahan/cocokkan', validasi(S.cocokkanNama), (req, res) => res.json(bahan.statusNamaResep(req.usaha, req.body.nama, petaHarga(req.usaha))));
+router.post('/bahan/:id/gabung', validasi(S.gabungBahan), (req, res) => res.json(bahan.gabungBahan(req.usaha, id(req), req.body.ke_id)));
 router.post('/bahan/:id/harga', validasi(S.hargaManual), (req, res) => res.status(201).json(bahan.isiHargaManual(req.usaha, id(req), req.body)));
 router.post('/bahan/:id/konversi', validasi(S.konversi), (req, res) => {
   bahan.detailBahan(req.usaha, id(req));

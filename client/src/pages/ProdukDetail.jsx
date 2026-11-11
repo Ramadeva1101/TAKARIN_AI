@@ -129,7 +129,8 @@ function Simulasi({ p }) {
         </div>
         <div>
           <p className="text-redup">Untung per porsi</p>
-          <p className="angka text-lg font-bold">{rupiah(harga - (hasil?.hpp ?? p.hpp))}</p>
+          {/* Selama ada bahan tanpa harga, untung belum bisa dihitung: jangan tampilkan angka yang terlalu bagus. */}
+          <p className="angka text-lg font-bold">{p.lengkap ? rupiah(harga - (hasil?.hpp ?? p.hpp)) : '–'}</p>
         </div>
       </div>
       {hasil && (
@@ -248,12 +249,14 @@ export default function ProdukDetail() {
   const [edit, setEdit] = useState(null);
   const [galat, setGalat] = useState(null);
   const [versi, setVersi] = useState(0);
+  const [proses, setProses] = useState(false);
 
   if (loading && !p) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
 
   const simpan = async (body) => {
     setGalat(null);
+    setProses(true);
     try {
       await api(`/produk/${id}`, { method: 'PUT', body });
       setEdit(null);
@@ -261,7 +264,22 @@ export default function ProdukDetail() {
       setVersi((v) => v + 1);
     } catch (err) {
       setGalat(pesanGalat(err));
+    } finally {
+      setProses(false);
     }
+  };
+
+  // Simpan resep hasil ubah. Pesan masalah tampil tepat di atas tombol, bukan di atas halaman.
+  const simpanResep = () => {
+    const d = rapikanResep(edit);
+    const m = cekResep(d, edit);
+    if (m) return setGalat(m);
+    simpan(d);
+  };
+
+  const tutupEdit = () => {
+    setEdit(null);
+    setGalat(null);
   };
 
   const hapus = async () => {
@@ -292,7 +310,7 @@ export default function ProdukDetail() {
           )
         }
       />
-      {galat && (
+      {galat && !edit && (
         <p role="alert" className="mb-4 rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
           {galat}
         </p>
@@ -301,17 +319,16 @@ export default function ProdukDetail() {
       {edit ? (
         <Kartu>
           <ResepEditor value={edit} onChange={setEdit} />
+          {galat && (
+            <p role="alert" className="mt-4 rounded-xl bg-rugi-muda px-3 py-2 text-sm text-rugi">
+              {galat}
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Tombol
-              onClick={() => {
-                const d = rapikanResep(edit);
-                const m = cekResep(d);
-                m ? setGalat(m) : simpan(d);
-              }}
-            >
-              Simpan resep
+            <Tombol onClick={simpanResep} disabled={proses}>
+              {proses ? 'Menyimpan' : 'Simpan resep'}
             </Tombol>
-            <Tombol varian="garis" onClick={() => setEdit(null)}>
+            <Tombol varian="garis" onClick={tutupEdit}>
               Batal
             </Tombol>
           </div>
@@ -321,7 +338,8 @@ export default function ProdukDetail() {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
               <p className="text-sm text-redup">Modal per porsi</p>
-              <p className="angka mt-1 text-2xl font-bold">{rupiah(p.hpp)}</p>
+              <p className="angka mt-1 text-2xl font-bold">{p.lengkap ? rupiah(p.hpp) : 'Belum lengkap'}</p>
+              {!p.lengkap && <p className="angka mt-1 text-xs text-kuning-tua">Sementara {rupiah(p.hpp)}, tanpa {p.kurang.map((k) => k.nama).join(', ')}</p>}
             </div>
             <div className="rounded-[20px] border border-garis bg-kartu shadow-kartu p-4">
               <p className="text-sm text-redup">Harga jual</p>

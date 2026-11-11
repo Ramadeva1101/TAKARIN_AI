@@ -4,6 +4,7 @@ import { Trash, WarningCircle } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Chip, Field, Galat, Judul, Kartu, Muat, Tombol, inputCls } from '../components/ui.jsx';
+import { bandingNama } from '../lib/cocok.js';
 
 const SATUAN_DASAR = [
   ['g', 'gram (ditimbang)'],
@@ -149,12 +150,23 @@ export default function BelanjaCek() {
     setItem(
       item.map((x, j) => {
         if (j !== i) return x;
-        const baru = { ...x, [k]: v, masalah: (x.masalah || []).filter((m) => m.kode === 'bahan_baru' || m.kode === 'konversi') };
+        // Peringatan bahan (baru, mirip, konversi) tetap ada sampai namanya diputuskan.
+        const baru = { ...x, [k]: v, masalah: (x.masalah || []).filter((m) => ['bahan_baru', 'bahan_mirip', 'konversi'].includes(m.kode)) };
         if (k === 'nama_bahan') {
-          const cocok = semuaBahan.find((b) => b.nama.toLowerCase() === v.trim().toLowerCase());
+          // Aturan yang sama dengan server: "cabe rawit" = "cabai rawit", tetapi "gula merah" bukan "gula pasir".
+          const cocok = semuaBahan.find((b) => bandingNama(b.nama, v) === 'persis');
+          const mirip = !cocok && semuaBahan.find((b) => bandingNama(b.nama, v) === 'mirip');
           baru.bahan_id = cocok?.id ?? null;
-          baru.masalah = baru.masalah.filter((m) => m.kode !== 'bahan_baru');
-          if (!cocok && v.trim()) baru.masalah.push({ kode: 'bahan_baru', pesan: `"${v.trim()}" belum ada di daftar bahan. Pilih dari saran kalau sebenarnya sama, atau biarkan untuk disimpan sebagai bahan baru.` });
+          baru.bahan_nama = cocok?.nama ?? null;
+          baru.masalah = baru.masalah.filter((m) => m.kode !== 'bahan_baru' && m.kode !== 'bahan_mirip');
+          if (!cocok && v.trim()) {
+            baru.masalah.push({
+              kode: 'bahan_baru',
+              pesan: mirip
+                ? `"${v.trim()}" belum ada. Mirip "${mirip.nama}": ketik "${mirip.nama}" kalau sama, atau biarkan untuk disimpan sebagai bahan baru.`
+                : `"${v.trim()}" belum ada di daftar bahan. Pilih dari saran kalau sebenarnya sama, atau biarkan untuk disimpan sebagai bahan baru.`,
+            });
+          }
         }
         return baru;
       }),
@@ -248,6 +260,15 @@ export default function BelanjaCek() {
                     <WarningCircle size={18} className="mt-0.5 shrink-0" aria-hidden /> {m.pesan}
                   </p>
                 ))}
+                {masalah.some((m) => m.kode === 'bahan_mirip') && (
+                  <button
+                    type="button"
+                    onClick={() => setItem(item.map((y, j) => (j === i ? { ...y, masalah: y.masalah.filter((m) => m.kode !== 'bahan_mirip') } : y)))}
+                    className="mt-2 inline-flex min-h-11 items-center rounded-full bg-biru px-4 text-sm font-semibold text-white sm:min-h-9"
+                  >
+                    Benar, sama dengan {x.bahan_nama}
+                  </button>
+                )}
                 {masalah.some((m) => m.kode === 'bahan_baru') && (
                   <label className="mt-2 block text-sm">
                     <span className="font-medium">Bahan baru ini diukur dengan</span>

@@ -22,6 +22,7 @@ function migrasi(db) {
   const ada = (tabel, kolom) => db.prepare(`PRAGMA table_info(${tabel})`).all().some((k) => k.name === kolom);
   const tambah = (tabel, kolom, def) => !ada(tabel, kolom) && db.exec(`ALTER TABLE ${tabel} ADD COLUMN ${kolom} ${def}`);
   tambah('usaha', 'hari_buka', 'INTEGER NOT NULL DEFAULT 30');
+  tambah('nota_item', 'cara_cocok', 'TEXT');
 }
 
 export function getDb() {

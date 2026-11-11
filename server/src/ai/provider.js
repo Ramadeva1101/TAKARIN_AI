@@ -112,9 +112,12 @@ export async function bacaUcapan(teks) {
   return chatJson(modelTeks(), [{ role: 'system', content: prompt.UCAPAN }, { role: 'user', content: teks }], skema.ucapan);
 }
 
-export async function bacaCerita(teks) {
+export async function bacaCerita(teks, namaBahanAda = []) {
   if (modeAi() === 'fixture') return { data: skema.cerita.parse(fixture('cerita')), model: 'fixture' };
-  return chatJson(modelTeks(), [{ role: 'system', content: prompt.CERITA }, { role: 'user', content: teks }], skema.cerita);
+  const sistem = namaBahanAda.length
+    ? `${prompt.CERITA}\n\nBahan yang sudah tercatat di usaha ini: ${namaBahanAda.slice(0, 80).join(', ')}.\nKalau bahan di cerita sama dengan salah satunya (misal "cabe" = "cabai rawit", "minyak" = "minyak goreng"), tulis persis nama yang sudah tercatat. Jangan memaksakan kalau bahannya berbeda (gula merah bukan gula pasir).`
+    : prompt.CERITA;
+  return chatJson(modelTeks(), [{ role: 'system', content: sistem }, { role: 'user', content: teks }], skema.cerita);
 }
 
 // Mengembalikan teks, atau null kalau mode fixture / AI gagal (pemanggil memakai templat).

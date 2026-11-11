@@ -28,7 +28,7 @@ export default function Produk() {
                 <dl className="angka mt-4 grid grid-cols-3 gap-2 text-sm">
                   <div>
                     <dt className="text-redup">Modal</dt>
-                    <dd className="font-semibold">{rupiah(p.hpp)}</dd>
+                    <dd className="font-semibold">{p.lengkap ? rupiah(p.hpp) : '–'}</dd>
                   </div>
                   <div>
                     <dt className="text-redup">Jual</dt>
