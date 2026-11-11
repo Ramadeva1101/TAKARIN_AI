@@ -183,6 +183,12 @@ Tanpa kunci API, aplikasi tetap bisa dicoba dengan `AI_MODE=fixture`. Semua fitu
 
 Akun ini dibuat oleh `npm run seed` dan berisi menu, resep, serta riwayat belanja contoh.
 
+Untuk mengembalikan akun demo ke data awal tanpa menghapus akun lain:
+
+```bash
+npm --prefix server run seed:demo
+```
+
 ## Penggunaan AI
 
 | Bagian produk | Layanan dan model | Tugas |

@@ -5,7 +5,8 @@
     "test": "vitest run",
     "dev": "node --watch --disable-warning=ExperimentalWarning --env-file=.env src/index.js",
     "start": "node --disable-warning=ExperimentalWarning --env-file=.env src/index.js",
-    "seed": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/seed.js"
+    "seed": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/seed.js",
+    "seed:demo": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/seed.js --demo"
   },
   "license": "ISC",
   "type": "module",

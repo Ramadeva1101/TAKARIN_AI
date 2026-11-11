@@ -1,10 +1,12 @@
 // Mengisi database dengan akun demo dan riwayat belanja contoh.
-// Jalankan: npm run seed  (menghapus database lama di DB_PATH)
+// Jalankan: npm run seed       (menghapus database lama di DB_PATH)
+//           npm run seed:demo  (hanya membuat ulang akun demo; akun lain tidak disentuh)
 import fs from 'node:fs';
 import bcrypt from 'bcrypt';
 
+const hanyaDemo = process.argv.includes('--demo');
 const dbPath = process.env.DB_PATH || './data/app.db';
-for (const f of [dbPath, `${dbPath}-wal`, `${dbPath}-shm`]) fs.rmSync(f, { force: true });
+if (!hanyaDemo) for (const f of [dbPath, `${dbPath}-wal`, `${dbPath}-shm`]) fs.rmSync(f, { force: true });
 
 const { run, get } = await import('../src/lib/db.js');
 const { simpanSetup } = await import('../src/services/usaha.js');
@@ -55,7 +57,10 @@ if (process.env.HARGA_LIVE === 'on') {
   adaHargaAsli = h.kota > 0;
   console.log('Harga PIHPS Bank Indonesia:', JSON.stringify(h));
 }
-if (!adaHargaAsli) console.log(`PIHPS tidak terjangkau, memakai harga contoh: ${imporCsv(baris.join('\n'))} baris`);
+if (!adaHargaAsli && !hanyaDemo) console.log(`PIHPS tidak terjangkau, memakai harga contoh: ${imporCsv(baris.join('\n'))} baris`);
+
+// Semua data usaha ikut terhapus lewat ON DELETE CASCADE.
+if (hanyaDemo) run('DELETE FROM users WHERE email = ?', 'demo@dapur.id');
 
 const hash = await bcrypt.hash('demo12345', 10);
 const { lastInsertRowid: userId } = run('INSERT INTO users (email, password_hash, nama) VALUES (?, ?, ?)', 'demo@dapur.id', hash, 'Bu Sari');
