@@ -53,14 +53,42 @@ export function ambilJson(teks) {
   return JSON.parse(tanpaPagar.slice(awal, akhir + 1));
 }
 
+// Satu kunci API hanya boleh menjalankan beberapa permintaan sekaligus; permintaan berikutnya ditolak 429
+// ("Terlalu banyak permintaan AI aktif"). Permintaan di server ini diantrekan, dan yang ditolak karena
+// sibuk dicoba lagi sebentar kemudian, sebelum pindah ke model cadangan.
+const PARALEL = Math.max(Number(process.env.AI_PARALEL) || 2, 1);
+let berjalan = 0;
+const antrean = [];
+async function giliran(kerja) {
+  if (berjalan >= PARALEL) await new Promise((r) => antrean.push(r));
+  berjalan++;
+  try {
+    return await kerja();
+  } finally {
+    berjalan--;
+    antrean.shift()?.();
+  }
+}
+
+const tunggu = (ms) => new Promise((r) => setTimeout(r, ms));
+// Sibuk sementara: layak dicoba lagi. Model yang kuotanya habis (400) langsung diganti cadangan.
+export const sedangSibuk = (err) => [429, 503].includes(err?.status) && !/kuota penyedia|habis/i.test(String(err?.message));
+
 async function cobaModel(models, kerja) {
   if (!models.length) throw new AiError('Nama model AI belum diisi di server/.env');
   const gagal = [];
   for (const model of models) {
-    try {
-      return { ...(await kerja(model)), model };
-    } catch (err) {
-      gagal.push({ model, pesan: String(err?.message || err).slice(0, 200) });
+    for (let ulang = 0; ulang < 3; ulang++) {
+      try {
+        return { ...(await giliran(() => kerja(model))), model };
+      } catch (err) {
+        if (sedangSibuk(err) && ulang < 2) {
+          await tunggu(1500 * (ulang + 1));
+          continue;
+        }
+        gagal.push({ model, pesan: String(err?.message || err).slice(0, 200) });
+        break;
+      }
     }
   }
   throw new AiError('Layanan AI sedang tidak bisa dipakai. Coba lagi atau isi manual.', gagal);
