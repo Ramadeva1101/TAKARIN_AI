@@ -172,6 +172,7 @@ Kebutuhan: **Node.js 24** (atau 22.5 ke atas, karena memakai `node:sqlite`) dan 
 | `MODEL_TEKS`, `MODEL_TEKS_FALLBACK` | Model teks untuk resep, ucapan, promo, dan catatan harian. |
 | `GROQ_API_KEY` | Kunci Groq untuk mengubah rekaman suara jadi teks. Dipakai hanya bila browser tidak punya pengenal suara bawaan. |
 | `HARGA_LIVE` | `on` = ambil harga dari PIHPS. Kosongkan untuk memakai data tersimpan saja. |
+| `DEMO_RESET` | `on` = akun demo dikembalikan ke data awal setiap server dinyalakan dan setiap tengah malam, supaya perubahan pengunjung tidak menumpuk. |
 
 Tanpa kunci API, aplikasi tetap bisa dicoba dengan `AI_MODE=fixture`. Semua fitur hitungan berjalan normal.
 
@@ -183,7 +184,7 @@ Tanpa kunci API, aplikasi tetap bisa dicoba dengan `AI_MODE=fixture`. Semua fitu
 
 Akun ini dibuat oleh `npm run seed` dan berisi menu, resep, serta riwayat belanja contoh.
 
-Untuk mengembalikan akun demo ke data awal tanpa menghapus akun lain:
+Dengan `DEMO_RESET=on`, akun demo kembali ke data awal setiap server dinyalakan dan setiap tengah malam. Untuk mengembalikannya secara manual tanpa menghapus akun lain:
 
 ```bash
 npm --prefix server run seed:demo
