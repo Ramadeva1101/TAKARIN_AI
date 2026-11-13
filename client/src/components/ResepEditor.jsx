@@ -1,15 +1,47 @@
 import { useEffect, useId, useRef } from 'react';
 import { Plus, Trash } from '@phosphor-icons/react';
 import { Field, Tombol, inputCls } from './ui.jsx';
+
+const kecil = inputCls.replace('w-full', 'shrink-0');
 import { api, rupiah } from '../lib/api.js';
 import { useApi } from '../lib/hooks.js';
 
 export const resepKosong = () => ({ nama: '', harga_jual: '', porsi_per_batch: 1, bahan: [{ nama: '', qty: '', satuan: '' }] });
 
 const SATUAN = ['g', 'kg', 'ons', 'ml', 'liter', 'sdm', 'sdt', 'gelas', 'siung', 'butir', 'potong', 'ekor', 'pcs', 'buah', 'lembar', 'ikat', 'bungkus', 'sachet'];
-const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar' };
+const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar', perkiraan: 'perkiraan Anda' };
 
-const teksHarga = (b) => (b?.harga ? `${rupiah(b.harga.harga)}/${b.harga.satuan} ${SUMBER[b.sumber_harga] ?? ''}`.trim() : null);
+export const umurHari = (tanggal) => (tanggal ? Math.floor((Date.now() - new Date(tanggal).getTime()) / 86_400_000) : 0);
+
+const teksHarga = (b) => {
+  if (!b?.harga) return null;
+  const lama = b.sumber_harga === 'perkiraan' && umurHari(b.tanggal_harga) > 30 ? `, ${umurHari(b.tanggal_harga)} hari lalu` : '';
+  return `${rupiah(b.harga.harga)}/${b.harga.satuan} ${SUMBER[b.sumber_harga] ?? ''}${lama}`.trim();
+};
+
+// Bahan yang belum punya harga: isi harga beli terakhir supaya modal langsung terhitung,
+// tanpa harus catat belanja dulu (misalnya bahannya masih ada di dapur).
+function HargaBeli({ b, ubah }) {
+  const hb = b.harga_beli ?? { harga: '', qty: 1, satuan: b.satuan?.trim() || 'kg' };
+  const set = (p) => ubah({ harga_beli: { ...hb, ...p } });
+  const pilihan = [...new Set([b.satuan?.trim(), 'kg', 'gram', 'ons', 'liter', 'ml', 'buah'].filter(Boolean))];
+  return (
+    <div className="col-span-full -mt-1 rounded-xl bg-kuning-muda px-3 py-2 text-xs">
+      <p>Harga beli terakhir {b.nama.trim()} (boleh kira-kira, nanti diganti otomatis saat Anda catat belanja):</p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+        <span>Rp</span>
+        <input aria-label={`Harga beli ${b.nama}`} type="number" inputMode="numeric" min="0" placeholder="5000" className={`${kecil} angka w-28`} value={hb.harga} onChange={(e) => set({ harga: e.target.value })} />
+        <span>untuk</span>
+        <input aria-label={`Jumlah beli ${b.nama}`} type="number" inputMode="decimal" min="0" step="any" className={`${kecil} angka w-20`} value={hb.qty} onChange={(e) => set({ qty: e.target.value })} />
+        <select aria-label={`Satuan beli ${b.nama}`} className={`${kecil} w-28`} value={hb.satuan} onChange={(e) => set({ satuan: e.target.value })}>
+          {pilihan.map((x) => (
+            <option key={x}>{x}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
 
 // Keterangan di bawah tiap bahan: bahan ini akan memakai harga dari mana.
 // Ini yang menghubungkan resep menu dengan catatan belanja.
@@ -32,7 +64,7 @@ function StatusBahan({ b, ubah }) {
     return (
       <p className={`col-span-full -mt-1 text-xs ${harga ? 'text-redup' : 'text-kuning-tua'}`}>
         Terhubung ke bahan <span className="font-semibold">{c.bahan.nama}</span>
-        {harga ? `, ${harga}` : '. Harga belum ada, isi setelah menu disimpan atau catat belanja.'}
+        {harga ? `, ${harga}` : '.'}
       </p>
     );
   }
@@ -56,7 +88,7 @@ function StatusBahan({ b, ubah }) {
   }
   return (
     <p className="col-span-full -mt-1 text-xs text-kuning-tua">
-      Bahan baru, harga belum ada. Isi harga perkiraan setelah menu disimpan, atau catat belanjanya.
+      {c.komoditas ? 'Bahan baru. Harga diambil dari harga pasar di kota Anda sampai Anda catat belanjanya.' : 'Bahan baru.'}
       {c.status === 'mirip' && (
         <>
           {' '}
@@ -69,6 +101,15 @@ function StatusBahan({ b, ubah }) {
   );
 }
 
+// Ditanya harga beli kalau bahan belum punya harga dan tidak ada di data pasar.
+function perluHargaBeli(b) {
+  const c = b.cocok;
+  if (!b.nama.trim() || !c || c.nama !== b.nama.trim()) return false;
+  if (c.status === 'terhubung' || (c.status === 'mirip' && b.bahan_id === c.bahan?.id)) return !c.bahan?.harga;
+  if (c.status === 'baru' || (c.status === 'mirip' && b.baru)) return !c.komoditas;
+  return false;
+}
+
 // Formulir satu menu: nama, harga, porsi per resep, dan daftar bahan dengan takaran bebas.
 export default function ResepEditor({ value, onChange }) {
   const id = useId();
@@ -76,7 +117,7 @@ export default function ResepEditor({ value, onChange }) {
   const set = (k, v) => onChange({ ...value, [k]: v });
   const setBaris = (i, perubahan) => onChange({ ...value, bahan: value.bahan.map((b, j) => (j === i ? { ...b, ...perubahan } : b)) });
   // Mengganti nama memutus pilihan sebelumnya, supaya harga tidak tertinggal di bahan lama.
-  const gantiNama = (i, nama) => setBaris(i, { nama, bahan_id: null, baru: false });
+  const gantiNama = (i, nama) => setBaris(i, { nama, bahan_id: null, baru: false, harga_beli: null });
 
   // Periksa nama bahan ke server (dijeda 400 ms) untuk tahu bahan mana yang sudah punya harga.
   const nilaiTerakhir = useRef(value);
@@ -148,6 +189,7 @@ export default function ResepEditor({ value, onChange }) {
                 <Trash size={18} aria-hidden />
               </button>
               <StatusBahan b={b} ubah={(p) => setBaris(i, p)} />
+              {perluHargaBeli(b) && <HargaBeli b={b} ubah={(p) => setBaris(i, p)} />}
             </div>
           ))}
         </div>
@@ -168,7 +210,15 @@ export function rapikanResep(r) {
     porsi_per_batch: Number(r.porsi_per_batch) || 1,
     bahan: r.bahan
       .filter((b) => b.nama.trim() || String(b.qty ?? '').trim())
-      .map((b) => ({ ...(b.bahan_id ? { bahan_id: b.bahan_id } : {}), nama: b.nama.trim(), qty: Number(b.qty), satuan: b.satuan?.trim() || null })),
+      .map((b) => ({
+        ...(b.bahan_id ? { bahan_id: b.bahan_id } : {}),
+        nama: b.nama.trim(),
+        qty: Number(b.qty),
+        satuan: b.satuan?.trim() || null,
+        ...(perluHargaBeli(b) && Number(b.harga_beli?.harga) > 0 && Number(b.harga_beli?.qty) > 0
+          ? { harga_beli: { harga: Number(b.harga_beli.harga), qty: Number(b.harga_beli.qty), satuan: b.harga_beli.satuan } }
+          : {}),
+      })),
   };
 }
 

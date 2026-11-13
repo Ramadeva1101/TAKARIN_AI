@@ -5,6 +5,10 @@ import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
 import { Chip, Field, Galat, Judul, Kartu, Muat, Tombol, inputCls } from '../components/ui.jsx';
 import { bandingNama } from '../lib/cocok.js';
+import IsiSatuan from '../components/IsiSatuan.jsx';
+
+// Satuan yang sudah dikenal untuk menjawab isi kemasan, dari analisis server.
+const pilihanIsi = (x) => (x.masalah || []).find((m) => m.kode === 'konversi')?.pilihan ?? [];
 
 const SATUAN_DASAR = [
   ['g', 'gram (ditimbang)'],
@@ -197,6 +201,7 @@ export default function BelanjaCek() {
             satuan: x.satuan.trim(),
             harga: Number(x.harga),
             konversi_faktor: Number(x.konversi_faktor) || null,
+            konversi_isi: Number(x.konversi_isi?.jumlah) > 0 ? { jumlah: Number(x.konversi_isi.jumlah), ke: x.konversi_isi.ke || pilihanIsi(x)[0]?.satuan } : null,
           })),
         },
       });
@@ -285,12 +290,18 @@ export default function BelanjaCek() {
                     </select>
                   </label>
                 )}
-                {masalah.some((m) => m.kode === 'konversi') && (
-                  <label className="mt-2 block text-sm">
-                    <span className="font-medium">{`1 ${x.satuan || 'satuan'} berapa ${x.satuan_dasar || 'gram'}?`}</span>
-                    <input type="number" min="0" step="any" className={`${inputCls} angka mt-1`} value={x.konversi_faktor || ''} onChange={(e) => set(i, 'konversi_faktor', e.target.value)} />
-                  </label>
-                )}
+                {masalah.some((m) => m.kode === 'konversi') &&
+                  (pilihanIsi(x).length ? (
+                    <div className="mt-2">
+                      <p className="mb-1 text-sm font-medium">Isi satuan ini supaya harganya bisa dibagi ke resep:</p>
+                      <IsiSatuan nama={x.nama_bahan} satuan={x.satuan} pilihan={pilihanIsi(x)} sisi="beli" nilai={x.konversi_isi ?? {}} ubah={(v) => set(i, 'konversi_isi', v)} />
+                    </div>
+                  ) : (
+                    <label className="mt-2 block text-sm">
+                      <span className="font-medium">{`1 ${x.satuan || 'satuan'} berapa ${x.satuan_dasar || 'gram'}?`}</span>
+                      <input type="number" min="0" step="any" className={`${inputCls} angka mt-1`} value={x.konversi_faktor || ''} onChange={(e) => set(i, 'konversi_faktor', e.target.value)} />
+                    </label>
+                  ))}
                 <Acuan it={x} />
               </li>
             );

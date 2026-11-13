@@ -102,7 +102,11 @@ export default function BahanDetail() {
         <Kartu>
           <h2 className="font-semibold">Harga</h2>
           <p className="angka mt-2 text-2xl font-bold">{h ? `${rupiah(h.harga)}/${h.satuan}` : 'Belum ada'}</p>
-          <p className="text-sm text-redup">Rata-rata tertimbang tiga belanja terakhir</p>
+          <p className="text-sm text-redup">
+            {b.sumber_harga === 'perkiraan'
+              ? 'Perkiraan Anda. Diganti otomatis begitu belanja bahan ini dicatat.'
+              : 'Rata-rata tertimbang tiga belanja terakhir'}
+          </p>
           {b.acuan ? (
             <div className="tepi-nota mt-4 pt-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -132,7 +136,7 @@ export default function BahanDetail() {
                   <li key={i} className="flex justify-between gap-3 py-2">
                     <span>
                       {tanggal(r.tanggal)}
-                      <span className="block text-xs text-redup">{r.nama_toko || r.sumber}</span>
+                      <span className="block text-xs text-redup">{r.nota_id ? r.nama_toko || r.sumber : 'perkiraan Anda'}</span>
                     </span>
                     <span className="angka font-semibold">{`${rupiah(x.harga)}/${x.satuan}`}</span>
                   </li>

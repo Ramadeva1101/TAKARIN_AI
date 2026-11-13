@@ -9,6 +9,7 @@ export const PILIHAN_BIAYA = [
   { nama: 'Sewa tempat', periode: 'bulan' },
   { nama: 'Gaji karyawan', periode: 'bulan' },
   { nama: 'Kemasan umum', periode: 'hari', ket: 'Plastik atau kantong yang tidak masuk resep' },
+  { nama: 'Penyusutan alat', periode: 'bulan', ket: 'Harga alat dibagi lama pakainya, misalnya kompor Rp600.000 untuk 24 bulan = Rp25.000' },
   { nama: 'Ongkos antar', periode: 'hari' },
 ];
 

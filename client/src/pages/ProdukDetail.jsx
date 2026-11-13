@@ -3,9 +3,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
 import { Chip, Galat, Judul, Kartu, Muat, Pemutar, Tombol } from '../components/ui.jsx';
-import ResepEditor, { cekResep, rapikanResep } from '../components/ResepEditor.jsx';
+import ResepEditor, { cekResep, rapikanResep, umurHari } from '../components/ResepEditor.jsx';
+import IsiSatuan, { isiKeServer } from '../components/IsiSatuan.jsx';
 
-const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar', acuan: 'harga pasar' };
+const SUMBER = { belanja: 'dari belanja', pasar: 'harga pasar', acuan: 'harga pasar', perkiraan: 'perkiraan Anda' };
+
+// Harga perkiraan yang sudah lama ditandai supaya pemilik ingat mencatat belanja.
+const teksSumber = (r) => {
+  const t = SUMBER[r.sumber_harga] || r.sumber_harga;
+  return r.sumber_harga === 'perkiraan' && umurHari(r.tanggal_harga) > 30 ? `${t}, ${umurHari(r.tanggal_harga)} hari lalu: catat belanja` : t;
+};
 
 // Rincian modal: daftar bertumpuk, satu baris per bahan, tanpa geser ke samping di HP.
 function Rincian({ p }) {
@@ -30,7 +37,7 @@ function Rincian({ p }) {
                 <span className="angka sm:hidden">
                   {r.qty} {r.satuan} ·{' '}
                 </span>
-                {r.biaya == null ? 'harga belum ada' : SUMBER[r.sumber_harga] || r.sumber_harga}
+                {r.biaya == null ? (r.masalah && r.masalah !== 'Harga belum ada' ? 'isi satuan belum diketahui' : 'harga belum ada') : teksSumber(r)}
               </span>
             </span>
             <span className="angka hidden sm:block">
@@ -146,13 +153,26 @@ function Simulasi({ p }) {
 // Bahan tanpa harga: isi perkiraan harga belinya di sini supaya modal bisa dihitung.
 const SATUAN_BELI = { g: ['kg', 'ons', 'gram'], ml: ['liter', 'ml'], butir: ['butir'], pcs: ['pcs'] };
 
-function BarisHarga({ k, satuanDasar, sesudah }) {
-  const pilihan = SATUAN_BELI[satuanDasar] || ['pcs'];
+function BarisHarga({ k, satuanDasar, satuanResep, sesudah }) {
+  // Bahan per buah dibeli dengan satuan yang sama seperti di resep (potong, bungkus).
+  const pilihan = satuanDasar === 'pcs' ? [...new Set([satuanResep, 'buah'].filter(Boolean))] : SATUAN_BELI[satuanDasar] || ['buah'];
   const [f, setF] = useState({ qty: 1, satuan: pilihan[0], harga: '' });
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState(null);
   // Harga yang tidak wajar (misal salah satuan) ditolak server dengan 409 sampai pengguna yakin.
   const [tanya, setTanya] = useState(null);
+  const [isi, setIsi] = useState({ jumlah: '', ke: '' });
+  const simpanIsi = async () => {
+    setProses(true);
+    setGalat(null);
+    try {
+      await api(`/bahan/${k.bahan_id}/isi`, { method: 'POST', body: isiKeServer({ satuan: k.satuan, pilihan: k.pilihan, sisi: 'resep', nilai: isi }) });
+      await sesudah();
+    } catch (err) {
+      setGalat(pesanGalat(err));
+      setProses(false);
+    }
+  };
   const ubahF = (perubahan) => {
     setF({ ...f, ...perubahan });
     setTanya(null);
@@ -173,7 +193,15 @@ function BarisHarga({ k, satuanDasar, sesudah }) {
   return (
     <li className="rounded-xl bg-kartu p-3">
       <p className="font-semibold capitalize">{k.nama}</p>
-      {k.alasan === 'konversi' ? (
+      {k.alasan === 'konversi' && k.pilihan?.length ? (
+        <div className="mt-2">
+          <IsiSatuan nama={k.nama} satuan={k.satuan} pilihan={k.pilihan} sisi="resep" nilai={isi} ubah={setIsi} />
+          <Tombol memuat={proses} varian="polos" className="mt-2 w-full" disabled={proses || !(Number(isi.jumlah) > 0)} onClick={simpanIsi}>
+            {proses ? 'Menyimpan' : 'Simpan'}
+          </Tombol>
+          {galat && <p className="mt-1 text-sm text-rugi">{galat}</p>}
+        </div>
+      ) : k.alasan === 'konversi' ? (
         <p className="mt-1 text-sm text-redup">
           {k.pesan}{' '}
           <Link to={`/bahan/${k.bahan_id}`} className="font-semibold text-biru">
@@ -214,7 +242,7 @@ function LengkapiHarga({ p, sesudah }) {
     <Kartu className="bg-kuning-muda">
       <h2 className="font-semibold">Lengkapi harga bahan</h2>
       <p className="mt-1 text-sm">
-        Modal {p.nama} belum bisa dihitung karena {p.kurang.length} bahan belum punya harga dan tidak ada di data pasar. Isi perkiraan harga belinya, atau{' '}
+        Modal {p.nama} belum bisa dihitung. Lengkapi {p.kurang.length} bahan di bawah: isi harga beli terakhir atau isi satuannya, atau{' '}
         <Link to="/belanja/baru" className="font-semibold text-biru">
           catat belanja
         </Link>{' '}
@@ -222,7 +250,13 @@ function LengkapiHarga({ p, sesudah }) {
       </p>
       <ul className="mt-3 flex flex-col gap-2">
         {p.kurang.map((k) => (
-          <BarisHarga key={`${k.bahan_id}-${k.alasan}`} k={k} satuanDasar={p.rincian.find((r) => r.bahan_id === k.bahan_id)?.satuan_dasar} sesudah={sesudah} />
+          <BarisHarga
+            key={`${k.bahan_id}-${k.alasan}`}
+            k={k}
+            satuanDasar={p.rincian.find((r) => r.bahan_id === k.bahan_id)?.satuan_dasar}
+            satuanResep={p.rincian.find((r) => r.bahan_id === k.bahan_id)?.satuan}
+            sesudah={sesudah}
+          />
         ))}
       </ul>
     </Kartu>
