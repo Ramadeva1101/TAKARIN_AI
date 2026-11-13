@@ -158,7 +158,9 @@ export default function BelanjaCek() {
       item.map((x, j) => {
         if (j !== i) return x;
         // Peringatan bahan (baru, mirip, konversi) tetap ada sampai namanya diputuskan.
-        const baru = { ...x, [k]: v, masalah: (x.masalah || []).filter((m) => ['bahan_baru', 'bahan_mirip', 'konversi'].includes(m.kode)) };
+        // Satuan diganti: pertanyaan isi lama tidak berlaku lagi (server memeriksa ulang saat disimpan).
+        const tetap = k === 'satuan' ? ['bahan_baru', 'bahan_mirip'] : ['bahan_baru', 'bahan_mirip', 'konversi'];
+        const baru = { ...x, [k]: v, masalah: (x.masalah || []).filter((m) => tetap.includes(m.kode)) };
         if (k === 'nama_bahan') {
           // Aturan yang sama dengan server: "cabe rawit" = "cabai rawit", tetapi "gula merah" bukan "gula pasir".
           const cocok = semuaBahan.find((b) => bandingNama(b.nama, v) === 'persis');
@@ -185,6 +187,11 @@ export default function BelanjaCek() {
     setGalat(null);
     const kurang = item.find((x) => !x.nama_bahan.trim() || !(Number(x.qty) > 0) || !x.satuan.trim() || !(Number(x.harga) > 0));
     if (kurang) return setGalat(`Lengkapi jumlah, satuan, dan harga untuk "${kurang.nama_bahan || kurang.teks_asli || 'baris kosong'}"`);
+    // Bahan yang hanya mirip namanya harus dipastikan dulu, supaya harga ceker tidak masuk ke dada ayam.
+    const mirip = item.find((x) => (x.masalah || []).some((m) => m.kode === 'bahan_mirip'));
+    if (mirip) return setGalat(`Pastikan "${mirip.nama_bahan}" memang sama dengan ${mirip.bahan_nama}, atau ganti nama bahannya.`);
+    const tanpaIsi = item.find((x) => (x.masalah || []).some((m) => m.kode === 'konversi') && !(Number(x.konversi_isi?.jumlah) > 0) && !(Number(x.konversi_faktor) > 0));
+    if (tanpaIsi) return setGalat(`Isi satuan ${tanpaIsi.satuan} untuk "${tanpaIsi.nama_bahan}" belum diisi.`);
     setProses(true);
     try {
       const r = await api(`/pembelian/${id}`, {
