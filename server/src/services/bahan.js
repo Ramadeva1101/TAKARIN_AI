@@ -1,9 +1,9 @@
 import { all, get, run } from '../lib/db.js';
 import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
-import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar } from '../domain/satuan.js';
+import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar, KEMASAN, HITUNGAN, hitungIsi, namaSatuanDasar } from '../domain/satuan.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { bandingNama, rapikanNama } from '../domain/pencocokan.js';
-import { hargaMencurigakan, hargaRataRata, selisihPersen, statusAcuan } from '../domain/harga.js';
+import { hargaMencurigakan, hargaDariRiwayat, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { acuanPerSatuanDasar, riwayatAcuan } from './hargaPasar.js';
 
 const kunci = (s) => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
@@ -32,6 +32,9 @@ export function cariAtauBuatBahan(usahaId, nama, satuanContoh) {
     satuanDasar,
     cocokkanKomoditas(n),
   );
+  // Bahan per buah ("1 potong tempe", "1 bungkus mie"): satuan pertamanya menjadi 1 buah.
+  const s = normalisasiSatuan(satuanContoh);
+  if (satuanDasar === 'pcs' && (KEMASAN.has(s) || HITUNGAN.has(s))) simpanKonversi(lastInsertRowid, s, 1);
   return get('SELECT * FROM bahan WHERE id = ?', lastInsertRowid);
 }
 
@@ -82,17 +85,18 @@ export function statusNamaResep(usaha, daftarNama, petaHargaUsaha) {
       id: bahan.id,
       nama: bahan.nama,
       satuan_dasar: bahan.satuan_dasar,
-      harga: h ? hargaTampilBahan(h.harga, bahan.satuan_dasar) : null,
+      harga: h ? hargaTampilBahan(h.harga, bahan.satuan_dasar, konversiBahan(bahan.id)) : null,
       sumber_harga: h?.sumber ?? null,
+      tanggal_harga: h?.tanggal ?? null,
     };
     return { nama: n, status: cara === 'alias' || cara === 'nama' ? 'terhubung' : 'mirip', bahan: info };
   });
 }
 
-function hargaTampilBahan(hargaPerDasar, satuanDasar) {
+function hargaTampilBahan(hargaPerDasar, satuanDasar, konversi = {}) {
   if (satuanDasar === 'g') return { harga: Math.round(hargaPerDasar * 1000), satuan: 'kg' };
   if (satuanDasar === 'ml') return { harga: Math.round(hargaPerDasar * 1000), satuan: 'liter' };
-  return { harga: Math.round(hargaPerDasar), satuan: satuanDasar };
+  return { harga: Math.round(hargaPerDasar), satuan: namaSatuanDasar(satuanDasar, konversi) };
 }
 
 /**
@@ -131,6 +135,19 @@ export function simpanAlias(usahaId, teksAsli, bahanId) {
   );
 }
 
+/**
+ * Isi kemasan atau hitungan dari jawaban pemilik: "1 papan = 10 potong", "1 kaleng = 370 gram".
+ * Salah satu satuan harus sudah diketahui isinya.
+ */
+export function aturIsi(usaha, bahanId, { dari, jumlah, ke }) {
+  const bahan = get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', bahanId, usaha.id);
+  if (!bahan) throw tidakDitemukan('Bahan');
+  const h = hitungIsi({ dari, jumlah, ke, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
+  if (!h.ok) throw new AppError(400, h.pesan);
+  for (const k of h.simpan) simpanKonversi(bahan.id, k.satuan, k.faktor);
+  return detailBahan(usaha, bahan.id);
+}
+
 export function simpanKonversi(bahanId, satuan, faktor) {
   run(
     `INSERT INTO konversi_satuan (bahan_id, satuan, faktor) VALUES (?, ?, ?)
@@ -147,9 +164,10 @@ export function konversiBahan(bahanId) {
 
 function ringkasBahan(b, usaha) {
   const riwayat = all(
-    'SELECT harga_per_satuan, tanggal, sumber, nama_toko FROM harga_bahan WHERE bahan_id = ? ORDER BY tanggal DESC, id DESC',
+    'SELECT harga_per_satuan, tanggal, sumber, nama_toko, nota_id FROM harga_bahan WHERE bahan_id = ? ORDER BY tanggal DESC, id DESC',
     b.id,
   );
+  const sendiri = hargaDariRiwayat(riwayat);
   const terakhir = riwayat[0] ?? null;
   const sebelumnya = riwayat[1] ?? null;
   const acuan = acuanPerSatuanDasar(b, usaha);
@@ -157,7 +175,9 @@ function ringkasBahan(b, usaha) {
   return {
     ...b,
     harga_terakhir: terakhir,
-    harga_rata_rata: hargaRataRata(riwayat),
+    harga_rata_rata: sendiri?.harga ?? null,
+    sumber_harga: sendiri?.sumber ?? null,
+    satuan_tampil: namaSatuanDasar(b.satuan_dasar, konversiBahan(b.id)),
     perubahan: terakhir && sebelumnya ? selisihPersen(terakhir.harga_per_satuan, sebelumnya.harga_per_satuan) : null,
     acuan,
     selisih_acuan: selisih,

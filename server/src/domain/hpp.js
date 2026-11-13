@@ -1,4 +1,4 @@
-import { keSatuanDasar } from './satuan.js';
+import { keSatuanDasar, pilihanIsi } from './satuan.js';
 import { margin, markup, hargaAman, statusMargin } from './harga.js';
 
 /**
@@ -41,7 +41,7 @@ export function hitungHppMenu({ menu, resep, hargaBahan, konversi = new Map(), b
     });
     const item = { bahan_id: r.bahan_id, nama: r.nama, qty: r.qty, satuan: r.satuan, satuan_dasar: r.satuan_dasar };
     if (!konv.ok) {
-      kurang.push({ bahan_id: r.bahan_id, nama: r.nama, alasan: 'konversi', pesan: konv.pesan });
+      kurang.push({ bahan_id: r.bahan_id, nama: r.nama, alasan: 'konversi', pesan: konv.pesan, satuan: konv.satuan, pilihan: pilihanIsi(r.satuan_dasar, konversi.get(r.bahan_id) ?? {}, konv.satuan) });
       return { ...item, biaya: null, masalah: konv.pesan };
     }
     const susut = Math.min(Math.max(Number(r.susut_persen) || 0, 0), 90) / 100;
@@ -59,6 +59,7 @@ export function hitungHppMenu({ menu, resep, hargaBahan, konversi = new Map(), b
       cara_konversi: konv.cara,
       harga_per_satuan: harga.harga,
       sumber_harga: harga.sumber,
+      tanggal_harga: harga.tanggal ?? null,
       biaya,
     };
   });

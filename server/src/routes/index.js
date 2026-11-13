@@ -136,6 +136,7 @@ router.put('/bahan/:id', validasi(S.ubahBahan), (req, res) => res.json(bahan.uba
 router.post('/bahan/cocokkan', validasi(S.cocokkanNama), (req, res) => res.json(bahan.statusNamaResep(req.usaha, req.body.nama, petaHarga(req.usaha))));
 router.post('/bahan/:id/gabung', validasi(S.gabungBahan), (req, res) => res.json(bahan.gabungBahan(req.usaha, id(req), req.body.ke_id)));
 router.post('/bahan/:id/harga', validasi(S.hargaManual), (req, res) => res.status(201).json(bahan.isiHargaManual(req.usaha, id(req), req.body)));
+router.post('/bahan/:id/isi', validasi(S.isi), (req, res) => res.json(bahan.aturIsi(req.usaha, id(req), req.body)));
 router.post('/bahan/:id/konversi', validasi(S.konversi), (req, res) => {
   bahan.detailBahan(req.usaha, id(req));
   simpanKonversi(id(req), req.body.satuan, req.body.faktor);

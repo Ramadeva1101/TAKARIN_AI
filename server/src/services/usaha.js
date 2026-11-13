@@ -40,6 +40,12 @@ export function simpanResep(usahaId, menuId, bahanList) {
       item.qty,
       item.satuan || bahan.satuan_dasar,
     );
+    if (item.harga_beli) {
+      const hb = item.harga_beli;
+      const konv = keSatuanDasar({ qty: hb.qty, satuan: hb.satuan, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
+      if (!konv.ok || !konv.nilai) throw new AppError(400, `Harga beli ${bahan.nama}: ${konv.pesan ?? 'jumlah tidak valid'}`);
+      run('INSERT INTO harga_bahan (bahan_id, harga_per_satuan, tanggal, sumber) VALUES (?, ?, ?, ?)', bahan.id, hb.harga / konv.nilai, tanggalHariIni(), 'manual');
+    }
   }
 }
 

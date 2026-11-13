@@ -1,6 +1,6 @@
 import { all, get } from '../lib/db.js';
 import { hitungHppMenu, biayaLainPerPorsi } from '../domain/hpp.js';
-import { hargaRataRata } from '../domain/harga.js';
+import { hargaDariRiwayat } from '../domain/harga.js';
 import { acuanPerSatuanDasar } from './hargaPasar.js';
 
 export function getUsahaById(usahaId) {
@@ -11,7 +11,7 @@ export function getUsahaById(usahaId) {
 export function petaHarga(usaha) {
   const bahan = all('SELECT * FROM bahan WHERE usaha_id = ?', usaha.id);
   const riwayat = all(
-    `SELECT hb.bahan_id, hb.harga_per_satuan, hb.tanggal FROM harga_bahan hb
+    `SELECT hb.bahan_id, hb.harga_per_satuan, hb.tanggal, hb.sumber, hb.nota_id FROM harga_bahan hb
      JOIN bahan b ON b.id = hb.bahan_id WHERE b.usaha_id = ? ORDER BY hb.tanggal DESC, hb.id DESC`,
     usaha.id,
   );
@@ -22,9 +22,9 @@ export function petaHarga(usaha) {
   }
   const peta = new Map();
   for (const b of bahan) {
-    const rata = hargaRataRata(perBahan.get(b.id) ?? []);
-    if (rata != null) {
-      peta.set(b.id, { harga: rata, sumber: 'belanja' });
+    const sendiri = hargaDariRiwayat(perBahan.get(b.id) ?? []);
+    if (sendiri) {
+      peta.set(b.id, sendiri);
       continue;
     }
     const acuan = acuanPerSatuanDasar(b, usaha);

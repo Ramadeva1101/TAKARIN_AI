@@ -1,7 +1,7 @@
 import { all, get, run, tx } from '../lib/db.js';
 import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
 import { rupiah, hargaTampil } from '../lib/format.js';
-import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR } from '../domain/satuan.js';
+import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR, hitungIsi, pilihanIsi, namaSatuanDasar } from '../domain/satuan.js';
 import { hargaMencurigakan, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { cocokkanBahan, cariAtauBuatBahan, simpanAlias, simpanKonversi, konversiBahan } from './bahan.js';
@@ -34,7 +34,7 @@ function analisisItem(usaha, item) {
     namaBahan: item.nama_bahan,
     konversiKhusus: bahan ? konversiBahan(bahan.id) : {},
   });
-  if (!konv.ok) masalah.push({ kode: 'konversi', pesan: konv.pesan });
+  if (!konv.ok) masalah.push({ kode: 'konversi', pesan: konv.pesan, satuan: konv.satuan, pilihan: pilihanIsi(satuanDasar, bahan ? konversiBahan(bahan.id) : {}, konv.satuan) });
   if (item.harga == null) masalah.push({ kode: 'harga_kosong', pesan: 'Harga belum terbaca. Isi harga totalnya.' });
 
   const hargaPerDasar = konv.ok && konv.nilai > 0 && item.harga != null ? item.harga / konv.nilai : null;
@@ -48,8 +48,9 @@ function analisisItem(usaha, item) {
   );
 
   const pembanding = terakhir?.harga_per_satuan ?? acuan?.harga_per_satuan_dasar;
+  const namaBuah = bahan ? namaSatuanDasar(satuanDasar, konversiBahan(bahan.id)) : undefined;
   if (hargaMencurigakan(hargaPerDasar, pembanding)) {
-    const t = hargaTampil(pembanding, satuanDasar);
+    const t = hargaTampil(pembanding, satuanDasar, namaBuah);
     masalah.push({ kode: 'harga_aneh', pesan: `Harga jauh berbeda dari biasanya (sekitar ${rupiah(t.harga)}/${t.satuan}). Cek lagi angkanya.` });
   }
   if (item.yakin != null && item.yakin < BATAS_YAKIN) masalah.push({ kode: 'yakin_rendah', pesan: 'AI kurang yakin membaca baris ini.' });
@@ -60,10 +61,10 @@ function analisisItem(usaha, item) {
     bahan_nama: bahan?.nama ?? null,
     satuan_dasar: satuanDasar,
     qty_dasar: konv.ok ? konv.nilai : null,
-    harga_satuan: hargaTampil(hargaPerDasar, satuanDasar),
-    harga_terakhir: terakhir ? { ...hargaTampil(terakhir.harga_per_satuan, satuanDasar), tanggal: terakhir.tanggal } : null,
+    harga_satuan: hargaTampil(hargaPerDasar, satuanDasar, namaBuah),
+    harga_terakhir: terakhir ? { ...hargaTampil(terakhir.harga_per_satuan, satuanDasar, namaBuah), tanggal: terakhir.tanggal } : null,
     acuan: acuan
-      ? { ...hargaTampil(acuan.harga_per_satuan_dasar, satuanDasar), wilayah: acuan.wilayah, level: acuan.level, tanggal: acuan.tanggal, sumber: acuan.sumber, kedaluwarsa: acuan.kedaluwarsa }
+      ? { ...hargaTampil(acuan.harga_per_satuan_dasar, satuanDasar, namaBuah), wilayah: acuan.wilayah, level: acuan.level, tanggal: acuan.tanggal, sumber: acuan.sumber, kedaluwarsa: acuan.kedaluwarsa }
       : null,
     selisih_acuan: selisih,
     status_acuan: statusAcuan(selisih),
@@ -177,6 +178,11 @@ export function simpan(usaha, notaId, data) {
         }
       }
       if (i.konversi_faktor) simpanKonversi(bahan.id, i.satuan, i.konversi_faktor);
+      if (i.konversi_isi) {
+        const h = hitungIsi({ dari: i.satuan, jumlah: i.konversi_isi.jumlah, ke: i.konversi_isi.ke, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
+        if (!h.ok) throw new AppError(400, `${bahan.nama}: ${h.pesan}`);
+        for (const k of h.simpan) simpanKonversi(bahan.id, k.satuan, k.faktor);
+      }
 
       const konv = keSatuanDasar({ qty: i.qty, satuan: i.satuan, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
       if (!konv.ok || !konv.nilai) throw new AppError(400, `${bahan.nama}: ${konv.pesan ?? 'jumlah tidak valid'}`);

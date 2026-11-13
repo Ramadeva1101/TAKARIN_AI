@@ -67,7 +67,7 @@ describe('menu dan belanja bertemu di bahan yang sama', () => {
     const r = await api('POST', '/bahan/cocokkan', { nama: ['cabe rawit', 'dada ayam', 'gula merah', ''] });
     expect(r.status).toBe(200);
     const [cabe, dada, gula, kosong] = r.data;
-    expect(cabe).toMatchObject({ status: 'terhubung', bahan: { nama: 'cabai rawit', harga: { harga: 70000, satuan: 'kg' }, sumber_harga: 'belanja' } });
+    expect(cabe).toMatchObject({ status: 'terhubung', bahan: { nama: 'cabai rawit', harga: { harga: 70000, satuan: 'kg' }, sumber_harga: 'perkiraan' } });
     expect(dada).toMatchObject({ status: 'mirip', bahan: { nama: 'ayam' } });
     expect(gula.status).toBe('baru');
     expect(kosong.status).toBe('kosong');
@@ -154,9 +154,60 @@ describe('menu dan belanja bertemu di bahan yang sama', () => {
     const ayam = await bahanBernama('ayam');
     const detail = (await api('GET', `/bahan/${ayam.id}`)).data;
     expect(detail.riwayat.map((r) => r.nama_toko)).toEqual(expect.arrayContaining(['Pasar Badung', 'Toko Ayam Pak Wayan']));
-    // Tiga harga terakhir (terbaru dulu): 36.000 saat daftar (hari ini), 30.000 (2 Nov), 40.000 (1 Nov), bobot 3:2:1.
-    const harapan = (36000 * 3 + 30000 * 2 + 40000 * 1) / 6;
+    // Harga saat daftar (36.000, tanpa nota) hanya perkiraan dan tidak dipakai lagi setelah ada belanja.
+    // Dua belanja (terbaru dulu): 30.000 (2 Nov), 40.000 (1 Nov), bobot 2:1.
+    const harapan = (30000 * 2 + 40000 * 1) / 3;
     const status = (await api('POST', '/bahan/cocokkan', { nama: ['ayam'] })).data[0];
     expect(status.bahan.harga.harga).toBe(Math.round(harapan));
+    expect(status.bahan.sumber_harga).toBe('belanja');
+  });
+
+  it('bahan per buah: harga beli di form menu dan isi kemasan dari belanja', async () => {
+    // Tempe ditulis per potong: dihitung per potong, harga beli "Rp5.000 untuk 10 potong" langsung jadi modal.
+    const m = await api('POST', '/produk', {
+      nama: 'Tempe Goreng',
+      harga_jual: 2000,
+      bahan: [{ nama: 'tempe', qty: 1, satuan: 'potong', harga_beli: { harga: 5000, qty: 10, satuan: 'potong' } }],
+    });
+    expect(m.status).toBe(201);
+    const tempe = await bahanBernama('tempe');
+    expect(tempe.satuan_dasar).toBe('pcs');
+    const d = (await api('GET', `/produk/${m.data.id}`)).data;
+    const baris = d.rincian.find((r) => r.nama === 'tempe');
+    expect(baris.biaya).toBeCloseTo(500);
+    expect(baris.sumber_harga).toBe('perkiraan');
+
+    // Belanja per papan: belum tahu isinya, jadi ditanya dengan pilihan "potong".
+    const draf = await api('POST', '/pembelian/manual', { item: [{ nama_bahan: 'tempe', qty: 2, satuan: 'papan', harga: 12000 }] });
+    const masalah = draf.data.item[0].masalah.find((x) => x.kode === 'konversi');
+    expect(masalah.pilihan.map((p) => p.satuan)).toContain('potong');
+    const simpan = await api('PUT', `/pembelian/${draf.data.id}`, {
+      item: draf.data.item.map((i) => ({ nama_bahan: i.nama_bahan, bahan_id: i.bahan_id, qty: i.qty, satuan: i.satuan, harga: i.harga, konversi_isi: { jumlah: 10, ke: 'potong' } })),
+    });
+    expect(simpan.status).toBe(200);
+    // 2 papan = 20 potong seharga 12.000 → Rp600 per potong; perkiraan tidak dipakai lagi.
+    const d2 = (await api('GET', `/produk/${m.data.id}`)).data;
+    const baris2 = d2.rincian.find((r) => r.nama === 'tempe');
+    expect(baris2.biaya).toBeCloseTo(600);
+    expect(baris2.sumber_harga).toBe('belanja');
+  });
+
+  it('takaran resep yang belum dikenal bisa dijawab dengan satuan pemilik', async () => {
+    // Susu kental manis dibeli per kaleng: bahan dihitung per kaleng.
+    await api('POST', '/produk', { nama: 'Susu Panas', harga_jual: 6000, bahan: [{ nama: 'susu kental manis', qty: 1, satuan: 'kaleng', harga_beli: { harga: 12000, qty: 1, satuan: 'kaleng' } }] });
+    // Menu lain memakai sdm: belum diketahui, ditanya dengan pilihan "kaleng".
+    const m = await api('POST', '/produk', { nama: 'Es Kopi Susu', harga_jual: 12000, bahan: [{ nama: 'susu kental manis', qty: 2, satuan: 'sdm' }] });
+    const d = (await api('GET', `/produk/${m.data.id}`)).data;
+    expect(d.kurang[0]).toMatchObject({ alasan: 'konversi', satuan: 'sdm' });
+    expect(d.kurang[0].pilihan.map((p) => p.satuan)).toContain('kaleng');
+    const skm = await bahanBernama('susu kental manis');
+    const r = await api('POST', `/bahan/${skm.id}/isi`, { dari: 'kaleng', jumlah: 18, ke: 'sdm' });
+    expect(r.status).toBe(200);
+    const d2 = (await api('GET', `/produk/${m.data.id}`)).data;
+    expect(d2.lengkap).toBe(true);
+    expect(d2.rincian[0].biaya).toBeCloseTo((12000 * 2) / 18);
+    // Dua satuan yang sama-sama belum dikenal ditolak dengan pesan jelas.
+    const r2 = await api('POST', `/bahan/${skm.id}/isi`, { dari: 'dus', jumlah: 4, ke: 'renceng' });
+    expect(r2.status).toBe(400);
   });
 });

@@ -30,6 +30,10 @@ const bahanResep = z.object({
   nama: z.string().trim().min(1).max(60),
   qty,
   satuan: z.string().trim().max(20).nullish(),
+  // Harga beli terakhir untuk bahan yang belum punya harga: "Rp5.000 untuk 10 potong".
+  harga_beli: z
+    .object({ harga: z.coerce.number().positive('Harga beli harus lebih dari 0'), qty: z.coerce.number().positive('Jumlah beli harus lebih dari 0'), satuan: z.string().trim().min(1).max(20) })
+    .nullish(),
 });
 
 export const produk = z.object({
@@ -81,6 +85,8 @@ export const simpanBelanja = z.object({
         satuan: z.string().trim().min(1).max(20),
         harga: z.coerce.number().positive(),
         konversi_faktor: z.coerce.number().positive().nullish(),
+        // "1 papan = 10 potong": isi satuan belanja dalam satuan lain yang sudah dikenal.
+        konversi_isi: z.object({ jumlah: z.coerce.number().positive(), ke: z.string().trim().min(1).max(20) }).nullish(),
       }),
     )
     .min(1),
@@ -98,6 +104,7 @@ export const ubahBahan = z.object({
   susut_persen: z.coerce.number().min(0).max(90).optional(),
 });
 
+export const isi = z.object({ dari: z.string().trim().min(1).max(20), jumlah: z.coerce.number().positive('Jumlah harus lebih dari 0'), ke: z.string().trim().min(1).max(20) });
 export const konversi = z.object({ satuan: z.string().trim().min(1).max(20), faktor: z.coerce.number().positive() });
 
 export const simulasi = z.object({

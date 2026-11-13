@@ -41,6 +41,21 @@ export function hargaRataRata(riwayat, n = 3) {
   return total / bobotTotal;
 }
 
+/**
+ * Harga bahan dari riwayatnya. Belanja yang tercatat (punya nota) selalu didahulukan; harga yang
+ * diisi sendiri tanpa nota hanya dipakai selama belum ada belanja, dan ditandai sebagai perkiraan.
+ * @returns {{harga:number, sumber:'belanja'|'perkiraan', tanggal:string} | null}
+ */
+export function hargaDariRiwayat(riwayat) {
+  const belanja = riwayat.filter((r) => r.nota_id != null);
+  if (belanja.length) return { harga: hargaRataRata(belanja), sumber: 'belanja', tanggal: terbaru(belanja).tanggal };
+  if (!riwayat.length) return null;
+  const t = terbaru(riwayat);
+  return { harga: t.harga_per_satuan, sumber: 'perkiraan', tanggal: t.tanggal };
+}
+
+const terbaru = (riwayat) => [...riwayat].sort((a, b) => (a.tanggal < b.tanggal ? 1 : a.tanggal > b.tanggal ? -1 : 0))[0];
+
 export function selisihPersen(nilai, acuan) {
   if (!acuan) return null;
   return (nilai - acuan) / acuan;

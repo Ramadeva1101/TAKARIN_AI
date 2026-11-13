@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { keSatuanDasar, normalisasiSatuan } from '../src/domain/satuan.js';
-import { margin, hargaAman, statusMargin, hargaRataRata, statusAcuan, hargaMencurigakan } from '../src/domain/harga.js';
+import { keSatuanDasar, normalisasiSatuan, tebakSatuanDasar, hitungIsi } from '../src/domain/satuan.js';
+import { margin, hargaAman, statusMargin, hargaRataRata, statusAcuan, hargaMencurigakan, hargaDariRiwayat } from '../src/domain/harga.js';
 import { hitungHppMenu, biayaLainPerPorsi } from '../src/domain/hpp.js';
 import { opsiPerbaikan } from '../src/domain/rekomendasi.js';
 import { hitungPromo } from '../src/domain/promo.js';
@@ -152,5 +152,32 @@ describe('komoditas', () => {
   it('mengubah harga acuan ke satuan dasar', () => {
     expect(acuanKeSatuanDasar(62000, 'kg', 'g')).toBe(62);
     expect(acuanKeSatuanDasar(32000, 'kg', 'butir')).toBe(2000);
+  });
+});
+
+describe('satuan kemasan dan hitungan', () => {
+  it('bahan yang ditulis per kemasan atau per potong dihitung per buah', () => {
+    expect(tebakSatuanDasar('tempe', 'potong')).toBe('pcs');
+    expect(tebakSatuanDasar('mie instan', 'bungkus')).toBe('pcs');
+    expect(tebakSatuanDasar('serai', 'batang')).toBe('pcs');
+    expect(tebakSatuanDasar('ayam', 'potong')).toBe('g');
+    expect(tebakSatuanDasar('santan', 'bungkus')).toBe('ml');
+  });
+
+  it('isi kemasan dihitung dari satuan yang sudah dikenal, ke dua arah', () => {
+    expect(hitungIsi({ dari: 'papan', jumlah: 10, ke: 'potong', satuanDasar: 'pcs', namaBahan: 'tempe', konversiKhusus: { potong: 1 } })).toEqual({ ok: true, simpan: [{ satuan: 'papan', faktor: 10 }] });
+    expect(hitungIsi({ dari: 'papan', jumlah: 10, ke: 'potong', satuanDasar: 'pcs', namaBahan: 'tempe', konversiKhusus: { papan: 1 } })).toEqual({ ok: true, simpan: [{ satuan: 'potong', faktor: 0.1 }] });
+    expect(hitungIsi({ dari: 'kaleng', jumlah: 370, ke: 'gram', satuanDasar: 'g', namaBahan: 'susu kental manis' }).simpan[0].faktor).toBe(370);
+    expect(hitungIsi({ dari: 'dus', jumlah: 4, ke: 'renceng', satuanDasar: 'pcs', namaBahan: 'bumbu', konversiKhusus: { sachet: 1 } }).ok).toBe(false);
+  });
+
+  it('kemasan tanpa isi tidak ditebak sebagai 1 buah', () => {
+    expect(keSatuanDasar({ qty: 1, satuan: 'pak', satuanDasar: 'pcs', namaBahan: 'kertas nasi' }).ok).toBe(false);
+  });
+
+  it('harga perkiraan hanya dipakai selama belum ada belanja', () => {
+    const perkiraan = { harga_per_satuan: 10, tanggal: '2026-11-10', nota_id: null };
+    expect(hargaDariRiwayat([perkiraan])).toMatchObject({ harga: 10, sumber: 'perkiraan' });
+    expect(hargaDariRiwayat([perkiraan, { harga_per_satuan: 12, tanggal: '2026-11-01', nota_id: 3 }])).toMatchObject({ harga: 12, sumber: 'belanja' });
   });
 });
