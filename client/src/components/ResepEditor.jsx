@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef } from 'react';
 import { Plus, Trash } from '@phosphor-icons/react';
-import { Field, Tombol, inputCls } from './ui.jsx';
+import { Field, InputRupiah, Tombol, inputCls } from './ui.jsx';
 
 const kecil = inputCls.replace('w-full', 'shrink-0');
 import { api, rupiah } from '../lib/api.js';
@@ -30,7 +30,7 @@ function HargaBeli({ b, ubah }) {
       <p>Harga beli terakhir {b.nama.trim()} (boleh kira-kira, nanti diganti otomatis saat Anda catat belanja):</p>
       <div className="mt-1.5 flex flex-wrap items-center gap-2">
         <span>Rp</span>
-        <input aria-label={`Harga beli ${b.nama}`} type="number" inputMode="numeric" min="0" placeholder="5000" className={`${kecil} angka w-28`} value={hb.harga} onChange={(e) => set({ harga: e.target.value })} />
+        <InputRupiah aria-label={`Harga beli ${b.nama}`} placeholder="5.000" className={`${kecil} angka w-28`} value={hb.harga} onChange={(e) => set({ harga: e.target.value })} />
         <span>untuk</span>
         <input aria-label={`Jumlah beli ${b.nama}`} type="number" inputMode="decimal" min="0" step="any" className={`${kecil} angka w-20`} value={hb.qty} onChange={(e) => set({ qty: e.target.value })} />
         <select aria-label={`Satuan beli ${b.nama}`} className={`${kecil} w-28`} value={hb.satuan} onChange={(e) => set({ satuan: e.target.value })}>
@@ -148,7 +148,7 @@ export default function ResepEditor({ value, onChange }) {
     <div className="flex flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <Field label="Nama menu" value={value.nama} onChange={(e) => set('nama', e.target.value)} className="sm:col-span-1" />
-        <Field label="Harga jual (Rp)" type="number" inputMode="numeric" min="0" value={value.harga_jual ?? ''} onChange={(e) => set('harga_jual', e.target.value)} />
+        <Field label="Harga jual (Rp)" rupiah value={value.harga_jual ?? ''} onChange={(e) => set('harga_jual', e.target.value)} />
         <Field
           label="Resep ini jadi berapa porsi"
           type="number"

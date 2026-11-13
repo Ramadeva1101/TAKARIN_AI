@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
-import { Camera, Microphone, TextAa, PencilSimple } from '@phosphor-icons/react';
+import { Camera, Images, Microphone, TextAa, PencilSimple } from '@phosphor-icons/react';
 import { api, pesanGalat } from '../lib/api.js';
-import { Field, Judul, Kartu, Tombol, inputCls } from '../components/ui.jsx';
+import { Field, InputRupiah, Judul, Kartu, Tombol, inputCls } from '../components/ui.jsx';
 import Dikte from '../components/Dikte.jsx';
 
 const CARA = [
@@ -17,25 +17,30 @@ function Foto({ kirim, proses }) {
   const [file, setFile] = useState(null);
   const [pratinjau, setPratinjau] = useState(null);
   useEffect(() => () => pratinjau && URL.revokeObjectURL(pratinjau), [pratinjau]);
+  const pilih = (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    setFile(f);
+    setPratinjau(URL.createObjectURL(f));
+  };
   return (
     <>
       <p className="text-sm text-redup">Foto nota dari atas, terang, dan seluruh baris terlihat. Hasil bacaan bisa Anda periksa sebelum disimpan.</p>
-      <label className="mt-4 flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-garis bg-dasar p-4 text-center hover:border-biru">
-        {pratinjau ? <img src={pratinjau} alt="Pratinjau nota" className="max-h-72 rounded-lg object-contain" /> : <Camera size={32} className="text-redup" aria-hidden />}
-        <span className="text-sm font-semibold text-biru">{file ? 'Ganti foto' : 'Ambil atau pilih foto nota'}</span>
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="sr-only"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (!f) return;
-            setFile(f);
-            setPratinjau(URL.createObjectURL(f));
-          }}
-        />
-      </label>
+      {pratinjau && <img src={pratinjau} alt="Pratinjau nota" className="mt-4 max-h-72 rounded-lg border border-garis object-contain" />}
+      {/* Dua pilihan: "capture" langsung membuka kamera di HP, tanpanya HP menawarkan galeri dan berkas. */}
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {[
+          { label: file ? 'Foto ulang' : 'Ambil foto', ikon: Camera, kamera: true },
+          { label: file ? 'Pilih foto lain' : 'Pilih dari galeri', ikon: Images, kamera: false },
+        ].map(({ label, ikon: Ikon, kamera }) => (
+          <label key={label} className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-garis bg-dasar p-3 text-center hover:border-biru focus-within:border-biru">
+            <Ikon size={28} className="text-biru" aria-hidden />
+            <span className="text-sm font-semibold text-biru">{label}</span>
+            <input type="file" accept="image/*" {...(kamera ? { capture: 'environment' } : {})} className="sr-only" onChange={pilih} />
+          </label>
+        ))}
+      </div>
       <Tombol memuat={proses}
         className="mt-4"
         disabled={!file || proses}
@@ -110,7 +115,7 @@ function Manual({ kirim, proses }) {
               <input aria-label={`Bahan ${i + 1}`} placeholder="bawang merah" className={`${inputCls} col-span-2 sm:col-span-1`} value={x.nama_bahan} onChange={(e) => set(i, 'nama_bahan', e.target.value)} />
               <input aria-label={`Jumlah ${i + 1}`} placeholder="1" type="number" min="0" step="any" className={`${inputCls} angka`} value={x.qty} onChange={(e) => set(i, 'qty', e.target.value)} />
               <input aria-label={`Satuan ${i + 1}`} placeholder="kg" className={inputCls} value={x.satuan} onChange={(e) => set(i, 'satuan', e.target.value)} />
-              <input aria-label={`Harga total ${i + 1}`} placeholder="Rp" type="number" min="0" className={`${inputCls} angka col-span-2 sm:col-span-1`} value={x.harga} onChange={(e) => set(i, 'harga', e.target.value)} />
+              <InputRupiah aria-label={`Harga total ${i + 1}`} placeholder="Rp" className={`${inputCls} angka col-span-2 sm:col-span-1`} value={x.harga} onChange={(e) => set(i, 'harga', e.target.value)} />
             </div>
           ))}
         </div>

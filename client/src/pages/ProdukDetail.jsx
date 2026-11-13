@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah } from '../lib/api.js';
-import { Chip, Galat, Judul, Kartu, Muat, Pemutar, Tombol } from '../components/ui.jsx';
+import { Chip, Galat, InputRupiah, Judul, Kartu, Muat, Pemutar, Tombol } from '../components/ui.jsx';
 import ResepEditor, { cekResep, rapikanResep, umurHari } from '../components/ResepEditor.jsx';
 import IsiSatuan, { isiKeServer } from '../components/IsiSatuan.jsx';
 
@@ -217,7 +217,7 @@ function BarisHarga({ k, satuanDasar, satuanResep, sesudah }) {
                 <option key={s}>{s}</option>
               ))}
             </select>
-            <input aria-label={`Harga ${k.nama} (Rp)`} type="number" min="0" inputMode="numeric" placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => ubahF({ harga: e.target.value })} />
+            <InputRupiah aria-label={`Harga ${k.nama} (Rp)`} placeholder="Harga Rp" className="angka min-h-11 rounded-lg border border-garis px-2 text-sm" value={f.harga} onChange={(e) => ubahF({ harga: e.target.value })} />
             <Tombol memuat={proses} varian="polos" className="col-span-3" disabled={proses || !(Number(f.harga) > 0) || !(Number(f.qty) > 0)} onClick={() => simpan()}>
               {proses ? 'Menyimpan' : 'Simpan'}
             </Tombol>

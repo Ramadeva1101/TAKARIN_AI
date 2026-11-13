@@ -34,9 +34,29 @@ export function Tombol({ varian = 'utama', className = '', to, memuat = false, d
   );
 }
 
-export function Field({ label, hint, error, as = 'input', className = '', children, ...p }) {
+/**
+ * Isian rupiah dengan titik ribuan ("500.000") supaya tidak salah ketik jumlah nol.
+ * Nilai yang dikirim ke onChange tetap angka polos tanpa titik ("500000"), jadi pemanggil
+ * cukup memakai e.target.value seperti input biasa.
+ */
+export function InputRupiah({ value, onChange, ...p }) {
+  const angka = typeof value === 'number' ? String(Math.round(value)) : String(value ?? '').replace(/\D/g, '');
+  const tampil = angka ? Number(angka).toLocaleString('id-ID') : '';
+  return (
+    <input
+      {...p}
+      type="text"
+      inputMode="numeric"
+      autoComplete="off"
+      value={tampil}
+      onChange={(e) => onChange?.({ target: { value: e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '') } })}
+    />
+  );
+}
+
+export function Field({ label, hint, error, as = 'input', rupiah = false, className = '', children, ...p }) {
   const id = useId();
-  const Tag = as;
+  const Tag = rupiah ? InputRupiah : as;
   return (
     <div className={className}>
       <label htmlFor={id} className="mb-1 block text-sm font-medium">

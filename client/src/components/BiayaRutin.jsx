@@ -1,4 +1,5 @@
 import { Plus, Trash } from '@phosphor-icons/react';
+import { InputRupiah } from './ui.jsx';
 
 // Pilihan cepat biaya di luar bahan. Usaha memilih yang dipakai saja; semuanya bisa diganti nama.
 export const PILIHAN_BIAYA = [
@@ -19,18 +20,19 @@ export function BarisBiaya({ b, i, ubah, hapus }) {
   const ket = PILIHAN_BIAYA.find((p) => kunci(p.nama) === kunci(b.nama))?.ket;
   return (
     <div className="rounded-xl border border-garis bg-kartu p-2.5 sm:border-0 sm:bg-transparent sm:p-0">
-      <div className="grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_8rem_7rem_2.75rem]">
-        <input aria-label={`Nama biaya ${i + 1}`} placeholder="Nama biaya" className="col-span-2 min-h-11 rounded-lg border border-garis bg-kartu px-3 text-sm outline-none focus:border-biru sm:col-span-1" value={b.nama} onChange={(e) => ubah({ ...b, nama: e.target.value })} />
-        <div className="col-span-2 grid grid-cols-[1fr_7rem_2.75rem] gap-2 sm:contents">
-          <input aria-label={`Nominal biaya ${i + 1}`} placeholder="Rp" type="number" min="0" inputMode="numeric" className="angka min-h-11 rounded-lg border border-garis bg-kartu px-3 text-sm outline-none focus:border-biru" value={b.nominal ?? ''} onChange={(e) => ubah({ ...b, nominal: e.target.value })} />
+      {/* HP: nama dan tombol hapus sebaris, nominal dan periode di bawahnya. Layar lebar: satu baris. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2 sm:grid-cols-[minmax(0,1fr)_8rem_7rem_2.75rem]">
+        <input aria-label={`Nama biaya ${i + 1}`} placeholder="Nama biaya" className="min-h-11 rounded-lg border border-garis bg-kartu px-3 text-sm outline-none focus:border-biru" value={b.nama} onChange={(e) => ubah({ ...b, nama: e.target.value })} />
+        <button type="button" aria-label={`Hapus biaya ${b.nama || i + 1}`} onClick={hapus} className="flex size-11 items-center justify-center rounded-lg text-redup hover:bg-rugi-muda hover:text-rugi sm:order-last">
+          <Trash size={18} aria-hidden />
+        </button>
+        <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_7rem] gap-2 sm:contents">
+          <InputRupiah aria-label={`Nominal biaya ${i + 1}`} placeholder="Rp" className="angka min-h-11 min-w-0 rounded-lg border border-garis bg-kartu px-3 text-sm outline-none focus:border-biru" value={b.nominal ?? ''} onChange={(e) => ubah({ ...b, nominal: e.target.value })} />
           <select aria-label={`Periode biaya ${i + 1}`} className="min-h-11 rounded-lg border border-garis bg-kartu px-2 text-sm outline-none focus:border-biru" value={b.periode} onChange={(e) => ubah({ ...b, periode: e.target.value })}>
             <option value="hari">per hari</option>
             <option value="bulan">per bulan</option>
             <option value="porsi">per porsi</option>
           </select>
-          <button type="button" aria-label={`Hapus biaya ${b.nama || i + 1}`} onClick={hapus} className="flex size-11 items-center justify-center rounded-lg text-redup hover:bg-rugi-muda hover:text-rugi">
-            <Trash size={18} aria-hidden />
-          </button>
         </div>
       </div>
       {ket && <p className="mt-1 px-1 text-xs text-redup">{ket}</p>}

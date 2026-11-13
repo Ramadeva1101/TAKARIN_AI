@@ -360,7 +360,7 @@ export default function Promo() {
                   </ul>
                 </details>
               )}
-              <Field className="mt-4 max-w-xs" label="Biaya kemasan paket (Rp)" type="number" min="0" inputMode="numeric" value={kemasan} onChange={(e) => setKemasan(e.target.value)} hint="Kotak atau kantong khusus paket, kalau ada." />
+              <Field className="mt-4 max-w-xs" label="Biaya kemasan paket (Rp)" rupiah value={kemasan} onChange={(e) => setKemasan(e.target.value)} hint="Kotak atau kantong khusus paket, kalau ada." />
             </Langkah>
 
             {hasil && (
@@ -398,9 +398,7 @@ export default function Promo() {
                 <Field
                   className="mt-4 max-w-xs"
                   label="Atau tentukan sendiri (Rp)"
-                  type="number"
-                  min="0"
-                  inputMode="numeric"
+                  rupiah
                   value={harga}
                   onChange={(e) => {
                     setHarga(e.target.value);

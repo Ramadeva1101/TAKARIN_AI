@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Trash, WarningCircle } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
-import { Chip, Field, Galat, Judul, Kartu, Muat, Tombol, inputCls } from '../components/ui.jsx';
+import { Chip, Field, Galat, InputRupiah, Judul, Kartu, Muat, Tombol, inputCls } from '../components/ui.jsx';
 import { bandingNama } from '../lib/cocok.js';
 import IsiSatuan from '../components/IsiSatuan.jsx';
 
@@ -266,7 +266,7 @@ export default function BelanjaCek() {
                   <input aria-label={`Nama bahan ${i + 1}`} list="daftar-bahan" className={`${inputCls} col-span-2 sm:col-span-1`} value={x.nama_bahan} onChange={(e) => set(i, 'nama_bahan', e.target.value)} />
                   <input aria-label={`Jumlah ${i + 1}`} type="number" min="0" step="any" className={`${inputCls} angka`} value={x.qty} onChange={(e) => set(i, 'qty', e.target.value)} />
                   <input aria-label={`Satuan ${i + 1}`} className={inputCls} value={x.satuan} onChange={(e) => set(i, 'satuan', e.target.value)} />
-                  <input aria-label={`Harga total ${i + 1}`} type="number" min="0" placeholder="Rp" className={`${inputCls} angka`} value={x.harga} onChange={(e) => set(i, 'harga', e.target.value)} />
+                  <InputRupiah aria-label={`Harga total ${i + 1}`} placeholder="Rp" className={`${inputCls} angka`} value={x.harga} onChange={(e) => set(i, 'harga', e.target.value)} />
                   <button
                     type="button"
                     aria-label={`Hapus baris ${x.nama_bahan || i + 1}`}
