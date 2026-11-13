@@ -61,7 +61,12 @@ function Rincian({ p }) {
   );
 }
 
-function Simulasi({ p }) {
+// Angka takaran yang enak dibaca: 80, 1,5, 0,25.
+const angkaTakaran = (n) => Number(n.toFixed(n < 10 ? 2 : 0)).toLocaleString('id-ID');
+
+// Coba-coba harga jual dan takaran bahan, lalu lihat untungnya. Tidak disimpan sampai pemilik memilih
+// "Pakai takaran ini". Takaran adalah keputusan yang bisa diambil pemilik; harga bahan tidak.
+function Simulasi({ p, sesudah }) {
   const [harga, setHarga] = useState(p.harga_jual);
   // Rentang geser: dari sekitar modal sampai 1,6x harga jual (minimal 1,5x modal). Langkah mengikuti besar harga.
   const langkahHarga = p.harga_jual < 5000 ? 100 : p.harga_jual < 20000 ? 250 : 500;
@@ -74,7 +79,10 @@ function Simulasi({ p }) {
   const [faktor, setFaktor] = useState({});
   const [hasil, setHasil] = useState(null);
   const [galat, setGalat] = useState(null);
-  const bahanUtama = [...p.rincian].filter((r) => r.biaya).sort((a, b) => b.biaya - a.biaya).slice(0, 3);
+  const [menyimpan, setMenyimpan] = useState(false);
+  // Bahan dengan biaya terbesar paling berpengaruh kalau takarannya diubah.
+  const bahanUtama = [...p.rincian].filter((r) => r.biaya).sort((a, b) => b.biaya - a.biaya).slice(0, 4);
+  const berubah = Object.values(faktor).some((f) => f !== 1) || harga !== p.harga_jual;
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -88,10 +96,26 @@ function Simulasi({ p }) {
     return () => clearTimeout(t);
   }, [p.id, harga, faktor]);
 
+  const pakai = async () => {
+    if (!window.confirm(`Simpan harga jual ${rupiah(harga)} dan takaran baru ke resep ${p.nama}?`)) return;
+    setMenyimpan(true);
+    setGalat(null);
+    try {
+      const bahan = p.resep.map((r) => ({ bahan_id: r.bahan_id, nama: r.nama, qty: Number((r.qty * (faktor[r.bahan_id] ?? 1)).toFixed(3)), satuan: r.satuan }));
+      await api(`/produk/${p.id}`, { method: 'PUT', body: { nama: p.nama, harga_jual: Number(harga), porsi_per_batch: p.porsi_per_batch, bahan } });
+      await sesudah();
+    } catch (err) {
+      setGalat(pesanGalat(err));
+      setMenyimpan(false);
+    }
+  };
+
   return (
     <Kartu>
-      <h2 className="font-semibold">Coba-coba harga</h2>
-      <p className="mb-4 text-sm text-redup">Geser untuk melihat untung kalau harga jual atau harga bahan berubah. Tidak disimpan.</p>
+      <h2 className="font-semibold">Coba-coba harga dan takaran</h2>
+      <p className="mb-4 text-sm text-redup">
+        Geser harga jual, atau kurangi takaran bahan yang paling mahal, lalu lihat untungnya. Misalnya nasi dikurangi sedikit tanpa mengurangi lauk. Tidak disimpan sebelum Anda pilih.
+      </p>
       <label className="block text-sm font-medium" htmlFor="sim-harga">
         Harga jual: <span className="angka">{rupiah(harga)}</span>
       </label>
@@ -109,14 +133,17 @@ function Simulasi({ p }) {
         const f = faktor[b.bahan_id] ?? 1;
         return (
           <div key={b.bahan_id} className="mt-2">
-            <label className="block text-sm font-medium capitalize" htmlFor={`sim-${b.bahan_id}`}>
-              Harga {b.nama}: <span className="angka">{f === 1 ? 'tetap' : `${f > 1 ? 'naik' : 'turun'} ${Math.round(Math.abs(f - 1) * 100)}%`}</span>
+            <label className="block text-sm font-medium" htmlFor={`sim-${b.bahan_id}`}>
+              <span className="capitalize">{b.nama}</span>:{' '}
+              <span className="angka">
+                {f === 1 ? `${angkaTakaran(b.qty)} ${b.satuan} (tetap)` : `${angkaTakaran(b.qty)} → ${angkaTakaran(b.qty * f)} ${b.satuan} (${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)}%)`}
+              </span>
             </label>
             <input
               id={`sim-${b.bahan_id}`}
               type="range"
               min="0.5"
-              max="2"
+              max="1.5"
               step="0.05"
               value={f}
               onChange={(e) => setFaktor({ ...faktor, [b.bahan_id]: Number(e.target.value) })}
@@ -140,11 +167,19 @@ function Simulasi({ p }) {
           <p className="angka text-lg font-bold">{p.lengkap ? rupiah(harga - (hasil?.hpp ?? p.hpp)) : '–'}</p>
         </div>
       </div>
-      {hasil && (
-        <div className="mt-3">
-          <Chip status={hasil.status} />
-        </div>
-      )}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {hasil && <Chip status={hasil.status} />}
+        {berubah && (
+          <>
+            <Tombol varian="garis" memuat={menyimpan} onClick={pakai}>
+              Pakai harga dan takaran ini
+            </Tombol>
+            <button type="button" onClick={() => { setFaktor({}); setHarga(p.harga_jual); }} className="min-h-11 text-sm font-semibold text-redup hover:text-tinta">
+              Kembalikan
+            </button>
+          </>
+        )}
+      </div>
       {galat && <p className="mt-2 text-sm text-rugi">{galat}</p>}
     </Kartu>
   );
@@ -443,7 +478,7 @@ export default function ProdukDetail() {
             </div>
           </div>
           <div className="mt-4">
-            <Simulasi key={`${versi}-${p.harga_jual}`} p={p} />
+            <Simulasi key={`${versi}-${p.harga_jual}`} p={p} sesudah={async () => { await muat(); setVersi((v) => v + 1); }} />
           </div>
         </>
       )}
