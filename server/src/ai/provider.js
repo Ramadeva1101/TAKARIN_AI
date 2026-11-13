@@ -35,7 +35,7 @@ function kelontong() {
 
 let klienSuara = null;
 function groq() {
-  if (!process.env.GROQ_API_KEY) throw new AiError('GROQ_API_KEY belum diisi di server/.env');
+  if (!process.env.GROQ_API_KEY) throw new AiError('Pengubah suara ke teks belum aktif di server ini. Ketik saja belanjaannya.');
   klienSuara ??= new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 60_000, maxRetries: 1 });
   return klienSuara;
 }
