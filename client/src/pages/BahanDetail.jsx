@@ -159,7 +159,7 @@ export default function BahanDetail() {
                     <option value="g">gram</option>
                     <option value="ml">ml</option>
                     <option value="butir">butir</option>
-                    <option value="pcs">pcs</option>
+                    <option value="pcs">dihitung per buah</option>
                   </select>
                 )}
               </Field>

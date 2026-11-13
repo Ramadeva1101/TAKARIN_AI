@@ -242,4 +242,16 @@ describe('menu dan belanja bertemu di bahan yang sama', () => {
     for (let i = 0; i < 11; i++) kode = (await api('POST', '/auth/masuk', { email: 'cocok@contoh.id', password: `salah${i}` })).status;
     expect(kode).toBe(429);
   });
+
+  it('sayur per ikat: diganti ditimbang tidak menyisakan isi tebakan', async () => {
+    const draf = await api('POST', '/pembelian/manual', { item: [{ nama_bahan: 'kangkung', qty: 2, satuan: 'ikat', harga: 6000 }] });
+    expect(draf.data.item[0].satuan_dasar).toBe('pcs');
+    const s = await api('PUT', `/pembelian/${draf.data.id}`, { item: [{ nama_bahan: 'kangkung', bahan_id: null, satuan_dasar: 'g', qty: 2, satuan: 'ikat', harga: 6000, konversi_faktor: 250 }] });
+    expect(s.status).toBe(200);
+    const kangkung = (await api('GET', `/bahan/${(await bahanBernama('kangkung')).id}`)).data;
+    expect(kangkung.satuan_dasar).toBe('g');
+    expect(kangkung.konversi).toEqual({ ikat: 250 });
+    // 2 ikat = 500 g seharga 6.000 → Rp12/g = Rp12.000/kg.
+    expect(Math.round(kangkung.harga_rata_rata * 1000)).toBe(12000);
+  });
 });

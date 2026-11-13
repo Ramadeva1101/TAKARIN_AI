@@ -10,12 +10,19 @@ import IsiSatuan from '../components/IsiSatuan.jsx';
 // Satuan yang sudah dikenal untuk menjawab isi kemasan, dari analisis server.
 const pilihanIsi = (x) => (x.masalah || []).find((m) => m.kode === 'konversi')?.pilihan ?? [];
 
-const SATUAN_DASAR = [
-  ['g', 'gram (ditimbang)'],
-  ['ml', 'ml (cairan)'],
-  ['butir', 'butir'],
-  ['pcs', 'pcs / buah'],
-];
+// Pilihan cara mengukur bahan baru. "Dihitung per ikat" lebih jelas daripada "pcs" untuk sayur per ikat.
+const SATUAN_STANDAR = ['g', 'gram', 'gr', 'kg', 'kilo', 'ons', 'ml', 'liter', 'l', 'ltr'];
+const SATUAN_DASAR = (satuan) => {
+  const s = (satuan || '').trim().toLowerCase();
+  const hitung = s && !SATUAN_STANDAR.includes(s) && !['butir', 'pcs', 'buah'].includes(s) ? `dihitung per ${s}` : 'dihitung per buah';
+  return [
+    ['g', 'ditimbang (gram)'],
+    ['ml', 'ditakar (ml, untuk cairan)'],
+    ['butir', 'per butir'],
+    ['pcs', hitung],
+  ];
+};
+const perluIsiGram = (x) => ['g', 'ml'].includes(x.satuan_dasar) && !SATUAN_STANDAR.includes((x.satuan || '').trim().toLowerCase());
 
 function Acuan({ it }) {
   if (!it.acuan && !it.harga_terakhir) return null;
@@ -190,7 +197,7 @@ export default function BelanjaCek() {
     // Bahan yang hanya mirip namanya harus dipastikan dulu, supaya harga ceker tidak masuk ke dada ayam.
     const mirip = item.find((x) => (x.masalah || []).some((m) => m.kode === 'bahan_mirip'));
     if (mirip) return setGalat(`Pastikan "${mirip.nama_bahan}" memang sama dengan ${mirip.bahan_nama}, atau ganti nama bahannya.`);
-    const tanpaIsi = item.find((x) => (x.masalah || []).some((m) => m.kode === 'konversi') && !(Number(x.konversi_isi?.jumlah) > 0) && !(Number(x.konversi_faktor) > 0));
+    const tanpaIsi = item.find((x) => ((x.masalah || []).some((m) => m.kode === 'konversi') || ((x.masalah || []).some((m) => m.kode === 'bahan_baru') && perluIsiGram(x))) && !(Number(x.konversi_isi?.jumlah) > 0) && !(Number(x.konversi_faktor) > 0));
     if (tanpaIsi) return setGalat(`Isi satuan ${tanpaIsi.satuan} untuk "${tanpaIsi.nama_bahan}" belum diisi.`);
     setProses(true);
     try {
@@ -289,12 +296,18 @@ export default function BelanjaCek() {
                     <span className="font-medium">Bahan baru ini diukur dengan</span>
                     <select className={`${inputCls} mt-1`} value={x.satuan_dasar} onChange={(e) => set(i, 'satuan_dasar', e.target.value)}>
                       <option value="">Tebak otomatis</option>
-                      {SATUAN_DASAR.map(([v, l]) => (
+                      {SATUAN_DASAR(x.satuan).map(([v, l]) => (
                         <option key={v} value={v}>
                           {l}
                         </option>
                       ))}
                     </select>
+                  </label>
+                )}
+                {masalah.some((m) => m.kode === 'bahan_baru') && !masalah.some((m) => m.kode === 'konversi') && perluIsiGram(x) && (
+                  <label className="mt-2 block text-sm">
+                    <span className="font-medium">{`1 ${x.satuan} ${x.nama_bahan} kira-kira berapa ${x.satuan_dasar === 'ml' ? 'ml' : 'gram'}?`}</span>
+                    <input type="number" min="0" step="any" className={`${inputCls} angka mt-1`} value={x.konversi_faktor || ''} onChange={(e) => set(i, 'konversi_faktor', e.target.value)} />
                   </label>
                 )}
                 {masalah.some((m) => m.kode === 'konversi') &&

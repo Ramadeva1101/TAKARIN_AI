@@ -1,7 +1,7 @@
 import { all, get, run, tx } from '../lib/db.js';
 import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
 import { rupiah, hargaTampil } from '../lib/format.js';
-import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR, hitungIsi, pilihanIsi, namaSatuanDasar } from '../domain/satuan.js';
+import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR, hitungIsi, pilihanIsi, namaSatuanDasar, normalisasiSatuan } from '../domain/satuan.js';
 import { hargaMencurigakan, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { cocokkanBahan, cariAtauBuatBahan, simpanAlias, simpanKonversi, konversiBahan } from './bahan.js';
@@ -176,6 +176,9 @@ export function simpan(usaha, notaId, data) {
         // yang kebetulan bernama sama (mengubahnya akan merusak riwayat harga).
         if (bahan.baru && i.satuan_dasar && SATUAN_DASAR.includes(i.satuan_dasar) && i.satuan_dasar !== bahan.satuan_dasar) {
           run('UPDATE bahan SET satuan_dasar = ? WHERE id = ?', i.satuan_dasar, bahan.id);
+          // Isi "1 ikat = 1 buah" dari tebakan awal tidak berlaku lagi untuk satuan dasar yang baru.
+          run('DELETE FROM konversi_satuan WHERE bahan_id = ?', bahan.id);
+          if (i.satuan_dasar === 'pcs' && normalisasiSatuan(i.satuan) !== 'pcs') simpanKonversi(bahan.id, i.satuan, 1);
           bahan = get('SELECT * FROM bahan WHERE id = ?', bahan.id);
         }
       }
