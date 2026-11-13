@@ -1,7 +1,7 @@
 import { all, get, run, tx } from '../lib/db.js';
 import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
 import { rupiah, hargaTampil } from '../lib/format.js';
-import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR, hitungIsi, pilihanIsi, namaSatuanDasar, normalisasiSatuan } from '../domain/satuan.js';
+import { keSatuanDasar, tebakSatuanDasar, SATUAN_DASAR, hitungIsi, pilihanIsi, namaSatuanDasar, normalisasiSatuan, rapikanSatuan, konversiAwal } from '../domain/satuan.js';
 import { hargaMencurigakan, selisihPersen, statusAcuan } from '../domain/harga.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { cocokkanBahan, cariAtauBuatBahan, simpanAlias, simpanKonversi, konversiBahan } from './bahan.js';
@@ -32,7 +32,8 @@ function analisisItem(usaha, item) {
     satuan: item.satuan,
     satuanDasar,
     namaBahan: item.nama_bahan,
-    konversiKhusus: bahan ? konversiBahan(bahan.id) : {},
+    // Bahan baru dibuat dengan satuan pertamanya sebagai 1 buah, jadi tidak perlu ditanya isinya.
+    konversiKhusus: bahan ? konversiBahan(bahan.id) : konversiAwal(satuanDasar, item.satuan),
   });
   if (!konv.ok) masalah.push({ kode: 'konversi', pesan: konv.pesan, satuan: konv.satuan, pilihan: pilihanIsi(satuanDasar, bahan ? konversiBahan(bahan.id) : {}, konv.satuan) });
   if (item.harga == null) masalah.push({ kode: 'harga_kosong', pesan: 'Harga belum terbaca. Isi harga totalnya.' });
@@ -104,7 +105,7 @@ export function buatDraf(usaha, { sumber, nama_toko = null, tanggal = null, tota
         i.nama_bahan,
         bahan?.id ?? null,
         i.qty ?? null,
-        i.satuan ?? null,
+        i.satuan ? rapikanSatuan(i.satuan) : null,
         i.harga ?? null,
         i.yakin ?? null,
         cara,
@@ -185,8 +186,8 @@ export function simpan(usaha, notaId, data) {
       if (i.konversi_faktor) simpanKonversi(bahan.id, i.satuan, i.konversi_faktor);
       if (i.konversi_isi) {
         const h = hitungIsi({ dari: i.satuan, jumlah: i.konversi_isi.jumlah, ke: i.konversi_isi.ke, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });
-        if (!h.ok) throw new AppError(400, `${bahan.nama}: ${h.pesan}`);
-        for (const k of h.simpan) simpanKonversi(bahan.id, k.satuan, k.faktor);
+        if (!h.ok && !h.sudahDiketahui) throw new AppError(400, `${bahan.nama}: ${h.pesan}`);
+        for (const k of h.ok ? h.simpan : []) simpanKonversi(bahan.id, k.satuan, k.faktor);
       }
 
       const konv = keSatuanDasar({ qty: i.qty, satuan: i.satuan, satuanDasar: bahan.satuan_dasar, namaBahan: bahan.nama, konversiKhusus: konversiBahan(bahan.id) });

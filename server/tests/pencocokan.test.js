@@ -254,4 +254,14 @@ describe('menu dan belanja bertemu di bahan yang sama', () => {
     // 2 ikat = 500 g seharga 6.000 → Rp12/g = Rp12.000/kg.
     expect(Math.round(kangkung.harga_rata_rata * 1000)).toBe(12000);
   });
+
+  it('nota dengan tempe "2 ppn" yang belum pernah dibeli tidak ditanya isinya dan bisa disimpan', async () => {
+    const draf = await api('POST', '/pembelian/manual', { item: [{ nama_bahan: 'tempe mendoan', qty: 2, satuan: 'ppn', harga: 12000 }] });
+    const it0 = draf.data.item[0];
+    expect(it0.satuan).toBe('papan');
+    expect(it0.masalah.map((m) => m.kode)).not.toContain('konversi');
+    // Jawaban isi yang tidak perlu (misalnya "1 papan = 10 buah") tidak menggagalkan penyimpanan.
+    const s = await api('PUT', `/pembelian/${draf.data.id}`, { item: [{ nama_bahan: 'tempe mendoan', qty: 2, satuan: 'papan', harga: 12000, konversi_isi: { jumlah: 10, ke: 'buah' } }] });
+    expect(s.status).toBe(200);
+  });
 });

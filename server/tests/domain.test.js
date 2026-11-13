@@ -181,3 +181,14 @@ describe('satuan kemasan dan hitungan', () => {
     expect(hargaDariRiwayat([perkiraan, { harga_per_satuan: 12, tanggal: '2026-11-01', nota_id: 3 }])).toMatchObject({ harga: 12, sumber: 'belanja' });
   });
 });
+
+describe('singkatan kemasan di nota', () => {
+  it('ppn dan bks ditulis lengkap, satuan lain dibiarkan', async () => {
+    const { rapikanSatuan, konversiAwal } = await import('../src/domain/satuan.js');
+    expect(rapikanSatuan('ppn')).toBe('papan');
+    expect(rapikanSatuan('bks')).toBe('bungkus');
+    expect(rapikanSatuan('ltr')).toBe('ltr');
+    expect(konversiAwal('pcs', 'ppn')).toEqual({ papan: 1 });
+    expect(konversiAwal('g', 'kg')).toEqual({});
+  });
+});

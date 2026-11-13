@@ -21,6 +21,14 @@ const WARNA_STATUS = {
 // Satu kalimat dari AI tentang hal terpenting hari ini.
 function TeksCatatan({ catatan, cadangan }) {
   if (!catatan.data) return <span className={catatan.loading ? 'opacity-70' : ''}>{cadangan}</span>;
+  // Setelah harga diubah, catatan lama sudah tidak berlaku; jangan ditampilkan selagi yang baru ditulis.
+  if (catatan.loading) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-redup">
+        <Pemutar size={14} /> Memperbarui catatan
+      </span>
+    );
+  }
   return (
     <>
       {catatan.data.teks}

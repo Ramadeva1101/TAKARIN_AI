@@ -100,6 +100,18 @@ export function keSatuanDasar({ qty, satuan, satuanDasar, namaBahan, konversiKhu
   return tanya;
 }
 
+// Singkatan kemasan di nota ("ppn", "bks", "btl") ditulis lengkap supaya mudah dibaca pemilik.
+export function rapikanSatuan(satuan) {
+  const s = normalisasiSatuan(satuan);
+  return KEMASAN.has(s) || HITUNGAN.has(s) ? s : satuan;
+}
+
+// Isi bawaan bahan yang belum ada: bahan per buah memakai satuan pertamanya sebagai 1 buah.
+export function konversiAwal(satuanDasar, satuan) {
+  const s = normalisasiSatuan(satuan);
+  return satuanDasar === 'pcs' && (KEMASAN.has(s) || HITUNGAN.has(s)) ? { [s]: 1 } : {};
+}
+
 // Nama satuan dasar yang dibaca pemilik: bahan per buah memakai satuan pertamanya (potong, bungkus).
 export function namaSatuanDasar(satuanDasar, konversiKhusus = {}) {
   if (satuanDasar === 'g') return 'gram';
@@ -135,7 +147,7 @@ export function hitungIsi({ dari, jumlah, ke, satuanDasar, namaBahan, konversiKh
   const nilai = (x) => keSatuanDasar({ qty: 1, satuan: x, satuanDasar, namaBahan, konversiKhusus });
   const vb = nilai(b);
   const va = nilai(a);
-  if (vb.ok && va.ok) return { ok: false, pesan: `Isi ${a} dan ${b} sudah diketahui, tidak perlu diisi lagi.` };
+  if (vb.ok && va.ok) return { ok: false, sudahDiketahui: true, pesan: `Isi ${a} dan ${b} sudah diketahui, tidak perlu diisi lagi.` };
   if (vb.ok) return { ok: true, simpan: [{ satuan: a, faktor: j * vb.nilai }] };
   if (va.ok) return { ok: true, simpan: [{ satuan: b, faktor: va.nilai / j }] };
   return { ok: false, pesan: `Isi ${a} dan ${b} sama-sama belum diketahui. Pilih satuan lain.` };
