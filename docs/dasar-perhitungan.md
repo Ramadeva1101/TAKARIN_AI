@@ -63,10 +63,15 @@ Pengujian internal dengan 24 bahan dari 12 jenis makanan (seblak, es kopi susu, 
 
 Dalam kasus tersebut aplikasi tidak menebak. Menu ditandai belum lengkap, dan pemilik diminta mengisi isinya.
 
-Rencana perbaikan:
+Perbaikan yang sudah diterapkan:
 
-1. Satuan kemasan (bungkus, sachet, pak, botol, kaleng) dikenali sebagai "buah", sesuai tebakan satuan dasarnya.
-2. Pertanyaan isi kemasan diajukan dalam satuan pemilik ("1 papan tempe jadi berapa potong?"), langsung di form menu dan halaman periksa belanja, mengikuti pola majoo dan meez di bagian 3.
-3. Harga beli terakhir bisa diisi di form menu untuk bahan yang belum punya harga.
-4. Harga perkiraan diberi label tersendiri, tidak lagi dipakai setelah ada belanja sungguhan, dan diberi pengingat bila lebih dari 30 hari.
-5. Pilihan biaya rutin ditambah "penyusutan alat", karena biaya ini paling sering terlewat ([UNP Kediri](https://proceeding.unpkediri.ac.id/index.php/simanis/article/download/10055/6918/39239)).
+1. Bahan yang pertama ditulis per kemasan atau per hitungan (bungkus, sachet, kaleng, papan, potong, batang, genggam, ekor) dihitung per buah, dengan satuan itu sebagai 1 buah. Pengecualian: bahan yang punya berat umum, misalnya 1 potong ayam (125 g), tetap dihitung per gram. Kemasan tanpa isi tidak pernah ditebak sebagai 1 buah, karena 1 pak kertas nasi bukan 1 lembar.
+2. Isi kemasan ditanyakan dalam satuan pemilik, langsung di halaman menu dan halaman periksa belanja, mengikuti pola majoo dan meez di bagian 3. Contohnya "1 papan tempe = 10 potong" atau "1 kaleng susu kental manis = 18 sdm". Jawaban disimpan sekali per bahan (`POST /bahan/:id/isi`, `domain/satuan.js` → `hitungIsi`).
+3. Harga beli terakhir bisa diisi langsung di form menu ("Rp5.000 untuk 10 potong"), untuk bahan yang belum punya harga dan tidak ada di data pasar.
+4. Harga yang diisi sendiri (tanpa nota) ditandai "perkiraan Anda". Harga ini tidak dipakai lagi begitu ada belanja yang tercatat, dan diberi pengingat bila lebih dari 30 hari (`hargaDariRiwayat` di `domain/harga.js`).
+5. Pilihan biaya rutin ditambah "Penyusutan alat", karena biaya ini paling sering terlewat ([UNP Kediri](https://proceeding.unpkediri.ac.id/index.php/simanis/article/download/10055/6918/39239)).
+
+Hasil pengujian ulang dengan 24 bahan yang sama:
+
+- 24 dari 24 takaran resep langsung terhitung.
+- 4 dari 24 satuan beli langsung terhitung. 20 lainnya ditanya sekali dengan pilihan satuan yang sudah dikenal ("1 ikat serai = ... batang"), dan tidak ada yang buntu.
