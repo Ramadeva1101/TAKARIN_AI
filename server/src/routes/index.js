@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { get, run } from '../lib/db.js';
 import { AppError } from '../lib/errors.js';
 import { modeAi, cekJenisUsaha, transkripsi } from '../ai/provider.js';
-import { wajibLogin, wajibUsaha, unggahFoto, unggahSuara, validasi, rahasiaJwt } from '../middleware/index.js';
+import { wajibLogin, wajibUsaha, unggahFoto, unggahSuara, validasi, rahasiaJwt, batasMasuk, batasDaftar, batasAi, batasPenjelasan } from '../middleware/index.js';
 import * as S from './skema.js';
 import * as usaha from '../services/usaha.js';
 import * as produk from '../services/produk.js';
@@ -25,7 +25,7 @@ router.get('/health', (_req, res) => res.json({ ok: true, ai_mode: modeAi() }));
 // ---- Akun ----
 const buatToken = (userId) => jwt.sign({ sub: String(userId) }, rahasiaJwt(), { expiresIn: '7d' });
 
-router.post('/auth/daftar', validasi(S.daftar), async (req, res) => {
+router.post('/auth/daftar', batasDaftar, validasi(S.daftar), async (req, res) => {
   const { nama, email, password } = req.body;
   if (get('SELECT id FROM users WHERE email = ?', email)) throw new AppError(409, 'Email sudah terdaftar');
   const hash = await bcrypt.hash(password, 10);
@@ -33,7 +33,7 @@ router.post('/auth/daftar', validasi(S.daftar), async (req, res) => {
   res.status(201).json({ token: buatToken(Number(lastInsertRowid)), user: { id: Number(lastInsertRowid), nama, email }, punya_usaha: false });
 });
 
-router.post('/auth/masuk', validasi(S.masuk), async (req, res) => {
+router.post('/auth/masuk', validasi(S.masuk), batasMasuk, async (req, res) => {
   const user = get('SELECT * FROM users WHERE email = ?', req.body.email);
   if (!user || !(await bcrypt.compare(req.body.password, user.password_hash))) throw new AppError(401, 'Email atau password salah');
   res.json({ token: buatToken(user.id), user: { id: user.id, nama: user.nama, email: user.email }, punya_usaha: Boolean(usaha.usahaMilik(user.id)) });
@@ -52,19 +52,21 @@ router.get('/pasar/kota', async (req, res) => res.json(await pasar.daftarKotaPil
 
 // ---- Onboarding ----
 // Rekaman suara menjadi teks (cadangan untuk browser tanpa pengenal suara bawaan).
-router.post('/suara/teks', unggahSuara, async (req, res) => {
+router.post('/suara/teks', batasAi, unggahSuara, async (req, res) => {
   if (!req.file) throw new AppError(400, 'Rekaman suara belum ada');
   const { teks } = await transkripsi(req.file.buffer, req.file.originalname, req.file.mimetype);
   if (!teks?.trim()) throw new AppError(422, 'Suara tidak terdengar jelas. Coba rekam lagi.');
   res.json({ teks: teks.trim() });
 });
-router.post('/usaha/cek-jenis', validasi(S.cekJenis), async (req, res) => res.json((await cekJenisUsaha(req.body.teks)).data));
-router.post('/usaha/cerita', validasi(S.cerita), async (req, res) => {
+router.post('/usaha/cek-jenis', batasAi, validasi(S.cekJenis), async (req, res) => res.json((await cekJenisUsaha(req.body.teks)).data));
+router.post('/usaha/cerita', batasAi, validasi(S.cerita), async (req, res) => {
   const milik = usaha.usahaMilik(req.user.id);
   const namaAda = milik ? bahan.daftarNamaBahan(milik.id) : [];
   res.json(await usaha.draftDariCerita(req.body.teks, namaAda));
 });
 router.post('/usaha/setup', validasi(S.setup), (req, res) => {
+  // Setup menimpa semua menu; hanya boleh sekali. Perubahan profil sesudahnya lewat PUT /usaha.
+  if (usaha.usahaMilik(req.user.id)?.setup_selesai) throw new AppError(409, 'Usaha sudah diatur. Ubah profil di halaman Pengaturan.');
   const hasil = usaha.simpanSetup(req.user.id, req.body);
   pihps.pastikanSegar(usaha.usahaMilik(req.user.id));
   res.status(201).json(hasil);
@@ -106,19 +108,19 @@ router.delete('/produk/:id', (req, res) => {
   res.status(204).end();
 });
 router.post('/produk/:id/simulasi', validasi(S.simulasi), (req, res) => res.json(produk.simulasi(req.usaha, id(req), req.body)));
-router.get('/produk/:id/rekomendasi', async (req, res) => res.json(await produk.rekomendasi(req.usaha, id(req))));
+router.get('/produk/:id/rekomendasi', batasPenjelasan, async (req, res) => res.json(await produk.rekomendasi(req.usaha, id(req))));
 
 // ---- Pembelian bahan ----
 router.get('/pembelian', (req, res) => res.json(pembelian.daftar(req.usaha)));
-router.post('/pembelian/foto', unggahFoto, async (req, res) => {
+router.post('/pembelian/foto', batasAi, unggahFoto, async (req, res) => {
   if (!req.file) throw new AppError(400, 'Foto nota belum dipilih');
   res.status(201).json(await pembelian.dariFoto(req.usaha, req.file));
 });
-router.post('/pembelian/suara', unggahSuara, async (req, res) => {
+router.post('/pembelian/suara', batasAi, unggahSuara, async (req, res) => {
   if (!req.file) throw new AppError(400, 'Rekaman suara belum ada');
   res.status(201).json(await pembelian.dariSuara(req.usaha, req.file));
 });
-router.post('/pembelian/teks', validasi(S.teksBelanja), async (req, res) => res.status(201).json(await pembelian.dariTeks(req.usaha, req.body.teks, req.body.sumber)));
+router.post('/pembelian/teks', batasAi, validasi(S.teksBelanja), async (req, res) => res.status(201).json(await pembelian.dariTeks(req.usaha, req.body.teks, req.body.sumber)));
 router.post('/pembelian/manual', validasi(S.belanjaManual), (req, res) =>
   res.status(201).json(pembelian.buatDraf(req.usaha, { sumber: 'manual', ...req.body, item: req.body.item.map((i) => ({ ...i, yakin: 1 })) })),
 );
@@ -145,7 +147,7 @@ router.post('/bahan/:id/konversi', validasi(S.konversi), (req, res) => {
 
 // ---- Promo ----
 router.post('/promo/hitung', validasi(S.promoHitung), (req, res) => res.json(promo.hitung(req.usaha, req.body)));
-router.post('/promo/saran', validasi(S.promoHitung), async (req, res) => res.json(await promo.saran(req.usaha, req.body)));
+router.post('/promo/saran', batasAi, validasi(S.promoHitung), async (req, res) => res.json(await promo.saran(req.usaha, req.body)));
 router.get('/promo', (req, res) => res.json(promo.daftar(req.usaha)));
 router.post('/promo', validasi(S.promoSimpan), (req, res) => res.status(201).json(promo.simpan(req.usaha, req.body)));
 router.put('/promo/:id', validasi(S.promoSimpan), (req, res) => res.json(promo.ubah(req.usaha, id(req), req.body)));

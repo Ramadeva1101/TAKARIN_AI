@@ -210,4 +210,36 @@ describe('menu dan belanja bertemu di bahan yang sama', () => {
     const r2 = await api('POST', `/bahan/${skm.id}/isi`, { dari: 'dus', jumlah: 4, ke: 'renceng' });
     expect(r2.status).toBe(400);
   });
+
+  it('pengaman data: satuan, hapus menu promo, setup ulang, dan batas percobaan masuk', async () => {
+    const gula = await bahanBernama('gula pasir');
+    // Isi buatan tidak boleh menimpa satuan pasti.
+    expect((await api('POST', `/bahan/${gula.id}/konversi`, { satuan: 'gram', faktor: 1000 })).status).toBe(400);
+    expect((await api('POST', `/bahan/${gula.id}/isi`, { dari: 'g', jumlah: 1, ke: 'kg' })).status).toBe(400);
+    // Cara mengukur tidak bisa diganti setelah ada riwayat harga.
+    expect((await api('PUT', `/bahan/${gula.id}`, { satuan_dasar: 'butir' })).status).toBe(409);
+    // Belanja dengan nama bahan lama tidak mengubah cara mengukurnya.
+    const draf = await api('POST', '/pembelian/manual', { item: [{ nama_bahan: 'Gula Pasir', qty: 1, satuan: 'kg', harga: 18000 }] });
+    const s = await api('PUT', `/pembelian/${draf.data.id}`, { item: [{ nama_bahan: 'Gula Pasir', bahan_id: null, satuan_dasar: 'pcs', qty: 1, satuan: 'kg', harga: 18000 }] });
+    expect(s.status).toBe(200);
+    expect((await bahanBernama('gula pasir')).satuan_dasar).toBe('g');
+
+    // Menu yang dipakai paket promo tidak bisa dihapus.
+    const a = await api('POST', '/produk', { nama: 'Teh A', harga_jual: 5000, bahan: [{ nama: 'gula pasir', qty: 10, satuan: 'g' }] });
+    const b = await api('POST', '/produk', { nama: 'Teh B', harga_jual: 5000, bahan: [{ nama: 'gula pasir', qty: 10, satuan: 'g' }] });
+    const promo = await api('POST', '/promo', { items: [{ menu_id: a.data.id }, { menu_id: b.data.id }], nama: 'Paket Teh', harga_paket: 9000 });
+    expect(promo.status).toBe(201);
+    const hapus = await api('DELETE', `/produk/${a.data.id}`);
+    expect(hapus.status).toBe(409);
+    expect(hapus.data.pesan).toContain('Paket Teh');
+
+    // Setup hanya sekali.
+    const ulang = await api('POST', '/usaha/setup', { usaha: { nama: 'X', target_margin: 0.4, porsi_per_hari: 10 }, produk: [], biaya: [] });
+    expect(ulang.status).toBe(409);
+
+    // Tebak password dibatasi.
+    let kode = 0;
+    for (let i = 0; i < 11; i++) kode = (await api('POST', '/auth/masuk', { email: 'cocok@contoh.id', password: `salah${i}` })).status;
+    expect(kode).toBe(429);
+  });
 });

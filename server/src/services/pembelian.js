@@ -172,7 +172,9 @@ export function simpan(usaha, notaId, data) {
       let bahan = i.bahan_id ? get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', i.bahan_id, usaha.id) : null;
       if (!bahan) {
         bahan = cariAtauBuatBahan(usaha.id, i.nama_bahan, i.satuan);
-        if (i.satuan_dasar && SATUAN_DASAR.includes(i.satuan_dasar) && i.satuan_dasar !== bahan.satuan_dasar) {
+        // Satuan dasar pilihan pengguna hanya untuk bahan yang baru dibuat di sini, bukan bahan lama
+        // yang kebetulan bernama sama (mengubahnya akan merusak riwayat harga).
+        if (bahan.baru && i.satuan_dasar && SATUAN_DASAR.includes(i.satuan_dasar) && i.satuan_dasar !== bahan.satuan_dasar) {
           run('UPDATE bahan SET satuan_dasar = ? WHERE id = ?', i.satuan_dasar, bahan.id);
           bahan = get('SELECT * FROM bahan WHERE id = ?', bahan.id);
         }

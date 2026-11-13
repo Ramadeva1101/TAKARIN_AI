@@ -1,4 +1,4 @@
-import { get, run, tx } from '../lib/db.js';
+import { all, get, run, tx } from '../lib/db.js';
 import { AppError, tidakDitemukan } from '../lib/errors.js';
 import { rupiah, persen } from '../lib/format.js';
 import { hitungHppMenu } from '../domain/hpp.js';
@@ -51,7 +51,11 @@ export function ubah(usaha, menuId, data) {
 }
 
 export function hapus(usaha, menuId) {
-  run('DELETE FROM menu WHERE id = ?', ambilMenu(usaha, menuId).id);
+  const menu = ambilMenu(usaha, menuId);
+  // Paket promo yang memakai menu ini akan kosong dan terbaca untung 100% kalau menunya dihapus.
+  const paket = all('SELECT DISTINCT p.nama FROM promo p JOIN promo_item i ON i.promo_id = p.id WHERE i.menu_id = ?', menu.id).map((x) => x.nama);
+  if (paket.length) throw new AppError(409, `${menu.nama} dipakai di paket promo ${paket.join(', ')}. Hapus paketnya dulu di halaman Promo.`);
+  run('DELETE FROM menu WHERE id = ?', menu.id);
 }
 
 /**

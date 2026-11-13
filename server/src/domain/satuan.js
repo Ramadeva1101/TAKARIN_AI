@@ -11,7 +11,7 @@ const SINONIM = {
   biji: 'butir', btr: 'butir', bji: 'butir',
   buah: 'pcs', bh: 'pcs', pc: 'pcs', lembar: 'pcs', lbr: 'pcs',
   bks: 'bungkus', saset: 'sachet', sachets: 'sachet', btl: 'botol', klg: 'kaleng', pack: 'pak', kantung: 'kantong',
-  ptg: 'potong', btg: 'batang', ekr: 'ekor',
+  ptg: 'potong', btg: 'batang', ekr: 'ekor', ppn: 'papan', pp: 'papan', ikt: 'ikat',
   cangkir: 'gelas', gls: 'gelas', cup: 'gelas',
 };
 
@@ -54,6 +54,16 @@ function cariUrt(tabel, namaBahan) {
 }
 
 /**
+ * Satuan yang isinya sudah pasti untuk satuan dasar ini (gram dan kg untuk bahan per gram, ml dan liter
+ * untuk bahan per ml). Isi khusus tidak boleh menimpanya, supaya "1 gram = 1000" tidak merusak modal.
+ */
+export function satuanPasti(satuan, satuanDasar) {
+  const s = normalisasiSatuan(satuan);
+  const dasar = normalisasiSatuan(satuanDasar);
+  return s === dasar || (dasar === 'g' && MASSA[s] != null) || (dasar === 'ml' && VOLUME[s] != null);
+}
+
+/**
  * Mengubah qty dalam satuan apa pun ke satuan dasar bahan.
  * @returns {{ ok: boolean, nilai?: number, cara?: string, pesan?: string }}
  */
@@ -64,7 +74,7 @@ export function keSatuanDasar({ qty, satuan, satuanDasar, namaBahan, konversiKhu
   const dasar = normalisasiSatuan(satuanDasar);
   const tanya = { ok: false, satuan: s, pesan: `1 ${s} ${namaBahan} isinya berapa?` };
 
-  if (konversiKhusus[s] != null) return { ok: true, nilai: n * konversiKhusus[s], cara: 'khusus' };
+  if (konversiKhusus[s] != null && !satuanPasti(s, dasar)) return { ok: true, nilai: n * konversiKhusus[s], cara: 'khusus' };
   if (s === dasar) return { ok: true, nilai: n, cara: 'sama' };
 
   if (dasar === 'g' && MASSA[s]) return { ok: true, nilai: n * MASSA[s], cara: 'standar' };
@@ -124,8 +134,9 @@ export function hitungIsi({ dari, jumlah, ke, satuanDasar, namaBahan, konversiKh
   if (!a || !b || a === b) return { ok: false, pesan: 'Pilih dua satuan yang berbeda' };
   const nilai = (x) => keSatuanDasar({ qty: 1, satuan: x, satuanDasar, namaBahan, konversiKhusus });
   const vb = nilai(b);
-  if (vb.ok) return { ok: true, simpan: [{ satuan: a, faktor: j * vb.nilai }] };
   const va = nilai(a);
+  if (vb.ok && va.ok) return { ok: false, pesan: `Isi ${a} dan ${b} sudah diketahui, tidak perlu diisi lagi.` };
+  if (vb.ok) return { ok: true, simpan: [{ satuan: a, faktor: j * vb.nilai }] };
   if (va.ok) return { ok: true, simpan: [{ satuan: b, faktor: va.nilai / j }] };
   return { ok: false, pesan: `Isi ${a} dan ${b} sama-sama belum diketahui. Pilih satuan lain.` };
 }

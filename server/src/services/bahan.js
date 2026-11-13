@@ -1,6 +1,6 @@
 import { all, get, run } from '../lib/db.js';
 import { AppError, tidakDitemukan, tanggalHariIni } from '../lib/errors.js';
-import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar, KEMASAN, HITUNGAN, hitungIsi, namaSatuanDasar } from '../domain/satuan.js';
+import { tebakSatuanDasar, normalisasiSatuan, SATUAN_DASAR, keSatuanDasar, KEMASAN, HITUNGAN, hitungIsi, namaSatuanDasar, satuanPasti } from '../domain/satuan.js';
 import { cocokkanKomoditas } from '../domain/komoditas.js';
 import { bandingNama, rapikanNama } from '../domain/pencocokan.js';
 import { hargaMencurigakan, hargaDariRiwayat, selisihPersen, statusAcuan } from '../domain/harga.js';
@@ -35,7 +35,8 @@ export function cariAtauBuatBahan(usahaId, nama, satuanContoh) {
   // Bahan per buah ("1 potong tempe", "1 bungkus mie"): satuan pertamanya menjadi 1 buah.
   const s = normalisasiSatuan(satuanContoh);
   if (satuanDasar === 'pcs' && (KEMASAN.has(s) || HITUNGAN.has(s))) simpanKonversi(lastInsertRowid, s, 1);
-  return get('SELECT * FROM bahan WHERE id = ?', lastInsertRowid);
+  // baru: penanda untuk pemanggil, supaya pengaturan bahan lama tidak ikut diubah.
+  return { ...get('SELECT * FROM bahan WHERE id = ?', lastInsertRowid), baru: true };
 }
 
 /**
@@ -149,6 +150,11 @@ export function aturIsi(usaha, bahanId, { dari, jumlah, ke }) {
 }
 
 export function simpanKonversi(bahanId, satuan, faktor) {
+  const bahan = get('SELECT nama, satuan_dasar FROM bahan WHERE id = ?', bahanId);
+  if (bahan && satuanPasti(satuan, bahan.satuan_dasar)) {
+    throw new AppError(400, `Isi ${normalisasiSatuan(satuan)} untuk ${bahan.nama} sudah pasti dan tidak bisa diubah.`);
+  }
+  if (!Number.isFinite(faktor) || faktor <= 0) throw new AppError(400, 'Isi harus angka lebih dari 0');
   run(
     `INSERT INTO konversi_satuan (bahan_id, satuan, faktor) VALUES (?, ?, ?)
      ON CONFLICT (bahan_id, satuan) DO UPDATE SET faktor = excluded.faktor`,
@@ -212,9 +218,19 @@ export function ubahBahan(usaha, bahanId, data) {
   const b = get('SELECT * FROM bahan WHERE id = ? AND usaha_id = ?', bahanId, usaha.id);
   if (!b) throw tidakDitemukan('Bahan');
   if (data.satuan_dasar && !SATUAN_DASAR.includes(data.satuan_dasar)) throw new AppError(400, 'Satuan dasar tidak dikenal');
+  // Riwayat harga dan isi kemasan tersimpan per satuan dasar lama; menggantinya akan membuat
+  // harga per gram terbaca sebagai harga per butir. Hanya boleh selama belum ada data.
+  if (data.satuan_dasar && data.satuan_dasar !== b.satuan_dasar) {
+    const ada = get('SELECT (SELECT COUNT(*) FROM harga_bahan WHERE bahan_id = ?) + (SELECT COUNT(*) FROM konversi_satuan WHERE bahan_id = ?) AS n', b.id, b.id);
+    if (ada.n > 0) throw new AppError(409, `Cara mengukur ${b.nama} tidak bisa diganti karena sudah ada riwayat harga atau isi kemasan. Buat bahan baru dengan nama lain kalau memang berbeda.`);
+  }
+  const namaBaru = data.nama ? kunci(data.nama) : b.nama;
+  if (namaBaru !== b.nama && get('SELECT 1 FROM bahan WHERE usaha_id = ? AND nama = ? AND id != ?', usaha.id, namaBaru, b.id)) {
+    throw new AppError(409, `Sudah ada bahan bernama ${namaBaru}. Gunakan "Gabungkan" kalau keduanya sama.`);
+  }
   run(
     'UPDATE bahan SET nama = ?, satuan_dasar = ?, komoditas = ?, susut_persen = ? WHERE id = ?',
-    data.nama ? kunci(data.nama) : b.nama,
+    namaBaru,
     data.satuan_dasar ?? b.satuan_dasar,
     data.komoditas === undefined ? b.komoditas : data.komoditas,
     data.susut_persen ?? b.susut_persen,
