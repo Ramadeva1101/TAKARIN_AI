@@ -94,7 +94,7 @@ flowchart TD
   G --> H[Ringkasan, saran harga, promo]
 ```
 
-Semua angka (modal, untung, harga saran) dihitung oleh kode di `server/src/domain/`. AI hanya membaca input dan merangkai kalimat. Angka yang ditulis AI dicek ulang terhadap hasil hitungan sebelum ditampilkan.
+Semua angka (modal, untung, harga saran) dihitung oleh kode di `server/src/domain/`. Dasar rumus, sumber penelitian, dan batasannya ada di [docs/dasar-perhitungan.md](docs/dasar-perhitungan.md). AI hanya membaca input dan merangkai kalimat. Angka yang ditulis AI dicek ulang terhadap hasil hitungan sebelum ditampilkan.
 
 Struktur folder:
 
