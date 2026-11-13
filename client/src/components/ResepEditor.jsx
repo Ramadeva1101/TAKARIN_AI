@@ -162,7 +162,7 @@ export default function ResepEditor({ value, onChange }) {
 
       <fieldset>
         <legend className="mb-1 text-sm font-medium">Bahan dan takaran</legend>
-        <p className="mb-2 text-xs text-redup">Pilih dari saran nama supaya memakai harga dari catatan belanja Anda.</p>
+        <p className="mb-2 text-xs text-redup">Masukkan juga kemasan per porsi (kertas nasi, cup, sedotan, kantong) karena ikut menjadi modal. Pilih dari saran nama supaya memakai harga dari catatan belanja Anda.</p>
         <datalist id={listSatuan}>
           {SATUAN.map((s) => (
             <option key={s} value={s} />
