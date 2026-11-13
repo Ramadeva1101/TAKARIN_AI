@@ -61,6 +61,22 @@ function Rincian({ p }) {
   );
 }
 
+// Kemasan tidak ikut diatur: setengah cup atau setengah kertas nasi tidak bisa dijual.
+const KEMASAN = /(cup|gelas plastik|kertas|plastik|mika|kotak|sedotan|kantong|kantung|mangkuk|styrofoam|box|tutup|bungkus nasi|wadah|tusuk)/i;
+// Satuan yang dihitung per buah: diatur per bilangan bulat, bukan persen.
+const SATUAN_BUAH = /^(pcs|buah|butir|biji|potong|ptg|siung|lembar|ekor|bungkus|sachet|batang|tusuk|iris|kepal)$/i;
+
+// Bahan yang takarannya masuk akal diubah, beserta cara mengaturnya.
+function bisaDiatur(r) {
+  if (!r.biaya || KEMASAN.test(r.nama)) return null;
+  const satuan = String(r.satuan || '').trim();
+  if (SATUAN_BUAH.test(satuan) || r.satuan_dasar === 'pcs' || r.satuan_dasar === 'butir') {
+    // 1 potong ayam tidak bisa jadi 0,8 potong; hanya takaran 2 ke atas yang bisa dikurangi per buah.
+    return r.qty >= 2 && Number.isInteger(r.qty) ? 'buah' : null;
+  }
+  return 'persen';
+}
+
 // Angka takaran yang enak dibaca: 80, 1,5, 0,25.
 const angkaTakaran = (n) => Number(n.toFixed(n < 10 ? 2 : 0)).toLocaleString('id-ID');
 
@@ -81,7 +97,7 @@ function Simulasi({ p, sesudah }) {
   const [galat, setGalat] = useState(null);
   const [menyimpan, setMenyimpan] = useState(false);
   // Bahan dengan biaya terbesar paling berpengaruh kalau takarannya diubah.
-  const bahanUtama = [...p.rincian].filter((r) => r.biaya).sort((a, b) => b.biaya - a.biaya).slice(0, 4);
+  const bahanUtama = p.rincian.map((r) => ({ ...r, cara: bisaDiatur(r) })).filter((r) => r.cara).sort((a, b) => b.biaya - a.biaya).slice(0, 4);
   const berubah = Object.values(faktor).some((f) => f !== 1) || harga !== p.harga_jual;
 
   useEffect(() => {
@@ -131,27 +147,33 @@ function Simulasi({ p, sesudah }) {
       />
       {bahanUtama.map((b) => {
         const f = faktor[b.bahan_id] ?? 1;
+        const baru = b.qty * f;
+        // Per buah: geser jumlah utuh (1 sampai 1,5x); lainnya: persen 50% sampai 150%.
+        const slider = b.cara === 'buah' ? { min: 1, max: Math.ceil(b.qty * 1.5), step: 1, value: Math.round(baru), ke: (v) => v / b.qty } : { min: 0.5, max: 1.5, step: 0.05, value: f, ke: (v) => v };
         return (
           <div key={b.bahan_id} className="mt-2">
             <label className="block text-sm font-medium" htmlFor={`sim-${b.bahan_id}`}>
               <span className="capitalize">{b.nama}</span>:{' '}
               <span className="angka">
-                {f === 1 ? `${angkaTakaran(b.qty)} ${b.satuan} (tetap)` : `${angkaTakaran(b.qty)} → ${angkaTakaran(b.qty * f)} ${b.satuan} (${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)}%)`}
+                {f === 1
+                  ? `${angkaTakaran(b.qty)} ${b.satuan} (tetap)`
+                  : `${angkaTakaran(b.qty)} → ${angkaTakaran(baru)} ${b.satuan}${b.cara === 'persen' ? ` (${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)}%)` : ''}`}
               </span>
             </label>
             <input
               id={`sim-${b.bahan_id}`}
               type="range"
-              min="0.5"
-              max="1.5"
-              step="0.05"
-              value={f}
-              onChange={(e) => setFaktor({ ...faktor, [b.bahan_id]: Number(e.target.value) })}
+              min={slider.min}
+              max={slider.max}
+              step={slider.step}
+              value={slider.value}
+              onChange={(e) => setFaktor({ ...faktor, [b.bahan_id]: slider.ke(Number(e.target.value)) })}
               className="h-11 w-full accent-biru"
             />
           </div>
         );
       })}
+      {!bahanUtama.length && <p className="mt-2 text-sm text-redup">Takaran menu ini semuanya per buah atau kemasan, jadi hanya harga jual yang bisa dicoba.</p>}
       <div className="tepi-nota mt-4 grid grid-cols-3 gap-2 pt-4 text-sm" aria-live="polite">
         <div>
           <p className="text-redup">Modal</p>
