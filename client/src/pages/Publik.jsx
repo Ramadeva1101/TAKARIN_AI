@@ -87,11 +87,11 @@ export function PublikLayout() {
             ))}
           </nav>
           {/* Di HP tombol dibuat ringkas (tanpa panah, padding kecil) agar tidak berdesakan dengan logo. */}
-          <div className="flex shrink-0 items-center gap-2.5 sm:gap-2">
-            <Tombol varian="masuk" to="/masuk" className="!px-4 sm:!px-5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <Tombol varian="masuk" to="/masuk" className="!min-h-9 !px-3.5 !text-sm sm:!min-h-11 sm:!px-5 sm:!text-base">
               Masuk <ArrowRight size={16} weight="bold" className="hidden text-kuning sm:block" aria-hidden />
             </Tombol>
-            <Tombol to="/daftar" className="!px-4 sm:!px-5">
+            <Tombol to="/daftar" className="!min-h-9 !px-3.5 !text-sm sm:!min-h-11 sm:!px-5 sm:!text-base">
               Daftar
             </Tombol>
             <button
@@ -111,11 +111,11 @@ export function PublikLayout() {
       {buka && (
         <div className="fixed inset-0 z-30 md:hidden">
           <button type="button" aria-label="Tutup menu" onClick={() => setBuka(false)} className="absolute inset-0 bg-tinta/30" />
-          <nav id="menu-hp" aria-label="Menu situs" className="absolute inset-y-0 right-0 flex w-1/2 min-w-56 flex-col bg-kartu px-4 py-3 shadow-xl">
-            <button type="button" onClick={() => setBuka(false)} aria-label="Tutup menu" className="-mr-2 inline-flex size-11 items-center justify-center self-end rounded-full hover:bg-dasar">
+          <nav id="menu-hp" aria-label="Menu situs" className="absolute top-3 right-3 flex w-1/2 min-w-56 flex-col rounded-2xl border border-garis bg-kartu p-2 shadow-xl">
+            <button type="button" onClick={() => setBuka(false)} aria-label="Tutup menu" className="inline-flex size-11 items-center justify-center self-end rounded-full hover:bg-dasar">
               <X size={22} weight="bold" aria-hidden />
             </button>
-            <ul className="mt-2 flex flex-col">
+            <ul className="flex flex-col pb-1">
               {MENU_SITUS.map(([to, label]) => (
                 <li key={to}>
                   <Link
@@ -129,6 +129,14 @@ export function PublikLayout() {
                 </li>
               ))}
             </ul>
+            <div className="mt-1 flex flex-col gap-2 border-t border-garis px-1 pt-3 pb-1">
+              <Tombol varian="masuk" to="/masuk" className="w-full">
+                Masuk
+              </Tombol>
+              <Tombol to="/daftar" className="w-full">
+                Daftar
+              </Tombol>
+            </div>
           </nav>
         </div>
       )}
