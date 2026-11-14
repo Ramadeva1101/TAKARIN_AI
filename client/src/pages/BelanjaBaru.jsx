@@ -16,31 +16,60 @@ const CARA = [
 function Foto({ kirim, proses }) {
   const [file, setFile] = useState(null);
   const [pratinjau, setPratinjau] = useState(null);
+  const [seret, setSeret] = useState(false);
+  const [salah, setSalah] = useState(null);
   useEffect(() => () => pratinjau && URL.revokeObjectURL(pratinjau), [pratinjau]);
-  const pilih = (e) => {
-    const f = e.target.files?.[0];
-    e.target.value = '';
+  const pakai = (f) => {
     if (!f) return;
+    if (!f.type.startsWith('image/')) {
+      setSalah('Berkas ini bukan gambar. Pilih foto nota berformat JPG, PNG, atau WEBP.');
+      return;
+    }
+    setSalah(null);
     setFile(f);
     setPratinjau(URL.createObjectURL(f));
   };
+  const pilih = (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    pakai(f);
+  };
+  // Di laptop, foto nota bisa diseret langsung ke kotak pilihan.
+  const lepas = (e) => {
+    e.preventDefault();
+    setSeret(false);
+    pakai(e.dataTransfer.files?.[0]);
+  };
   return (
-    <>
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setSeret(true);
+      }}
+      onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget) && setSeret(false)}
+      onDrop={lepas}
+    >
       <p className="text-sm text-redup">Foto nota dari atas, terang, dan seluruh baris terlihat. Hasil bacaan bisa Anda periksa sebelum disimpan.</p>
       {pratinjau && <img src={pratinjau} alt="Pratinjau nota" className="mt-4 max-h-72 rounded-lg border border-garis object-contain" />}
       {/* Dua pilihan: "capture" langsung membuka kamera di HP, tanpanya HP menawarkan galeri dan berkas. */}
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <div className={`mt-4 grid gap-2 rounded-2xl sm:grid-cols-2 ${seret ? 'outline-2 outline-offset-4 outline-biru outline-dashed' : ''}`}>
         {[
           { label: file ? 'Foto ulang' : 'Ambil foto', ikon: Camera, kamera: true },
           { label: file ? 'Pilih foto lain' : 'Pilih dari galeri', ikon: Images, kamera: false },
         ].map(({ label, ikon: Ikon, kamera }) => (
           <label key={label} className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-garis bg-dasar p-3 text-center hover:border-biru focus-within:border-biru">
             <Ikon size={28} className="text-biru" aria-hidden />
-            <span className="text-sm font-semibold text-biru">{label}</span>
+            <span className="text-sm font-semibold text-biru">{seret ? 'Lepaskan foto di sini' : label}</span>
             <input type="file" accept="image/*" {...(kamera ? { capture: 'environment' } : {})} className="sr-only" onChange={pilih} />
           </label>
         ))}
       </div>
+      <p className="mt-2 hidden text-xs text-redup sm:block">Foto nota juga bisa diseret ke kotak di atas.</p>
+      {salah && (
+        <p role="alert" className="mt-2 text-sm text-rugi">
+          {salah}
+        </p>
+      )}
       <Tombol memuat={proses}
         className="mt-4"
         disabled={!file || proses}
@@ -54,7 +83,7 @@ function Foto({ kirim, proses }) {
       >
         {proses ? 'Membaca nota' : 'Baca nota'}
       </Tombol>
-    </>
+    </div>
   );
 }
 
