@@ -173,7 +173,7 @@ export default function Onboarding() {
                   {lain.cek ? 'Memeriksa' : 'Periksa'}
                 </Tombol>
               </div>
-              <p className="mt-1 text-xs text-redup">AI memeriksa apakah usaha ini mengolah bahan menjadi makanan atau minuman, karena modal per porsi hanya bisa dihitung untuk usaha seperti itu.</p>
+              <p className="mt-1 text-xs text-redup">Modal per porsi hanya bisa dihitung untuk usaha yang mengolah bahan menjadi makanan atau minuman.</p>
               {lain.hasil && (
                 <p role="status" className={`mt-3 flex gap-2 rounded-xl px-3 py-2 text-sm ${lain.hasil.valid ? 'bg-aman-muda text-aman' : 'bg-waspada-muda text-waspada'}`}>
                   {lain.hasil.valid ? <CheckCircle size={20} weight="fill" className="shrink-0" aria-hidden /> : <WarningCircle size={20} weight="fill" className="shrink-0" aria-hidden />}
@@ -230,7 +230,7 @@ export default function Onboarding() {
               inputMode="numeric"
               value={usaha.porsi_per_hari}
               onChange={u('porsi_per_hari')}
-              hint="Semua menu digabung, termasuk potong, gelas, atau kotak."
+              hint="Gabungan semua menu"
             />
             <Field
               label="Buka berapa hari dalam sebulan"
@@ -240,7 +240,7 @@ export default function Onboarding() {
               inputMode="numeric"
               value={usaha.hari_buka}
               onChange={u('hari_buka')}
-              hint="Contoh: libur tiap Minggu = 26 hari. Biaya bulanan dibagi ke hari buka saja."
+              hint="Contoh: libur setiap Minggu berarti 26 hari"
             />
           </div>
           <p className="mt-5 mb-2 text-sm font-medium">Target untung dari harga jual</p>

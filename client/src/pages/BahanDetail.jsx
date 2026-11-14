@@ -164,7 +164,7 @@ export default function BahanDetail() {
                 )}
               </Field>
               <Field label="Nama di harga pasar" value={form.komoditas} onChange={(e) => setForm({ ...form, komoditas: e.target.value })} hint="Contoh: cabai rawit merah, daging ayam ras" />
-              <Field label="Susut (%)" type="number" min="0" max="90" value={form.susut_persen} onChange={(e) => setForm({ ...form, susut_persen: e.target.value })} hint="Bagian terbuang: kulit, tulang, batang" />
+              <Field label="Susut (%)" type="number" min="0" max="90" value={form.susut_persen} onChange={(e) => setForm({ ...form, susut_persen: e.target.value })} hint="Bagian yang terbuang, misalnya kulit, tulang, atau batang" />
             </div>
             {pesan && (
               <p role="status" className={`mt-3 text-sm ${pesan.ok ? 'text-aman' : 'text-rugi'}`}>

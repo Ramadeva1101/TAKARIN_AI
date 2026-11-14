@@ -88,7 +88,7 @@ function Teks({ kirim, proses }) {
         value={teks}
         onChange={(e) => setTeks(e.target.value)}
         placeholder={'cabe rawit 1/2 kg 35rb\nbawang putih 1/4 10rb\ngula 2 kilo'}
-        hint="Satu bahan per baris. Singkatan seperti rb, goceng, ceban dipahami."
+        hint="Satu bahan per baris. Singkatan seperti rb, goceng, dan ceban bisa dibaca."
       />
       <Tombol memuat={proses} className="mt-4" disabled={teks.trim().length < 3 || proses} onClick={() => kirim('/pembelian/teks', { body: { teks } })}>
         {proses ? 'Membaca' : 'Baca tulisan'}

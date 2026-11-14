@@ -27,7 +27,7 @@ function HargaBeli({ b, ubah }) {
   const pilihan = [...new Set([b.satuan?.trim(), 'kg', 'gram', 'ons', 'liter', 'ml', 'buah'].filter(Boolean))];
   return (
     <div className="col-span-full -mt-1 rounded-xl bg-kuning-muda px-3 py-2 text-xs">
-      <p>Harga beli terakhir {b.nama.trim()} (boleh kira-kira, nanti diganti otomatis saat Anda catat belanja):</p>
+      <p>Harga beli {b.nama.trim()} (perkiraan boleh, diperbarui saat belanja dicatat):</p>
       <div className="mt-1.5 flex flex-wrap items-center gap-2">
         <span>Rp</span>
         <InputRupiah aria-label={`Harga beli ${b.nama}`} placeholder="5.000" className={`${kecil} angka w-28`} value={hb.harga} onChange={(e) => set({ harga: e.target.value })} />
@@ -88,7 +88,7 @@ function StatusBahan({ b, ubah }) {
   }
   return (
     <p className="col-span-full -mt-1 text-xs text-kuning-tua">
-      {c.komoditas ? 'Bahan baru. Harga diambil dari harga pasar di kota Anda sampai Anda catat belanjanya.' : 'Bahan baru.'}
+      {c.komoditas ? 'Bahan baru. Memakai harga pasar di kota Anda sampai belanjanya dicatat.' : 'Bahan baru.'}
       {c.status === 'mirip' && (
         <>
           {' '}
@@ -155,8 +155,8 @@ export default function ResepEditor({ value, onChange }) {
           onChange={(e) => set('harga_jual', e.target.value)}
           hint={
             Number(value.porsi_per_batch) > 1 && Number(value.harga_jual) > 0
-              ? `Satu resep (${value.porsi_per_batch} porsi) terjual Rp${(value.harga_jual * value.porsi_per_batch).toLocaleString('id-ID')}`
-              : 'Harga satu porsi atau satu potong, bukan satu resep'
+              ? `Total satu resep (${value.porsi_per_batch} porsi): Rp${(value.harga_jual * value.porsi_per_batch).toLocaleString('id-ID')}`
+              : undefined
           }
         />
         <Field
@@ -166,13 +166,13 @@ export default function ResepEditor({ value, onChange }) {
           min="1"
           value={value.porsi_per_batch ?? 1}
           onChange={(e) => set('porsi_per_batch', e.target.value)}
-          hint="Isi 1 kalau takaran di bawah untuk satu porsi"
+          hint="Isi 1 jika takaran di bawah untuk satu porsi"
         />
       </div>
 
       <fieldset>
         <legend className="mb-1 text-sm font-medium">Bahan dan takaran</legend>
-        <p className="mb-2 text-xs text-redup">Masukkan juga kemasan per porsi (kertas nasi, cup, sedotan, kantong) karena ikut menjadi modal. Pilih dari saran nama supaya memakai harga dari catatan belanja Anda.</p>
+        <p className="mb-2 text-xs text-redup">Sertakan kemasan seperti cup, kertas nasi, atau sedotan karena termasuk modal.</p>
         <datalist id={listSatuan}>
           {SATUAN.map((s) => (
             <option key={s} value={s} />

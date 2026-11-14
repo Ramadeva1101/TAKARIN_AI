@@ -94,7 +94,6 @@ export default function ProdukBaru() {
           <Dikte
             label="Ucapkan menu"
             onTeks={(t) => setCerita((c) => (c.trim() ? `${c.trim()} ${t}` : t))}
-            contoh="Tekan, lalu bicara seperti menjelaskan ke karyawan baru. Contoh: es kopi susu dua belas ribu, kopi lima belas gram, susu kental manis dua sendok, cup plastik satu."
           />
           <div className="my-4 flex items-center gap-3 text-xs text-redup" aria-hidden>
             <span className="h-px flex-1 bg-garis" /> atau ketik <span className="h-px flex-1 bg-garis" />
@@ -106,7 +105,7 @@ export default function ProdukBaru() {
             value={cerita}
             onChange={(e) => setCerita(e.target.value)}
             placeholder={contoh}
-            hint="Sebutkan nama menu, harga jual, lalu bahan dan takaran per porsi. Kemasan juga, seperti kertas nasi, cup, sedotan, atau kantong, karena ikut menjadi modal. Takaran sdm, siung, atau potong boleh."
+            hint="Sebutkan nama menu, harga jual per porsi, serta bahan dan takarannya. Takaran sdm, siung, atau potong bisa dipakai."
           />
           <div className="mt-4 flex flex-wrap gap-2">
             <Tombol memuat={proses} onClick={susun} disabled={proses || cerita.trim().length < 10}>

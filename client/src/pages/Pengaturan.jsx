@@ -121,7 +121,7 @@ export default function Pengaturan() {
               )}
               <Field label="Target untung (%)" type="number" min="5" max="90" value={profil.target_margin} onChange={u('target_margin')} />
               <Field label="Porsi terjual per hari buka" type="number" min="1" value={profil.porsi_per_hari} onChange={u('porsi_per_hari')} />
-              <Field label="Hari buka sebulan" type="number" min="1" max="31" value={profil.hari_buka} onChange={u('hari_buka')} hint="Biaya bulanan dibagi ke hari buka." />
+              <Field label="Hari buka sebulan" type="number" min="1" max="31" value={profil.hari_buka} onChange={u('hari_buka')} hint="Biaya bulanan dibagi ke hari buka" />
             </div>
             <Pesan p={p1} />
             <Tombol type="submit" className="mt-4" memuat={menyimpan === 'profil'}>

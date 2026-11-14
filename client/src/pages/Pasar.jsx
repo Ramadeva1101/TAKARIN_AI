@@ -217,7 +217,6 @@ export default function Pasar() {
             <div className="rounded-[20px] border border-garis bg-kartu p-4">
               <p className="text-sm text-redup">Dipakai di resep Anda</p>
               <p className="angka mt-1 text-2xl font-extrabold text-biru">{dipakai.length} <span className="text-sm font-semibold">bahan</span></p>
-              <p className="text-xs text-redup">Harga belanja dibandingkan otomatis</p>
             </div>
           </div>
 
