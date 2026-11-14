@@ -4,6 +4,7 @@ import { hitungSemua } from './hpp.js';
 import { tulisCatatan, modeAi } from '../ai/provider.js';
 import { validasiAngka } from '../domain/validasiAngka.js';
 import { bersihWilayah } from '../domain/wilayah.js';
+import { trenHarga, musimHarga } from '../domain/arah.js';
 import { daftarProvinsi, daftarKota, hargaLiveAktif } from './pihps.js';
 
 const rupiah = (n) => `Rp${Math.round(n).toLocaleString('id-ID')}`;
@@ -79,6 +80,8 @@ export function hargaWilayah(usaha) {
         perubahan_harian: sebelum ? (akhir.harga - sebelum.harga) / sebelum.harga : null,
         perubahan_mingguan: minggu ? (akhir.harga - minggu.harga) / minggu.harga : null,
         riwayat: riwayat.slice(-14),
+        tren: trenHarga(riwayat),
+        musim: musimHarga(k),
         bahan: t ? [...t.bahan].map(([id, nama]) => ({ id, nama })) : [],
         menu: t ? [...t.menu].map(([id, nama]) => ({ id, nama })) : [],
       };

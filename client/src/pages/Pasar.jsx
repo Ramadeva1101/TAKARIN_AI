@@ -23,6 +23,35 @@ export function Perubahan({ nilai, ket }) {
   );
 }
 
+const TEKS_ARAH = { naik: 'Cenderung naik', turun: 'Cenderung turun', stabil: 'Cenderung stabil' };
+
+// Arah harga dari garis tren 30 hari dan pola hari besar. Sengaja tidak menampilkan angka ramalan.
+function ArahHarga({ d }) {
+  const t = d.tren;
+  if (!t && !d.musim) return null;
+  return (
+    <div className="mt-3 rounded-xl border border-garis px-3 py-2.5 text-sm">
+      <p className="font-semibold">Arah harga</p>
+      {t ? (
+        <>
+          <p className={`mt-0.5 font-semibold ${t.arah === 'naik' ? 'text-rugi' : t.arah === 'turun' ? 'text-aman' : ''}`}>
+            {TEKS_ARAH[t.arah]}
+            {t.arah !== 'stabil' && <span className="angka font-normal text-redup">{`, sekitar ${persen(Math.abs(t.perubahan_per_bulan))} sebulan`}</span>}
+          </p>
+          <p className="text-xs text-redup">
+            Dari garis tren {t.jumlah_data} data harga, {tanggal(t.dari)} sampai {tanggal(t.sampai)}.
+            {t.bergejolak && ' Harganya sering naik turun tajam, jadi arah ini kurang pasti.'}
+          </p>
+        </>
+      ) : (
+        <p className="mt-0.5 text-xs text-redup">Data harga belum cukup untuk membaca tren.</p>
+      )}
+      {d.musim && <p className="mt-2 text-xs">{d.musim.teks}</p>}
+      <p className="mt-2 text-xs text-redup">Bukan ramalan. Dibaca dari harga yang sudah terjadi dan pola tahun-tahun sebelumnya.</p>
+    </div>
+  );
+}
+
 // Panel rincian satu komoditas: harga, perubahan, grafik yang bisa disentuh, dan menu yang memakainya.
 function Rincian({ d, belanja }) {
   const punya = belanja.filter((b) => b.harga_terakhir && d.bahan.some((x) => x.id === b.id));
@@ -50,6 +79,7 @@ function Rincian({ d, belanja }) {
           <Perubahan nilai={d.perubahan_mingguan} ket="" />
         </div>
       </div>
+      <ArahHarga d={d} />
       <div className="mt-4">
         <AreaHarga data={d.riwayat} satuan={d.satuan} label={`Harga ${d.komoditas} di ${d.wilayah}, ${d.riwayat.length} data terakhir`} />
       </div>

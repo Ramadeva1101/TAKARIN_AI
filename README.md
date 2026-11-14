@@ -58,7 +58,7 @@ Takarin tidak menggantikan rumus HPP yang sudah baku. Rumus yang dipakai sama de
 5. Pencocokan bahan. Resep dan nota memakai aturan yang sama, jadi "cbe rwt" di nota tetap masuk ke "cabai rawit" di resep. Nama yang hanya mirip harus dipastikan dulu oleh pemilik, dan bahan yang tercatat dua kali bisa digabung.
 6. Satuan kemasan. "1 papan tempe = 10 potong" atau "1 kaleng susu kental manis = 18 sdm" cukup diisi sekali per bahan.
 7. Modal per porsi. Harga bahan memakai rata-rata tertimbang tiga belanja terakhir, ditambah susut bahan dan bagian biaya rutin per porsi.
-8. Harga pasar dari PIHPS Bank Indonesia untuk 13 jenis bahan pokok, di tingkat kota, provinsi, atau nasional, lengkap dengan grafik 30 hari.
+8. Harga pasar dari PIHPS Bank Indonesia untuk 13 jenis bahan pokok, di tingkat kota, provinsi, atau nasional, lengkap dengan grafik 30 hari. Setiap bahan diberi arah harga (cenderung naik, turun, atau stabil) dari garis tren 30 hari, ditambah catatan bila sedang menjelang hari besar seperti Natal atau Lebaran. Ini bukan ramalan angka, dan aplikasi menyatakannya begitu.
 9. Ringkasan: untung tiap menu dibanding target, catatan harian satu kalimat, dan saran harga jual yang bisa langsung dipakai.
 10. Coba-coba harga jual dan takaran per menu sebelum dipakai.
 11. Promo paket. Aplikasi memberi pilihan harga paket yang tidak rugi, menunjukkan berapa paket yang perlu terjual agar untung tidak turun, dan mengusulkan nama serta caption WhatsApp. Paket rugi tidak bisa disimpan.

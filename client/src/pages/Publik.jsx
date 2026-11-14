@@ -162,6 +162,10 @@ const MASALAH = [
     judul: 'Nota disimpan, tidak dihitung',
     teks: 'Nota belanja menumpuk, padahal isinya bisa menunjukkan menu mana yang masih untung.',
   },
+  {
+    judul: 'Dihitung sekali, lalu ditinggal',
+    teks: 'Hitungan modal bulan lalu sudah tidak berlaku. Kalau harus diperbarui manual, lama-lama tidak dikerjakan.',
+  },
 ];
 
 // Kalkulator kecil: berapa untung yang hilang sebulan kalau modal naik tetapi harga jual tetap.
@@ -300,7 +304,7 @@ export function Beranda() {
           dari <span className="teks-biru">Nota</span> <span className="teks-emas">Belanja</span>
         </h1>
         <p className="mx-auto mt-3 max-w-3xl text-base text-redup sm:text-lg">
-          Foto nota belanja, ucapkan, atau ketik. Takarin AI menghitung modal setiap menu dan memberi tahu harga jual yang tetap untung.
+          Harga bahan naik tiap minggu, harga jual Anda tetap. Foto nota belanja, dan Takarin AI menghitung ulang modal semua menu, termasuk takaran sendok dan siung.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Tombol to="/daftar" className="!min-h-12 px-7 text-base">
@@ -340,7 +344,7 @@ export function Beranda() {
               Untung tergerus <span className="teks-emas">tanpa terasa</span>
             </h2>
             <p className="mt-3 max-w-lg text-redup">
-              Harga jual ditentukan sekali di awal, lalu jarang dihitung ulang ketika harga bahan naik. Selisih beberapa ratus rupiah per porsi tidak terasa di kasir, tetapi terasa di akhir bulan.
+              Harga jual ditentukan sekali di awal, lalu jarang dihitung ulang ketika harga bahan naik. Cabai naik 10,6% berarti sekitar Rp170 lebih mahal per porsi ayam geprek. Dengan 50 porsi sehari, itu sekitar Rp255.000 sebulan dari satu bahan saja.
             </p>
             <figure className="mt-6 flex items-center gap-4 border-l-4 border-kuning pl-4">
               <p className="angka text-5xl font-extrabold tracking-tight text-biru">10,6%</p>
@@ -349,7 +353,7 @@ export function Beranda() {
                 <span className="block text-redup">Data Bank Indonesia, 10 November 2026</span>
               </figcaption>
             </figure>
-            <ol className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+            <ol className="mt-6 grid gap-3 text-sm sm:grid-cols-3 lg:grid-cols-1">
               {MASALAH.map(({ judul, teks }, i) => (
                 <li key={judul} className="border-t-2 border-garis pt-3">
                   <span className="angka text-xs font-bold text-biru">0{i + 1}</span>
@@ -394,10 +398,19 @@ export function Beranda() {
         </ul>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:pb-24">
+        <div className="grid gap-4 border-t border-garis pt-10 lg:grid-cols-[1fr_1.4fr] lg:gap-10">
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Tanpa isi tabel</h2>
+          <p className="text-redup sm:text-lg">
+            Kalkulator HPP dan template Excel meminta semua bahan dalam gram dan harga diketik ulang setiap kali berubah. Di Takarin cukup foto nota atau ceritakan resepnya, lalu modal semua menu ikut diperbarui.
+          </p>
+        </div>
+      </section>
+
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
           <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Hitungannya bisa dipercaya</h2>
-          <p className="mt-3 max-w-2xl text-redup">AI membantu membaca tulisan tangan, memahami ucapan, dan menyusun resep dari cerita Anda. Angka modal dan untung tetap dihitung dengan cara yang pasti.</p>
+          <p className="mt-3 max-w-2xl text-redup">AI hanya membaca nota, ucapan, dan cerita Anda. Semua angka modal dan untung dihitung dengan rumus HPP standar dari buku dan jurnal costing, lalu Anda periksa sebelum disimpan.</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {PRINSIP.map(([Ikon, judul, teks]) => (
               <li key={judul} className="flex gap-4 rounded-[20px] border border-white bg-white/80 p-5 shadow-kartu">
