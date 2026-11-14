@@ -54,7 +54,7 @@ export function PublikLayout() {
     return () => window.removeEventListener('scroll', cek);
   }, [pathname]);
   const aktif = (to) => (to.includes('#') ? to === `/#${bagian}` : pathname === to && !bagian);
-  // Menu burger di HP: panel setengah layar dari kanan.
+  // Menu burger di HP: kartu selebar layar di bagian atas.
   const [buka, setBuka] = useState(false);
   useEffect(() => setBuka(false), [pathname, hash]);
   useEffect(() => {
@@ -111,7 +111,7 @@ export function PublikLayout() {
       {buka && (
         <div className="fixed inset-0 z-30 md:hidden">
           <button type="button" aria-label="Tutup menu" onClick={() => setBuka(false)} className="absolute inset-0 bg-tinta/30" />
-          <nav id="menu-hp" aria-label="Menu situs" className="absolute top-3 right-3 flex w-1/2 min-w-56 flex-col rounded-2xl border border-garis bg-kartu p-2 shadow-xl">
+          <nav id="menu-hp" aria-label="Menu situs" className="absolute inset-x-3 top-3 flex flex-col rounded-2xl border border-garis bg-kartu p-2 shadow-xl">
             <button type="button" onClick={() => setBuka(false)} aria-label="Tutup menu" className="inline-flex size-11 items-center justify-center self-end rounded-full hover:bg-dasar">
               <X size={22} weight="bold" aria-hidden />
             </button>
