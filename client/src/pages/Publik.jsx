@@ -19,10 +19,6 @@ import {
   ChartLineUp,
   Scales,
   MapPin,
-  ShieldCheck,
-  UserCheck,
-  Leaf,
-  Database,
 } from '@phosphor-icons/react';
 import { Chip, IkonKotak, Merek, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
@@ -207,22 +203,22 @@ function Kebocoran() {
 
 const LANGKAH = [
   {
-    judul: 'Ceritakan menu',
-    teks: 'Ketik atau ucapkan menu Anda seperti bercerita: harga jualnya, bahannya, dan takarannya. Takarin AI mengubahnya menjadi resep yang bisa Anda periksa.',
-    gambar: '/langkah-menu.webp',
-    alt: 'Halaman Tambah menu: resep ayam geprek hasil susunan AI, setiap bahan terhubung ke harga dari catatan belanja.',
+    judul: 'Catat belanja',
+    teks: 'Foto nota, ucapkan, atau ketik belanjaan seperti biasa. Harga yang jauh dari belanja sebelumnya atau dari harga pasar ditandai, jadi salah baca ketahuan sebelum disimpan.',
+    gambar: '/langkah-belanja.webp',
+    alt: 'Halaman Periksa belanja: ayam, cabe rawit, dan bawang putih dengan tanda Wajar atau Di atas pasar, lalu tepung bumbu berwarna kuning karena isi bungkusnya belum diisi.',
   },
   {
-    judul: 'Catat belanja',
-    teks: 'Foto nota, ucapkan, atau ketik belanjaan. Yang meragukan diberi warna kuning supaya Anda cek dulu sebelum disimpan.',
-    gambar: '/langkah-belanja.webp',
-    alt: 'Halaman Periksa belanja: hasil baca ucapan menjadi baris bawang, daun bawang, dan daging ayam, dengan baris yang perlu dicek berwarna kuning.',
+    judul: 'Ceritakan menu',
+    teks: 'Sebutkan harga jual dan bahan per porsi seperti menjelaskan ke karyawan. Setiap bahan langsung tersambung ke harga belanja Anda. Bahan yang belum pernah dibeli memakai harga pasar di kota Anda.',
+    gambar: '/langkah-menu.webp',
+    alt: 'Halaman Tambah menu: resep ayam geprek Rp15.000 hasil susunan AI, setiap bahan terhubung ke harga dari catatan belanja.',
   },
   {
     judul: 'Lihat modal dan untung',
-    teks: 'Modal tiap porsi dihitung dari harga yang Anda bayar. Kalau bahannya belum pernah Anda beli, dipakai harga pasar di kota Anda. Menu yang untungnya kurang langsung ditandai.',
+    teks: 'Modal per porsi dan untungnya langsung terlihat, lengkap dengan rincian per bahan. Setiap kali Anda mencatat belanja lagi, modal semua menu ikut diperbarui.',
     gambar: '/langkah-modal.webp',
-    alt: 'Halaman menu Ayam Geprek: modal per porsi Rp7.721, harga jual Rp15.000, untung 48,5%, dan rincian biaya tiap bahan.',
+    alt: 'Halaman menu Ayam Geprek: modal per porsi Rp8.708, harga jual Rp15.000, untung 41,9%, dan rincian biaya tiap bahan.',
   },
 ];
 
@@ -287,10 +283,9 @@ const FITUR = [
 ];
 
 const PRINSIP = [
-  [ShieldCheck, 'Angka modal tidak ditebak', 'Modal dan untung selalu dihitung dengan cara yang sama. AI hanya membantu membaca nota dan ucapan Anda.'],
-  [UserCheck, 'Anda yang memutuskan', 'Hasil baca nota atau ucapan ditunjukkan dulu. Anda bisa membetulkannya sebelum disimpan.'],
-  [Leaf, 'Hemat kuota', 'Foto nota diperkecil di HP sebelum dikirim, jadi tidak boros kuota internet.'],
-  [Database, 'Harga pasar dari sumber resmi', 'Harga pasar diambil dari Bank Indonesia, lengkap dengan tanggalnya.'],
+  ['Rumusnya rumus HPP biasa', 'Modal per porsi adalah biaya bahan yang terpakai ditambah bagian biaya gas, listrik, sewa, dan gaji. Cara hitung ini sama dengan yang dipakai di buku dan jurnal akuntansi biaya.'],
+  ['AI tidak menghitung uang', 'AI hanya mengubah nota, ucapan, dan cerita Anda menjadi daftar bahan. Hasilnya Anda periksa dulu, lalu program yang menghitung modal dan untung.'],
+  ['Harga pasar dari Bank Indonesia', 'Bahan yang belum pernah Anda beli memakai harga PIHPS Bank Indonesia di kota Anda, lengkap dengan tanggal datanya.'],
 ];
 
 export function Beranda() {
@@ -373,7 +368,7 @@ export function Beranda() {
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               Cukup <span className="teks-biru">3 Langkah</span> <span className="teks-emas">Mudah</span>
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-redup">Isi menu sekali. Setelah itu Anda cukup mencatat belanja, sisanya dihitung otomatis.</p>
+            <p className="mx-auto mt-2 max-w-2xl text-redup">Catat belanja seperti biasa dan ceritakan menu sekali. Setelah itu modal dihitung ulang setiap kali Anda belanja.</p>
           </div>
           <CaraKerja />
         </div>
@@ -409,19 +404,15 @@ export function Beranda() {
 
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
-          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Hitungannya bisa dipercaya</h2>
-          <p className="mt-3 max-w-2xl text-redup">AI hanya membaca nota, ucapan, dan cerita Anda. Semua angka modal dan untung dihitung dengan rumus HPP standar dari buku dan jurnal costing, lalu Anda periksa sebelum disimpan.</p>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-            {PRINSIP.map(([Ikon, judul, teks]) => (
-              <li key={judul} className="flex gap-4 rounded-[20px] border border-white bg-white/80 p-5 shadow-kartu">
-                <IkonKotak ikon={Ikon} warna="biru" />
-                <div>
-                  <h3 className="font-semibold">{judul}</h3>
-                  <p className="mt-1 text-sm text-redup">{teks}</p>
-                </div>
-              </li>
+          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Dari mana angkanya</h2>
+          <dl className="mt-8 grid gap-8 sm:grid-cols-3">
+            {PRINSIP.map(([judul, teks]) => (
+              <div key={judul} className="border-t-2 border-biru pt-4">
+                <dt className="font-semibold">{judul}</dt>
+                <dd className="mt-1 text-sm text-redup">{teks}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
         </div>
       </section>
 
