@@ -79,8 +79,13 @@ export default function Masuk({ mode }) {
           <Link to="/" className="inline-flex min-h-11 items-center lg:hidden">
             <Merek className="text-xl" />
           </Link>
-          <Link to="/" className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-1 text-sm font-semibold text-redup hover:text-biru">
-            <ArrowLeft size={18} weight="bold" aria-hidden /> Kembali ke beranda
+          <Link
+            to="/"
+            className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-garis bg-kartu px-3.5 text-sm font-semibold whitespace-nowrap text-tinta hover:border-biru/40 hover:text-biru"
+          >
+            <ArrowLeft size={16} weight="bold" aria-hidden />
+            <span className="hidden min-[360px]:inline">Kembali ke beranda</span>
+            <span className="min-[360px]:hidden">Beranda</span>
           </Link>
         </div>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8">
