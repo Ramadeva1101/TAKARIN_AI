@@ -15,9 +15,17 @@ Kategori Web, subtema UMKM. Dibuat untuk LOGICODIX 2026.
 
 ## Masalah yang kami angkat
 
-Kebanyakan warung menentukan harga jual sekali di awal, lalu jarang menghitungnya lagi. Padahal harga bahan berubah tiap minggu. Cabai rawit merah di Denpasar, misalnya, naik 10,6% dalam seminggu menurut PIHPS Bank Indonesia. Selisih beberapa ratus rupiah per porsi tidak terasa di kasir, tetapi terasa di akhir bulan.
+Kebanyakan warung menentukan harga jual sekali di awal, lalu jarang menghitungnya lagi. Padahal harga bahan berubah tiap minggu. Cabai rawit merah di Denpasar, misalnya, naik 10,6% dalam seminggu menurut PIHPS Bank Indonesia.
 
-Ada dua hal yang membuat hitungan ini sulit dikerjakan sendiri. Pertama, resep warung memakai sendok, siung, dan potong, bukan gram. Kedua, nota belanja biasanya hanya disimpan, tidak diolah. Beberapa penelitian tentang UMKM kuliner menemukan pola yang sama: harga ditetapkan dengan perkiraan, dan biaya seperti gas, listrik, dan tenaga kerja sering terlewat. Sumbernya kami kumpulkan di [docs/dasar-perhitungan.md](docs/dasar-perhitungan.md).
+Kerugiannya kecil per porsi, jadi tidak terasa. Ambil ayam geprek yang memakai 20 gram cabai rawit. Kalau cabai Rp80.000/kg, biaya cabai per porsi Rp1.600. Naik 10,6% berarti tambah sekitar Rp170 per porsi. Untuk warung yang menjual 50 porsi sehari, itu sekitar Rp255.000 sebulan dari satu bahan di satu menu, dan harga jualnya tetap.
+
+Pemilik warung sebenarnya bisa menghitung ini. Yang membuat mereka tidak melakukannya ada tiga:
+
+1. **Resep warung tidak memakai gram.** Takarannya sendok, siung, potong, atau "secukupnya". Kalkulator HPP dan template Excel meminta semua bahan dalam gram atau kilogram.
+2. **Nota belanja hanya disimpan.** Nota ditulis tangan, disingkat ("cbe rwt 1/4"), dan satuan belinya berbeda dengan satuan resep (beli per papan, pakai per potong). Menyalinnya ke tabel tiap hari terlalu repot.
+3. **Hitungan sekali tidak cukup.** HPP yang dihitung bulan lalu sudah tidak berlaku bulan ini. Selama pembaruannya harus manual, hitungan itu akan berhenti dilakukan.
+
+Beberapa penelitian tentang UMKM kuliner menemukan pola yang sama: harga ditetapkan dengan perkiraan, dan biaya seperti gas, listrik, dan tenaga kerja sering terlewat. Sumbernya kami kumpulkan di [docs/dasar-perhitungan.md](docs/dasar-perhitungan.md).
 
 ## Solusi
 
@@ -26,6 +34,20 @@ Pemilik usaha cukup menceritakan resepnya sekali, lewat ketikan atau suara. Sete
 Kalau sebuah bahan belum pernah dibeli, aplikasi memakai harga pasar di kota usaha dari PIHPS Bank Indonesia. Kalau bahan itu juga tidak ada di data pasar (tahu, kecap, sosis, dan sejenisnya), pemilik diminta mengisi harga beli terakhirnya. Harga perkiraan itu otomatis diganti begitu belanja sungguhan dicatat.
 
 Sasaran penggunanya pemilik warung makan, kedai minuman, katering rumahan, dan penjual jajanan yang belum memakai pembukuan digital.
+
+## Apa bedanya dengan cara yang sudah ada
+
+| | Template Excel atau kalkulator HPP | Aplikasi kasir dan inventori | Takarin AI |
+|---|---|---|---|
+| Cara memasukkan resep | Isi tabel, semua dalam gram | Isi form per bahan | Ceritakan atau ucapkan, lalu periksa hasilnya |
+| Takaran sendok, siung, potong | Harus dikonversi sendiri | Umumnya harus dikonversi sendiri | Dikonversi otomatis dengan tabel URT, bisa diubah per bahan |
+| Harga bahan diperbarui | Diketik ulang manual | Dari input pembelian lewat form | Dari foto nota, suara, atau ketikan bebas |
+| Bahan yang belum pernah dibeli | Kosong | Kosong | Harga pasar kota dari PIHPS Bank Indonesia |
+| Modal semua menu ikut berubah | Tidak, harus dibuka satu per satu | Tergantung aplikasi | Ya, setiap kali belanja dicatat |
+| Saran harga jual dan promo yang tidak rugi | Tidak ada | Biasanya tidak ada | Ada, dengan batas harga minimal |
+| Biaya | Gratis, tetapi semua manual | Umumnya berlangganan dan dirancang untuk usaha yang sudah memakai kasir | Hanya butuh HP dan browser |
+
+Takarin tidak menggantikan rumus HPP yang sudah baku. Rumus yang dipakai sama dengan buku dan jurnal costing, dan semua angka uang dihitung oleh kode, bukan oleh AI. Yang berbeda adalah cara datanya masuk. AI mengubah nota, suara, dan cerita menjadi data, sehingga pemilik warung tidak perlu mengisi tabel. Hasil bacaan AI selalu diperiksa pemilik sebelum disimpan, dan kalau AI sedang tidak tersedia, semua hitungan dan isian manual tetap berjalan.
 
 ## Fitur yang sudah jalan
 
@@ -38,7 +60,7 @@ Sasaran penggunanya pemilik warung makan, kedai minuman, katering rumahan, dan p
 7. Modal per porsi. Harga bahan memakai rata-rata tertimbang tiga belanja terakhir, ditambah susut bahan dan bagian biaya rutin per porsi.
 8. Harga pasar dari PIHPS Bank Indonesia untuk 13 jenis bahan pokok, di tingkat kota, provinsi, atau nasional, lengkap dengan grafik 30 hari.
 9. Ringkasan: untung tiap menu dibanding target, catatan harian satu kalimat, dan saran harga jual yang bisa langsung dipakai.
-10. Coba-coba harga per menu, tanpa disimpan.
+10. Coba-coba harga jual dan takaran per menu sebelum dipakai.
 11. Promo paket. Aplikasi memberi pilihan harga paket yang tidak rugi, menunjukkan berapa paket yang perlu terjual agar untung tidak turun, dan mengusulkan nama serta caption WhatsApp. Paket rugi tidak bisa disimpan.
 
 ## Teknologi
@@ -50,7 +72,7 @@ Sasaran penggunanya pemilik warung makan, kedai minuman, katering rumahan, dan p
 | Database | SQLite bawaan Node (`node:sqlite`) |
 | AI | KelontongAI (gateway model dengan API yang kompatibel OpenAI), Groq Whisper untuk suara |
 | Data luar | PIHPS Nasional, Bank Indonesia |
-| Tes | Vitest, 54 tes unit dan API |
+| Tes | Vitest, 56 tes unit dan API |
 
 ## Arsitektur
 
