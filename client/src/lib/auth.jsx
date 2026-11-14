@@ -37,3 +37,7 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthCtx);
+
+// Halaman tujuan setelah onboarding selesai. Dibaca oleh penjaga rute /mulai, karena penjaga itu
+// yang lebih dulu memindahkan pengguna begitu profil usaha tersimpan.
+export const arahSetelahMulai = { ke: null };

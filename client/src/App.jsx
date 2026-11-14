@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './lib/auth.jsx';
+import { AuthProvider, arahSetelahMulai, useAuth } from './lib/auth.jsx';
 import { Muat } from './components/ui.jsx';
 import Layout from './components/Layout.jsx';
 import Masuk from './pages/Masuk.jsx';
@@ -37,7 +37,7 @@ function Gerbang({ children }) {
   const { siap, user, usaha } = useAuth();
   if (!siap) return <Muat penuh />;
   if (!user) return <Navigate to="/masuk" replace />;
-  if (usaha?.setup_selesai) return <Navigate to="/" replace />;
+  if (usaha?.setup_selesai) return <Navigate to={arahSetelahMulai.ke || '/'} replace />;
   return children;
 }
 

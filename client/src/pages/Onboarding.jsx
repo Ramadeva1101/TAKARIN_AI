@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { CheckCircle, WarningCircle } from '@phosphor-icons/react';
 import BiayaRutin, { biayaValid } from '../components/BiayaRutin.jsx';
 import { api, pesanGalat } from '../lib/api.js';
-import { useAuth } from '../lib/auth.jsx';
+import { arahSetelahMulai, useAuth } from '../lib/auth.jsx';
 import { Field, Kartu, Merek, Tombol, inputCls } from '../components/ui.jsx';
 import { JENIS } from '../lib/jenis.js';
 
@@ -32,7 +31,6 @@ function Pilihan({ aktif, onClick, judul, ket }) {
 
 export default function Onboarding() {
   const { user, segarkan, keluar } = useAuth();
-  const nav = useNavigate();
   const [langkah, setLangkah] = useState(0);
   const [wilayah, setWilayah] = useState({ kota: [], provinsi: [] });
   const bersih = (s) => s.toLowerCase().replace(/^(kota administrasi|kota|kabupaten|kab\.?)\s+/, '').trim();
@@ -99,9 +97,9 @@ export default function Onboarding() {
           biaya: biayaSurvei(),
         },
       });
-      await segarkan();
       // Pengguna baru mulai dari catat belanja, supaya resep yang dibuat sesudahnya langsung memakai harga yang dibayar.
-      nav('/belanja/baru?awal=1', { replace: true });
+      arahSetelahMulai.ke = '/belanja/baru?awal=1';
+      await segarkan();
     } catch (err) {
       setGalat(pesanGalat(err));
       setProses(false);
