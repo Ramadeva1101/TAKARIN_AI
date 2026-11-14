@@ -19,6 +19,8 @@ import {
   ChartLineUp,
   Scales,
   MapPin,
+  List,
+  X,
 } from '@phosphor-icons/react';
 import { Chip, IkonKotak, Merek, Tombol } from '../components/ui.jsx';
 import Garis from '../components/Garis.jsx';
@@ -52,6 +54,19 @@ export function PublikLayout() {
     return () => window.removeEventListener('scroll', cek);
   }, [pathname]);
   const aktif = (to) => (to.includes('#') ? to === `/#${bagian}` : pathname === to && !bagian);
+  // Menu burger di HP: panel setengah layar dari kanan.
+  const [buka, setBuka] = useState(false);
+  useEffect(() => setBuka(false), [pathname, hash]);
+  useEffect(() => {
+    if (!buka) return;
+    const tutup = (e) => e.key === 'Escape' && setBuka(false);
+    document.addEventListener('keydown', tutup);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', tutup);
+      document.body.style.overflow = '';
+    };
+  }, [buka]);
   return (
     <div className="latar-merek flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md">
@@ -79,9 +94,44 @@ export function PublikLayout() {
             <Tombol to="/daftar" className="!px-4 sm:!px-5">
               Daftar
             </Tombol>
+            <button
+              type="button"
+              onClick={() => setBuka(true)}
+              aria-label="Buka menu"
+              aria-expanded={buka}
+              aria-controls="menu-hp"
+              className="-mr-2 inline-flex size-11 items-center justify-center rounded-full text-tinta hover:bg-dasar md:hidden"
+            >
+              <List size={24} weight="bold" aria-hidden />
+            </button>
           </div>
         </div>
       </header>
+      {/* Di luar header: backdrop-blur pada header membuat elemen fixed di dalamnya ikut terkurung. */}
+      {buka && (
+        <div className="fixed inset-0 z-30 md:hidden">
+          <button type="button" aria-label="Tutup menu" onClick={() => setBuka(false)} className="absolute inset-0 bg-tinta/30" />
+          <nav id="menu-hp" aria-label="Menu situs" className="absolute inset-y-0 right-0 flex w-1/2 min-w-56 flex-col bg-kartu px-4 py-3 shadow-xl">
+            <button type="button" onClick={() => setBuka(false)} aria-label="Tutup menu" className="-mr-2 inline-flex size-11 items-center justify-center self-end rounded-full hover:bg-dasar">
+              <X size={22} weight="bold" aria-hidden />
+            </button>
+            <ul className="mt-2 flex flex-col">
+              {MENU_SITUS.map(([to, label]) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    onClick={() => setBuka(false)}
+                    aria-current={aktif(to) ? 'page' : undefined}
+                    className={`flex min-h-12 items-center rounded-xl px-3 text-base font-medium ${aktif(to) ? 'bg-biru-muda text-biru-tua' : 'text-tinta hover:bg-dasar'}`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      )}
       <div className="flex-1">
         <Outlet />
       </div>
