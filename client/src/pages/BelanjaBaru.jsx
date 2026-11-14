@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import { Camera, Images, Microphone, TextAa, PencilSimple } from '@phosphor-icons/react';
 import { api, pesanGalat } from '../lib/api.js';
@@ -172,6 +172,7 @@ function Manual({ kirim, proses }) {
 
 export default function BelanjaBaru() {
   const nav = useNavigate();
+  const awal = useSearchParams()[0].get('awal') === '1';
   const [cara, setCara] = useState('foto');
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState(null);
@@ -181,7 +182,7 @@ export default function BelanjaBaru() {
     setGalat(null);
     try {
       const draf = await api(path, { method: 'POST', ...opsi });
-      nav(`/belanja/${draf.id}`);
+      nav(`/belanja/${draf.id}${awal ? '?awal=1' : ''}`);
     } catch (err) {
       setGalat({ pesan: pesanGalat(err), manual: err.data?.bisa_manual });
       setProses(false);
@@ -192,7 +193,11 @@ export default function BelanjaBaru() {
 
   return (
     <>
-      <Judul judul="Catat belanja" sub="Pilih cara yang paling mudah. Anda akan memeriksa hasilnya sebelum disimpan." kembali="/belanja" />
+      <Judul
+        judul={awal ? 'Catat belanja terakhir Anda' : 'Catat belanja'}
+        sub={awal ? 'Profil usaha sudah tersimpan. Catat belanja bahan terakhir supaya modal menu memakai harga yang Anda bayar.' : 'Pilih cara yang paling mudah. Anda akan memeriksa hasilnya sebelum disimpan.'}
+        kembali={awal ? undefined : '/belanja'}
+      />
       <div role="tablist" aria-label="Cara mencatat" className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {CARA.map(({ id, label, ikon: Ikon }) => (
           <button
@@ -222,6 +227,14 @@ export default function BelanjaBaru() {
           </div>
         )}
       </Kartu>
+      {awal && (
+        <p className="mt-6 text-sm text-redup">
+          Nota belanja tidak ada?{' '}
+          <Link to="/produk/baru?awal=1" replace className="inline-flex min-h-11 items-center font-semibold text-biru">
+            Langsung tambah menu
+          </Link>
+        </p>
+      )}
     </>
   );
 }

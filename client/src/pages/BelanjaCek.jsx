@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Trash, WarningCircle } from '@phosphor-icons/react';
 import { useApi } from '../lib/hooks.js';
 import { api, persen, pesanGalat, rupiah, tanggal } from '../lib/api.js';
@@ -41,7 +41,7 @@ function Acuan({ it }) {
   );
 }
 
-function Dampak({ hasil }) {
+function Dampak({ hasil, awal }) {
   const { dampak, ringkasan } = hasil;
   return (
     <Kartu className="border-biru/40">
@@ -73,8 +73,8 @@ function Dampak({ hasil }) {
         </ul>
       )}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Tombol to="/">Ke ringkasan</Tombol>
-        <Tombol varian="garis" to="/belanja/baru">
+        {awal ? <Tombol to="/produk/baru?awal=1">Lanjut tambah menu</Tombol> : <Tombol to="/">Ke ringkasan</Tombol>}
+        <Tombol varian="garis" to={awal ? '/belanja/baru?awal=1' : '/belanja/baru'}>
           Catat belanja lain
         </Tombol>
       </div>
@@ -119,6 +119,7 @@ export default function BelanjaCek() {
   const [toko, setToko] = useState('');
   const [tgl, setTgl] = useState('');
   const [hasil, setHasil] = useState(null);
+  const awal = useSearchParams()[0].get('awal') === '1';
   const [galat, setGalat] = useState(null);
   const [proses, setProses] = useState(false);
   const [menghapus, setMenghapus] = useState(false);
@@ -132,7 +133,7 @@ export default function BelanjaCek() {
 
   if (loading && !n) return <Muat />;
   if (error) return <Galat error={error} ulang={muat} />;
-  if (hasil) return <Dampak hasil={hasil} />;
+  if (hasil) return <Dampak hasil={hasil} awal={awal} />;
 
   const sumber = { foto: 'foto nota', suara: 'ucapan', teks: 'ketikan', manual: 'isian tabel' }[n.sumber];
   const hapus = async () => {

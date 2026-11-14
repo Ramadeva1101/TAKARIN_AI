@@ -73,7 +73,7 @@ export default function ProdukBaru() {
     <form onSubmit={simpan} noValidate>
       <Judul
         judul={awal ? 'Tambahkan menu pertama' : 'Tambah menu'}
-        sub={awal ? `Profil ${usaha?.nama ?? 'usaha'} sudah tersimpan. Sekarang ceritakan satu atau beberapa menu, modal per porsinya langsung dihitung.` : 'Modal per porsi dihitung dari harga belanja terakhir atau harga pasar daerah.'}
+        sub={awal ? 'Ceritakan satu atau beberapa menu. Bahan yang sudah ada di catatan belanja memakai harga itu, yang belum memakai harga pasar di kota Anda.' : 'Modal per porsi dihitung dari harga belanja terakhir atau harga pasar daerah.'}
         kembali={awal ? undefined : '/produk'}
       />
       <Segmen

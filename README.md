@@ -29,7 +29,7 @@ Beberapa penelitian tentang UMKM kuliner menemukan pola yang sama: harga ditetap
 
 ## Solusi
 
-Pemilik usaha cukup menceritakan resepnya sekali, lewat ketikan atau suara. Setelah itu pekerjaan rutinnya hanya mencatat belanja: foto nota, ucapkan, atau ketik. Takarin AI mencocokkan setiap barang di nota dengan bahan di resep, lalu menghitung ulang modal semua menu yang memakai bahan itu.
+Setelah mengisi profil usaha, pemilik mencatat belanja bahan terakhirnya: foto nota, ucapkan, atau ketik. Lalu ia menceritakan resep menunya sekali, lewat ketikan atau suara, dan setiap bahan langsung tersambung ke harga belanja itu. Urutan ini sama dengan aplikasi costing yang sudah ada, yang mulai dari harga beli bahan sebelum resep. Setelah itu pekerjaan rutinnya hanya mencatat belanja. Takarin AI mencocokkan setiap barang di nota dengan bahan di resep, lalu menghitung ulang modal semua menu yang memakai bahan itu.
 
 Kalau sebuah bahan belum pernah dibeli, aplikasi memakai harga pasar di kota usaha dari PIHPS Bank Indonesia. Kalau bahan itu juga tidak ada di data pasar (tahu, kecap, sosis, dan sejenisnya), pemilik diminta mengisi harga beli terakhirnya. Harga perkiraan itu otomatis diganti begitu belanja sungguhan dicatat.
 

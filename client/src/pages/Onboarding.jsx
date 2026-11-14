@@ -100,8 +100,8 @@ export default function Onboarding() {
         },
       });
       await segarkan();
-      // Menu dibuat setelah masuk, di halaman tambah menu.
-      nav('/produk/baru?awal=1', { replace: true });
+      // Pengguna baru mulai dari catat belanja, supaya resep yang dibuat sesudahnya langsung memakai harga yang dibayar.
+      nav('/belanja/baru?awal=1', { replace: true });
     } catch (err) {
       setGalat(pesanGalat(err));
       setProses(false);
@@ -286,7 +286,7 @@ export default function Onboarding() {
         )}
         {langkah === LANGKAH.length - 1 && (
           <Tombol memuat={proses} onClick={simpan} disabled={proses}>
-            {proses ? 'Menyimpan' : 'Simpan dan tambah menu'}
+            {proses ? 'Menyimpan' : 'Simpan dan catat belanja'}
           </Tombol>
         )}
       </div>
