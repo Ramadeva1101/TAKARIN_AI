@@ -151,16 +151,16 @@ const FAKTA = [
 
 const MASALAH = [
   {
-    judul: 'Takaran pakai sendok, bukan gram',
-    teks: 'Susah tahu berapa rupiah dua sendok gula atau tiga siung bawang.',
+    judul: 'Takaran rumah tangga',
+    teks: 'Resep warung memakai sendok, siung, dan potong, sehingga biaya per porsi sulit dihitung.',
   },
   {
-    judul: 'Nota disimpan, tidak dihitung',
-    teks: 'Nota belanja menumpuk, padahal isinya bisa menunjukkan menu mana yang masih untung.',
+    judul: 'Nota tidak diolah',
+    teks: 'Nota belanja hanya disimpan, padahal isinya menentukan menu mana yang masih menguntungkan.',
   },
   {
-    judul: 'Dihitung sekali, lalu ditinggal',
-    teks: 'Hitungan modal bulan lalu sudah tidak berlaku. Kalau harus diperbarui manual, lama-lama tidak dikerjakan.',
+    judul: 'HPP cepat usang',
+    teks: 'Harga bahan berubah setiap minggu. Perhitungan yang diperbarui manual cenderung berhenti dilakukan.',
   },
 ];
 
@@ -269,23 +269,22 @@ function CaraKerja() {
           </div>
           <img key={l.gambar} src={l.gambar} width="1930" height="1222" alt={l.alt} loading="lazy" className="block aspect-[1930/1222] h-auto w-full object-cover object-top" />
         </div>
-        <figcaption className="mt-2 text-xs text-redup">Tangkapan layar aplikasi dengan akun demo.</figcaption>
       </figure>
     </div>
   );
 }
 
 const FITUR = [
-  { ikon: Camera, warna: 'biru', judul: 'Nota tulisan tangan tetap terbaca', teks: 'Singkatan seperti "cbe rwt" tetap dikenali. Bicara biasa juga bisa, misalnya "ayam goceng, eh salah, ceban".' },
-  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar di kota Anda', teks: 'Lihat harga cabai, bawang, ayam, dan bahan lain di pasar kota Anda, supaya tahu belanjaan Anda kemahalan atau tidak.' },
-  { ikon: Calculator, warna: 'aman', judul: 'Saran harga jual', teks: 'Geser harga jual dan lihat untungnya langsung berubah. Kalau ada menu yang kurang untung, Takarin AI menyarankan harga baru yang bisa dipakai dengan satu ketukan.' },
-  { ikon: Tag, warna: 'rugi', judul: 'Promo paket yang tetap untung', teks: 'Gabungkan beberapa menu jadi satu paket. Takarin AI memberi pilihan harga yang tidak rugi dan membuatkan teks promo untuk status WhatsApp.' },
+  { ikon: Camera, warna: 'biru', judul: 'Nota tulisan tangan terbaca', teks: 'Singkatan seperti "cbe rwt" dan nominal lisan seperti "goceng" atau "ceban" dikenali otomatis.' },
+  { ikon: Storefront, warna: 'kuning', judul: 'Harga pasar per kota', teks: 'Pantau harga cabai, bawang, ayam, dan bahan pokok lain di kota Anda sebagai pembanding harga belanja.' },
+  { ikon: Calculator, warna: 'aman', judul: 'Saran harga jual', teks: 'Simulasikan harga jual dan takaran, lalu lihat dampaknya pada margin. Menu dengan margin di bawah target mendapat rekomendasi harga baru.' },
+  { ikon: Tag, warna: 'rugi', judul: 'Promo paket tanpa rugi', teks: 'Susun paket dari beberapa menu dengan pilihan harga yang tetap di atas modal, lengkap dengan teks promo untuk WhatsApp.' },
 ];
 
 const PRINSIP = [
-  ['Rumusnya rumus HPP biasa', 'Modal per porsi adalah biaya bahan yang terpakai ditambah bagian biaya gas, listrik, sewa, dan gaji. Cara hitung ini sama dengan yang dipakai di buku dan jurnal akuntansi biaya.'],
-  ['AI tidak menghitung uang', 'AI hanya mengubah nota, ucapan, dan cerita Anda menjadi daftar bahan. Hasilnya Anda periksa dulu, lalu program yang menghitung modal dan untung.'],
-  ['Harga pasar dari Bank Indonesia', 'Bahan yang belum pernah Anda beli memakai harga PIHPS Bank Indonesia di kota Anda, lengkap dengan tanggal datanya.'],
+  ['Metode HPP standar', 'Modal per porsi mencakup biaya bahan sesuai resep dan alokasi biaya operasional seperti gas, listrik, sewa, dan gaji.'],
+  ['AI membaca, sistem menghitung', 'AI mengubah nota, ucapan, dan cerita menu menjadi data. Perhitungan modal dan margin dilakukan sistem setelah data Anda periksa.'],
+  ['Acuan harga resmi', 'Bahan yang belum pernah dibeli memakai harga PIHPS Bank Indonesia di kota Anda, lengkap dengan tanggal pembaruannya.'],
 ];
 
 export function Beranda() {
@@ -404,7 +403,7 @@ export function Beranda() {
 
       <section className="border-y border-garis bg-gradient-to-br from-biru-muda via-white to-kuning-muda/50">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
-          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Dari mana angkanya</h2>
+          <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Hitungan yang transparan</h2>
           <dl className="mt-8 grid gap-8 sm:grid-cols-3">
             {PRINSIP.map(([judul, teks]) => (
               <div key={judul} className="border-t-2 border-biru pt-4">

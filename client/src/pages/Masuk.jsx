@@ -38,7 +38,6 @@ function Panel() {
       <div className="relative mt-16">
         <p className="max-w-md text-[28px] leading-tight font-bold">Modal tiap porsi, dihitung dari nota belanja Anda.</p>
         <p className="mt-3 max-w-md text-white/80">Foto nota, ucapkan, atau ketik belanjaan. Untung setiap menu diperbarui dan dibandingkan dengan harga pasar di kota Anda.</p>
-        <p className="mt-4 text-xs text-white/60">Tangkapan layar halaman Ringkasan dengan akun demo.</p>
       </div>
     </div>
   );
