@@ -96,7 +96,11 @@ export function penangananGalat(err, _req, res, _next) {
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ pesan: err.code === 'LIMIT_FILE_SIZE' ? 'Ukuran file terlalu besar' : err.message });
   }
-  if (err instanceof AiError) return res.status(503).json({ pesan: err.message, detail: err.detail, bisa_manual: true });
+  if (err instanceof AiError) {
+    // Pesan mentah dari penyedia AI hanya untuk log server, tidak dikirim ke pengguna.
+    if (err.detail?.length) console.error('AI gagal:', JSON.stringify(err.detail));
+    return res.status(503).json({ pesan: err.message, bisa_manual: true });
+  }
   if (err instanceof AppError) return res.status(err.status).json({ pesan: err.message });
   console.error(err);
   return res.status(500).json({ pesan: 'Terjadi kesalahan di server' });

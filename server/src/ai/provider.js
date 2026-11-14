@@ -72,7 +72,8 @@ async function giliran(kerja) {
 
 const tunggu = (ms) => new Promise((r) => setTimeout(r, ms));
 // Sibuk sementara: layak dicoba lagi. Model yang kuotanya habis (400) langsung diganti cadangan.
-export const sedangSibuk = (err) => [429, 503].includes(err?.status) && !/kuota penyedia|habis/i.test(String(err?.message));
+// 502/504 biasanya gangguan sesaat di gerbang penyedia, jadi diperlakukan sama.
+export const sedangSibuk = (err) => [429, 500, 502, 503, 504].includes(err?.status) && !/kuota penyedia|habis/i.test(String(err?.message));
 
 async function cobaModel(models, kerja) {
   if (!models.length) throw new AiError('Nama model AI belum diisi di server/.env');
@@ -86,12 +87,18 @@ async function cobaModel(models, kerja) {
           await tunggu(1500 * (ulang + 1));
           continue;
         }
-        gagal.push({ model, pesan: String(err?.message || err).slice(0, 200) });
+        gagal.push({ model, sibuk: sedangSibuk(err), pesan: String(err?.message || err).slice(0, 200) });
         break;
       }
     }
   }
-  throw new AiError('Layanan AI sedang tidak bisa dipakai. Coba lagi atau isi manual.', gagal);
+  const ramai = gagal.every((g) => g.sibuk);
+  throw new AiError(
+    ramai
+      ? 'Takarin AI sedang ramai dipakai. Tunggu sebentar lalu coba lagi, atau isi bahannya sendiri.'
+      : 'Takarin AI sedang tidak bisa dipakai. Coba lagi nanti, atau isi bahannya sendiri.',
+    gagal,
+  );
 }
 
 async function chatJson(models, messages, schema) {
