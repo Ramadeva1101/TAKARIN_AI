@@ -148,7 +148,17 @@ export default function ResepEditor({ value, onChange }) {
     <div className="flex flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <Field label="Nama menu" value={value.nama} onChange={(e) => set('nama', e.target.value)} className="sm:col-span-1" />
-        <Field label="Harga jual (Rp)" rupiah value={value.harga_jual ?? ''} onChange={(e) => set('harga_jual', e.target.value)} />
+        <Field
+          label="Harga jual per porsi (Rp)"
+          rupiah
+          value={value.harga_jual ?? ''}
+          onChange={(e) => set('harga_jual', e.target.value)}
+          hint={
+            Number(value.porsi_per_batch) > 1 && Number(value.harga_jual) > 0
+              ? `Satu resep (${value.porsi_per_batch} porsi) terjual Rp${(value.harga_jual * value.porsi_per_batch).toLocaleString('id-ID')}`
+              : 'Harga satu porsi atau satu potong, bukan satu resep'
+          }
+        />
         <Field
           label="Resep ini jadi berapa porsi"
           type="number"
