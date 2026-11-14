@@ -76,7 +76,7 @@ Takarin tidak menggantikan rumus HPP yang sudah baku. Rumus yang dipakai sama de
 | Database | SQLite bawaan Node (`node:sqlite`) |
 | AI | KelontongAI (gateway model dengan API yang kompatibel OpenAI), Groq Whisper untuk suara |
 | Data luar | PIHPS Nasional, Bank Indonesia |
-| Tes | Vitest, 56 tes unit dan API |
+| Tes | Vitest, 60 tes unit dan API |
 
 ## Arsitektur
 
@@ -121,9 +121,98 @@ server/            backend Express
 docs/              dasar perhitungan dan sumber
 ```
 
-## Menjalankan di komputer sendiri
+## Dokumentasi frontend
 
-Butuh Node.js 24 (minimal 22.5, karena memakai `node:sqlite`) dan npm.
+Frontend ada di `client/`, dibuat dengan **React 19** dan **Vite**. Navigasi memakai **React Router**, tampilan memakai **Tailwind CSS 4**, grafik memakai **Recharts**, dan ikon memakai **Phosphor Icons**. Foto nota diperkecil di browser dengan `browser-image-compression` sebelum diunggah.
+
+### Halaman (`client/src/pages/`)
+
+| File | Rute | Isi |
+|---|---|---|
+| `Publik.jsx` | `/`, `/tentang`, `/bantuan`, `/privasi`, `/syarat` | Beranda untuk tamu, halaman informasi, dan pusat bantuan |
+| `Masuk.jsx` | `/masuk`, `/daftar` | Masuk dan daftar akun, termasuk tombol akun demo |
+| `Onboarding.jsx` | `/mulai` | Empat pertanyaan awal: jenis usaha, lokasi, penjualan, biaya rutin |
+| `Dashboard.jsx` | `/` (sesudah masuk) | Ringkasan untung per menu, harga pasar bahan, catatan harian, saran harga |
+| `BelanjaBaru.jsx` | `/belanja/baru` | Catat belanja dari foto nota, ucapan, ketikan, atau tabel |
+| `BelanjaCek.jsx` | `/belanja/:id` | Memeriksa hasil bacaan sebelum disimpan, lalu dampaknya ke modal menu |
+| `Belanja.jsx` | `/belanja` | Riwayat belanja |
+| `ProdukBaru.jsx` | `/produk/baru` | Tambah menu dengan bercerita atau isi manual |
+| `ProdukDetail.jsx` | `/produk/:id` | Modal per porsi, rincian bahan, coba-coba harga dan takaran |
+| `Produk.jsx` | `/produk` | Daftar menu |
+| `Bahan.jsx`, `BahanDetail.jsx` | `/bahan`, `/bahan/:id` | Daftar bahan baku, riwayat harga, susut, dan isi kemasan |
+| `Pasar.jsx` | `/pasar` | Harga pasar PIHPS per kota beserta arah harga 30 hari |
+| `Promo.jsx` | `/promo` | Promo paket dengan pilihan harga yang tidak rugi |
+| `Pengaturan.jsx` | `/pengaturan` | Profil usaha, target untung, dan biaya rutin |
+
+### Komponen dan modul bersama
+
+| Lokasi | Isi |
+|---|---|
+| `components/ui.jsx` | Komponen dasar: tombol, kartu, isian, isian rupiah, chip status |
+| `components/Layout.jsx` | Kerangka aplikasi: menu samping di laptop, menu bawah di HP |
+| `components/ResepEditor.jsx` | Editor resep yang menghubungkan tiap bahan ke harga belanja |
+| `components/IsiSatuan.jsx` | Pertanyaan isi kemasan, misalnya "1 papan = 10 potong" |
+| `components/BiayaRutin.jsx` | Isian biaya rutin seperti gas, listrik, dan sewa |
+| `components/Dikte.jsx` | Rekam suara untuk diubah menjadi teks |
+| `components/Chart.jsx`, `Grafik.jsx`, `Garis.jsx` | Grafik harga dan untung |
+| `lib/api.js` | Pemanggilan API, penyimpanan token, format rupiah dan tanggal |
+| `lib/auth.jsx` | Status login dan data usaha |
+| `lib/cocok.js`, `lib/harga.js`, `lib/jenis.js`, `lib/hooks.js` | Pencocokan nama bahan, format harga, daftar jenis usaha, hook data |
+
+### Aset (`client/public/`)
+
+Logo (`logo-takarin.webp`, `logo-tanda.webp`, `logo-asli.webp`), ikon tab (`favicon.png`), dan tangkapan layar aplikasi untuk beranda (`tangkapan-ringkasan.webp`, `langkah-belanja.webp`, `langkah-menu.webp`, `langkah-modal.webp`). Semua gambar dibuat sendiri dari aplikasi ini.
+
+## Dokumentasi backend
+
+Backend ada di `server/`, dibuat dengan **Express 5** di **Node.js**. Database memakai **SQLite** bawaan Node (`node:sqlite`), input divalidasi dengan **zod**, password disimpan dengan **bcrypt**, login memakai **JWT**, dan unggahan file memakai **multer**.
+
+### Endpoint API
+
+Semua endpoint diawali `/api`. Kecuali daftar dan masuk, setiap permintaan wajib membawa header `Authorization: Bearer <token>`. Selain `/auth/*`, `/pasar/provinsi`, `/pasar/kota`, `/suara/teks`, `/usaha/cek-jenis`, `/usaha/cerita`, dan `/usaha/setup`, endpoint juga mewajibkan pertanyaan awal usaha sudah selesai diisi.
+
+| Kelompok | Endpoint | Kegunaan |
+|---|---|---|
+| Akun | `POST /auth/daftar`, `POST /auth/masuk`, `GET /auth/saya` | Daftar, masuk, dan data akun yang sedang masuk |
+| Usaha | `POST /usaha/setup`, `GET /usaha`, `PUT /usaha`, `PUT /usaha/biaya` | Pertanyaan awal, profil usaha, biaya rutin |
+| Usaha (AI) | `POST /usaha/cek-jenis`, `POST /usaha/cerita` | Memeriksa jenis usaha di luar daftar, menyusun resep dari cerita |
+| Suara | `POST /suara/teks` | Rekaman suara menjadi teks |
+| Ringkasan | `GET /dashboard`, `GET /dashboard/catatan` | Data halaman Ringkasan dan catatan harian |
+| Menu | `GET /produk`, `POST /produk`, `GET /produk/:id`, `PUT /produk/:id`, `DELETE /produk/:id` | Kelola menu dan resep |
+| Menu | `POST /produk/:id/simulasi`, `GET /produk/:id/rekomendasi` | Coba-coba harga dan takaran, saran harga jual |
+| Belanja | `POST /pembelian/foto`, `POST /pembelian/suara`, `POST /pembelian/teks`, `POST /pembelian/manual` | Membuat draf belanja dari foto, suara, teks, atau tabel |
+| Belanja | `GET /pembelian`, `GET /pembelian/:id`, `PUT /pembelian/:id`, `DELETE /pembelian/:id` | Riwayat, periksa dan simpan draf, hapus belanja |
+| Bahan | `GET /bahan`, `GET /bahan/:id`, `PUT /bahan/:id`, `POST /bahan/cocokkan` | Daftar bahan, detail, ubah, cocokkan nama |
+| Bahan | `POST /bahan/:id/gabung`, `POST /bahan/:id/harga`, `POST /bahan/:id/isi`, `POST /bahan/:id/konversi` | Gabung bahan ganda, harga manual, isi kemasan, konversi satuan |
+| Harga pasar | `GET /pasar`, `POST /pasar/perbarui`, `GET /pasar/provinsi`, `GET /pasar/kota` | Harga PIHPS untuk kota usaha dan daftar wilayah |
+| Promo | `POST /promo/hitung`, `POST /promo/saran`, `GET /promo`, `POST /promo`, `PUT /promo/:id`, `DELETE /promo/:id` | Hitung pilihan harga paket, usulan nama dan caption, simpan paket |
+| Lain | `GET /health` | Cek server hidup |
+
+Kesalahan dikembalikan dalam bentuk `{ "pesan": "..." }` dengan kode HTTP yang sesuai: 400, 401, 404, 409, 429, atau 503 bila layanan AI tidak tersedia.
+
+### Skema database
+
+Didefinisikan di `server/src/lib/schema.sql`. Semua data usaha ikut terhapus bila akunnya dihapus (`ON DELETE CASCADE`).
+
+| Tabel | Kolom utama | Isi |
+|---|---|---|
+| `users` | `email`, `password_hash`, `nama` | Akun pengguna |
+| `usaha` | `user_id`, `nama`, `jenis`, `kota`, `provinsi`, `target_margin`, `porsi_per_hari`, `hari_buka`, `setup_selesai` | Profil usaha, satu per akun |
+| `bahan` | `usaha_id`, `nama`, `satuan_dasar`, `komoditas`, `susut_persen` | Bahan baku milik usaha |
+| `alias_bahan` | `bahan_id`, `istilah` | Nama lain bahan, misalnya "cbe rwt" untuk cabai rawit |
+| `konversi_satuan` | `bahan_id`, `satuan`, `faktor` | Isi kemasan, misalnya 1 papan = 10 potong |
+| `nota`, `nota_item` | `tanggal`, `sumber`, `status`; `nama_bahan`, `qty`, `satuan`, `harga`, `bahan_id` | Catatan belanja dan barisnya |
+| `harga_bahan` | `bahan_id`, `harga_per_satuan`, `tanggal`, `sumber`, `nota_id` | Riwayat harga per bahan dari belanja |
+| `harga_pasar` | `komoditas`, `wilayah`, `level`, `harga`, `tanggal`, `sumber` | Harga PIHPS Bank Indonesia |
+| `menu`, `resep_item` | `nama`, `harga_jual`, `porsi_per_batch`; `bahan_id`, `qty`, `satuan` | Menu dan resepnya |
+| `biaya_lain` | `nama`, `nominal`, `periode` | Biaya rutin seperti gas, listrik, sewa |
+| `promo`, `promo_item` | `nama`, `harga_paket`, `biaya_kemasan`, `caption`; `menu_id`, `qty` | Paket promo dan isinya |
+
+Contoh isi konfigurasi ada di `server/.env.example`. Penjelasan tiap variabelnya ada di bagian Variabel lingkungan di bawah.
+
+## Menjalankan di localhost
+
+Butuh Node.js 24 (minimal 22.13, karena memakai `node:sqlite` tanpa flag tambahan) dan npm.
 
 Pasang dependensi:
 
