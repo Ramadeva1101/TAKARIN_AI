@@ -187,7 +187,7 @@ function Kebocoran() {
       <p className="font-bold">Coba hitung untung yang hilang</p>
       <p className="text-sm text-redup">Modal per porsi naik, harga jual tetap.</p>
       <div className="mt-4 grid gap-1">
-        {geser('Kenaikan modal per porsi', naik, setNaik, 100, 2000, 50, rp(naik))}
+        {geser('Kenaikan modal per porsi', naik, setNaik, 100, 10000, 100, rp(naik))}
         {geser('Porsi terjual per hari', porsi, setPorsi, 10, 200, 5, `${porsi} porsi`)}
         {geser('Harga jual per porsi', harga, setHarga, 5000, 50000, 500, rp(harga))}
       </div>
