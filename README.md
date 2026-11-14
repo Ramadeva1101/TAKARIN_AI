@@ -173,7 +173,7 @@ npm --prefix server run seed:demo
 | Bagian aplikasi | Model (lewat KelontongAI) | Tugas |
 |---|---|---|
 | Catat belanja dari foto nota | `minimax-m3.1-flash`, cadangan `gpt-5.6-luna` dan `gpt-6-astra-ultrafast` | Membaca nama barang, jumlah, satuan, harga, dan tanggal |
-| Catat belanja dari ucapan atau ketikan, susun resep dari cerita, cek jenis usaha | `deepseek-v4-flash`, cadangan `deepseek-v4-flash-0731` dan `glm-5.3-flash` | Mengubah kalimat bebas menjadi data terstruktur |
+| Catat belanja dari ucapan atau ketikan, susun resep dari cerita, cek jenis usaha | `deepseek-v4-flash`, cadangan `deepseek-v4-flash-0731`, `gpt-6-astra-ultrafast`, `glm-5.3-flash`, dan `gpt-5.6-luna` | Mengubah kalimat bebas menjadi data terstruktur |
 | Nama dan caption promo, catatan harian, penjelasan modal | `deepseek-v4-flash` | Menulis kalimat dari angka yang sudah dihitung kode |
 | Suara ke teks (cadangan) | Groq `whisper-large-v3-turbo` | Mengubah rekaman suara menjadi teks |
 
