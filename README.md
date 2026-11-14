@@ -15,21 +15,25 @@ Kategori Web, subtema UMKM. Dibuat untuk LOGICODIX 2026.
 
 ## Masalah yang kami angkat
 
-Kebanyakan warung menentukan harga jual sekali di awal, lalu jarang menghitungnya lagi. Padahal harga bahan berubah tiap minggu. Cabai rawit merah di Denpasar, misalnya, naik 10,6% dalam seminggu menurut PIHPS Bank Indonesia.
+**Menghitung HPP (modal per porsi) itu ribet, sehingga kebanyakan UMKM kuliner tidak melakukannya.** Harga jual akhirnya ditentukan dengan perkiraan sekali di awal, lalu jarang dihitung ulang.
 
-Kerugiannya kecil per porsi, jadi tidak terasa. Ambil ayam geprek yang memakai 20 gram cabai rawit. Kalau cabai Rp80.000/kg, biaya cabai per porsi Rp1.600. Naik 10,6% berarti tambah sekitar Rp170 per porsi. Untuk warung yang menjual 50 porsi sehari, itu sekitar Rp255.000 sebulan dari satu bahan di satu menu, dan harga jualnya tetap.
+Ada tiga hal yang membuatnya ribet:
 
-Pemilik warung sebenarnya bisa menghitung ini. Yang membuat mereka tidak melakukannya ada tiga:
+1. **Takaran warung tidak memakai gram.** Resepnya pakai sendok, siung, dan potong, sedangkan kalkulator HPP dan template Excel meminta semua bahan dalam gram atau kilogram.
+2. **Harga bahan berubah setiap minggu.** HPP yang dihitung bulan lalu sudah tidak berlaku, jadi hitungannya harus diulang dari awal.
+3. **Semua alat yang ada meminta isian manual.** Nota belanja harus disalin ke tabel baris per baris, termasuk satuan beli yang berbeda dengan satuan resep (beli per papan, pakai per potong).
 
-1. **Resep warung tidak memakai gram.** Takarannya sendok, siung, potong, atau "secukupnya". Kalkulator HPP dan template Excel meminta semua bahan dalam gram atau kilogram.
-2. **Nota belanja hanya disimpan.** Nota ditulis tangan, disingkat ("cbe rwt 1/4"), dan satuan belinya berbeda dengan satuan resep (beli per papan, pakai per potong). Menyalinnya ke tabel tiap hari terlalu repot.
-3. **Hitungan sekali tidak cukup.** HPP yang dihitung bulan lalu sudah tidak berlaku bulan ini. Selama pembaruannya harus manual, hitungan itu akan berhenti dilakukan.
+Dampaknya tidak terasa per porsi, tetapi terasa per bulan. Contohnya, cabai rawit merah di Denpasar naik 10,6% dalam seminggu menurut PIHPS Bank Indonesia. Untuk ayam geprek yang memakai 20 gram cabai, itu tambahan sekitar Rp170 per porsi, atau sekitar Rp255.000 sebulan untuk 50 porsi sehari, dari satu bahan saja.
 
 Beberapa penelitian tentang UMKM kuliner menemukan pola yang sama: harga ditetapkan dengan perkiraan, dan biaya seperti gas, listrik, dan tenaga kerja sering terlewat. Sumbernya kami kumpulkan di [docs/dasar-perhitungan.md](docs/dasar-perhitungan.md).
 
 ## Solusi
 
-Setelah mengisi profil usaha, pemilik mencatat belanja bahan terakhirnya: foto nota, ucapkan, atau ketik. Lalu ia menceritakan resep menunya sekali, lewat ketikan atau suara, dan setiap bahan langsung tersambung ke harga belanja itu. Urutan ini sama dengan aplikasi costing yang sudah ada, yang mulai dari harga beli bahan sebelum resep. Setelah itu pekerjaan rutinnya hanya mencatat belanja. Takarin AI mencocokkan setiap barang di nota dengan bahan di resep, lalu menghitung ulang modal semua menu yang memakai bahan itu.
+Takarin AI menyederhanakan perhitungan HPP menjadi tiga langkah yang mengikuti kebiasaan pemilik warung:
+
+1. **Catat belanja.** Foto nota, ucapkan, atau ketik belanjaan. Nota tulisan tangan dan singkatan seperti "cbe rwt" tetap terbaca, dan hasilnya diperiksa pemilik sebelum disimpan.
+2. **Ceritakan menu.** Resep cukup diceritakan seperti menjelaskan ke karyawan, dengan takaran sendok, siung, atau potong. Setiap bahan langsung tersambung ke harga belanja.
+3. **Lihat modal dan untung.** Modal per porsi, untung, dan harga jual minimal langsung terlihat, lalu dihitung ulang otomatis setiap kali belanja baru dicatat.
 
 Kalau sebuah bahan belum pernah dibeli, aplikasi memakai harga pasar di kota usaha dari PIHPS Bank Indonesia. Kalau bahan itu juga tidak ada di data pasar (tahu, kecap, sosis, dan sejenisnya), pemilik diminta mengisi harga beli terakhirnya. Harga perkiraan itu otomatis diganti begitu belanja sungguhan dicatat.
 
