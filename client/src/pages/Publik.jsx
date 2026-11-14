@@ -86,12 +86,12 @@ export function PublikLayout() {
               </Link>
             ))}
           </nav>
-          {/* Di HP tombol dibuat ringkas (tanpa panah, padding kecil) agar tidak berdesakan dengan logo. */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <Tombol varian="masuk" to="/masuk" className="!min-h-9 !px-3.5 !text-sm sm:!min-h-11 sm:!px-5 sm:!text-base">
-              Masuk <ArrowRight size={16} weight="bold" className="hidden text-kuning sm:block" aria-hidden />
+          {/* Di HP, Masuk dan Daftar ada di dalam menu burger. */}
+          <div className="flex shrink-0 items-center gap-2">
+            <Tombol varian="masuk" to="/masuk" className="!hidden !px-5 md:!inline-flex">
+              Masuk <ArrowRight size={16} weight="bold" className="text-kuning" aria-hidden />
             </Tombol>
-            <Tombol to="/daftar" className="!min-h-9 !px-3.5 !text-sm sm:!min-h-11 sm:!px-5 sm:!text-base">
+            <Tombol to="/daftar" className="!hidden !px-5 md:!inline-flex">
               Daftar
             </Tombol>
             <button
